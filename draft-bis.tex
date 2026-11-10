@@ -35,13 +35,13 @@ For instance consider the scenario where we are trying to model a car, which has
 
 \todo{Draw Bayesian Network}
 
-Probabilistic Programming languages can be seen as a compositional generalisation of Bayesian networks: they provide a compositional syntax for specifying probabilistic models and performing inference on them. Like for Bayesian networks, we can write program represent joint distributions, like in \todo{}. Unlike Bayesian networks, we can also record observations like $\mathsf{carStarts}=\true$ using the $\opcondition: \booleans \to 1$ operation, like in \todo{}, or more general `soft' conditioning using $\opscore: \reals^+ \to 1$. Finally, general inference algorithms like \todo{} allows one to sample from the conditional distribution that the program represents. 
+Probabilistic Programming languages can be seen as a compositional generalisation of Bayesian networks: they provide a compositional syntax for specifying probabilistic models and performing inference on them. Like for Bayesian networks, we can write program represent joint distributions, like in \todo{}. Unlike Bayesian networks, we can also record observations like $\mathsf{carStarts}=\true$ using the $\opcondition: \booleans \to 1$ operation, like in \todo{}, or more general `soft' conditioning using $\opscore: \reals^+ \to 1$. \todo{Describe 2 conditionings Operationally}. Finally, general inference algorithms like \todo{} allows one to sample from the conditional distribution that the program represents. 
 
 \todo{Write program}
 
 \paragraph{Semantics of PPLs} The semantics of probabilistic programming languages are generally given in a category $\catc$ that `supports probability theory' with a normalised probability monad $\Prob$. In the discrete case, one considers $\Set$ and the finitely supported distributions monad. Because $\Set$ is cartesian-closed, one can not only interpret first order programs, but also higher order ones like $(X \to \Prob(Y)) \to \Prob(Z)$. In the more general continuous case, one often uses categories like the category of measurable spaces $\Meas$ (or subcategories thereof) with the Giry monad $G: \Meas \to \Meas$ \todo{cite}. Because $\Meas$ is famously not cartesian-closed, several works \cite{semantics_ppl_staton2016,Heunen_2017} have developed the category of quasi-Borel spaces (QBS) as an alternative in which higher order probabilistic programming is possible. Many extensions to QBS have since been developed, such as $\omega$QBS \todo{cite}, which enables recursion, and quasi-Borel families (QBFs), which enable dependent types \todo{cite}. 
 
-Normalised probability monads only allow one to interpret sampling; interpreting conditioning (or scoring in general) will require \emph{unnormalised} probability monads $\Dist$. An unnormalised probability monad should be a super-monad of the normalised counterpart. Without going into too much detail, there are many possible choices for $\Dist$ with different trade-offs. For instance, we can consider $\Dist(X) = \Prob(X \times \reals^+)$, which enables general scoring using a writer effect; or indeed the subdistribution monad $\Dist(X) = \Prob(X + 1)$, which only supports (hard) conditioning. 
+Normalised probability monads only allow one to interpret sampling; interpreting conditioning (or scoring in general) will require \emph{unnormalised} probability monads $\Dist$. An unnormalised probability monad should be a super-monad of the normalised counterpart. Without going into too much detail, there are many possible choices for $\Dist$ with different trade-offs. For instance, we can consider $\Dist(X) = \Prob(X \times \reals^+)$, which enables general scoring using a writer effect; or indeed the subdistribution monad $\Dist(X) = \Prob(X + 1)$, which only supports (hard) conditioning. \todo{Normalisation can be thought of as...}
 
 \paragraph{Synthetic Foundations}
 
@@ -126,8 +126,17 @@ Four systems support rung 3 natively~\cite{tavares2021language,chirho,perov2020m
 
 \subsubsection{Logical, Diagrammatic, Categorical notions of Causality}
 
+\paragraph{Functorial Semantics}
+
+\paragraph{Logical characterisation of Ibeling and Icard}
+
+\paragraph{Modulating Normalisation}
+
 \subsubsection{"Causality" in other fields}
 
+\paragraph{Concurrency}
+
+\paragraph{Quantum Computing}
 
 % \section{From quantum protocols to causality}
 
