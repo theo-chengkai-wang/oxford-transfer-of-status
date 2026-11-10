@@ -1,0 +1,216 @@
+\documentclass[11pt,a4paper]{article}
+
+
+\usepackage[margin=2cm]{geometry}
+\usepackage{biblatex}
+\input{pkgs.tex}
+\title{Qualifying Dissertation for the Transfer of Status}
+\author{Theo Wang}
+\date{\today}
+
+\addbibresource{refs.bib}
+
+\begin{document}
+
+\maketitle
+
+% \begin{abstract}
+%     Placeholder
+% \end{abstract}
+
+\section{Introduction}
+
+% [I am interested in causality, approached it in two angles in the past year. Admittedly narrow, and misses quite a few things, that I plan to learn this year.]
+
+% \input{lit_review.tex}
+
+\section{Literature Review}
+
+\subsection{Foundations of Probabilistic Programming}
+
+\paragraph{From Bayesian Networks to Probabilistic Programming} A central tool in Bayesian probabilistic modelling is Bayesian networks \todo{cite}, a graphical representation of a joint distribution. Formally, a Bayesian network over a certain set of variables $V$ is a directed acyclic graph over $V$, a domain $D_x$ for each variable $x \in V$, and for each variable $v \in V$, a conditional distribution $P(x \mid \mathsf{Parents}(x))$. This data can be seen as a Markov factorisation of a joint distribution $$P(x_1...x_n) = \prod_{x\in V} P(x \mid \mathsf{Parents}(x))$$
+Bayesian networks are useful because their graphical structure encodes the conditional independencies between variables (a variable is assumed to only depend on its parents), exploited to make Bayesian inference (computing conditional distributions) more efficient. \todo{cite again} 
+
+For instance consider the scenario where we are trying to model a car, which has fuel with probability $0.8$, battery with probability $0.9$, and only starts if it has both fuel and battery. Then we can model the joint distribution between $\mathsf{fuel}$, $\mathsf{battery}$ and $\mathsf{carStarts}$ with the following Bayesian network: 
+
+\todo{Draw Bayesian Network}
+
+Probabilistic Programming languages can be seen as a compositional generalisation of Bayesian networks: they provide a compositional syntax for specifying probabilistic models and performing inference on them. Like for Bayesian networks, we can write program represent joint distributions, like in \todo{}. Unlike Bayesian networks, we can also record observations like $\mathsf{carStarts}=\true$ using the $\opcondition: \booleans \to 1$ operation, like in \todo{}, or more general `soft' conditioning using $\opscore: \reals^+ \to 1$. Finally, general inference algorithms like \todo{} allows one to sample from the conditional distribution that the program represents. 
+
+\todo{Write program}
+
+\paragraph{Semantics of PPLs} The semantics of probabilistic programming languages are generally given in a category $\catc$ that `supports probability theory' with a normalised probability monad $\Prob$. In the discrete case, one considers $\Set$ and the finitely supported distributions monad. Because $\Set$ is cartesian-closed, one can not only interpret first order programs, but also higher order ones like $(X \to \Prob(Y)) \to \Prob(Z)$. In the more general continuous case, one often uses categories like the category of measurable spaces $\Meas$ (or subcategories thereof) with the Giry monad $G: \Meas \to \Meas$ \todo{cite}. Because $\Meas$ is famously not cartesian-closed, several works \cite{semantics_ppl_staton2016,Heunen_2017} have developed the category of quasi-Borel spaces (QBS) as an alternative in which higher order probabilistic programming is possible. Many extensions to QBS have since been developed, such as $\omega$QBS \todo{cite}, which enables recursion, and quasi-Borel families (QBFs), which enable dependent types \todo{cite}. 
+
+Normalised probability monads only allow one to interpret sampling; interpreting conditioning (or scoring in general) will require \emph{unnormalised} probability monads $\Dist$. An unnormalised probability monad should be a super-monad of the normalised counterpart. Without going into too much detail, there are many possible choices for $\Dist$ with different trade-offs. For instance, we can consider $\Dist(X) = \Prob(X \times \reals^+)$, which enables general scoring using a writer effect; or indeed the subdistribution monad $\Dist(X) = \Prob(X + 1)$, which only supports (hard) conditioning. 
+
+\paragraph{Synthetic Foundations}
+
+% \subsubsection{Monadic Probabilistic Programming}
+
+% \begin{itemize}
+%     \item Bayesian networks at the centre of model based reasoning. Nice notation for statistical models. Conditional independencies. Denotation as just a distribution. Efficient representation for computing conditional distributions, hence "Bayesian network". 
+%     \item Probabilistic programming \cite{vandemeent2021introductionprobabilisticprogramming} is programming paradigm that allows the user for declaratively specifying probabilistic models, and compositionally performing Bayesian inference on those models. \todo{Cite a few languages.} Think: compositional generalisation of Bayesian networks. 
+%     \item Core primitives: sample and score. + Example program of model + conditioning statement, that allows for the computation of CONDITIONAL probabilities.
+%     \item Semantics usually given by a monad: Category + Distribution Monad, or unnormalised Distribution monad to allow conditioning. Discrete case, as above, is in Set + Dist monad. Cont case is more complex, with a history of giving semantics to it using first Meas (or subcats of Meas) + Giry monad. But then no function spaces. More recently, model found for QBS + Prob monad that supports higher order reasoning.
+%     \item Many works step from the monadic semantics, like lazyppl + efficient lazy inference algorithm, or like Liell-Cock and Staton's ImP construction. We do sth similar to that. 
+% \end{itemize}
+
+% \subsubsection{Synthetic Foundations}
+
+% \begin{itemize}
+%     \item Markov Categories: synthetically axiomatises the categorical structure to talk about probability. 
+%     \item Definition: SMC + copy-discard structure, where discard is natural. 
+%     \item String diagrammatic reasoning, elegantly prove properties like X or Y. 
+%     \item A Bayesian network is now just a string diagram. 
+% \end{itemize}
+
+
+\subsection{Foundations of Causal Modelling}
+
+\subsubsection{Pearl's Three Rungs of Causality}
+
+\subsubsection{Semantics of Causality}
+
+\paragraph{Causal Models}
+
+\paragraph{Causal Structures}
+
+% \subsubsection{Pearl's causality, in 3 rungs}
+
+% Directly move the explanation of the POPL paper to here.
+% \begin{itemize}
+%     \item Rung 1: Bayesian Networks.
+%     \item Rung 2: Interventions
+%     \item Rung 3: Counterfactuals
+% \end{itemize}
+
+% \subsubsection{Equivalences of causal models}
+% Copy from paper and tweak.
+
+% \subsubsection{Logical, diagrammatic, categorical accounts of causality}
+
+% Copy from paper and tweak. Those references are exactly the ones I need to mention. 
+
+\subsection{Causal Probabilistic Programming Languages}
+
+\subsubsection{Summary of our POPL 2027 paper}
+
+
+\paragraph{Contribution 1: semantic foundations of causal programming}
+Our first contribution is to develop a semantic foundation of causal models by taking the analogy with probabilistic programs seriously. In \cref{section:hierarchylanguages}, we reconstruct Pearl's rungs of causality as a hierarchy of simple first order probabilistic programming languages $\Lone, \Ltwo, \Lthree$.  Each language exposes more intension than the previous one using syntactic annotations, and causal inference is performed using program transformations that consume these syntactic annotations: $\Lone$ is a standard first order PPL; $\Ltwo$ exposes typed holes named \emph{intervention labels}, canonically of type $\Maybe{A}$, allowing substituting to optionally perform an intervention; $\Lthree$ annotates each let binding with $\mathbf{exo}$ or $\mathbf{endo}$, so that twinning can be formulated as a vectorisation transform. The same idea underlies the intervention-as-program-transformation view of Witty~\cite{witty2021sbi,witty2023bayesian}, the logical account by Ibeling and Icard~\cite{ibeling2020hierarchy}, and the string-diagrammatic accounts of Jacobs et al.~\cite{jacobs2019causal} and Lorenz and Tull~\cite{lorenz2023causalmodelsstringdiagrams}. 
+
+What is new is the observation that this simple setting yields a semantic characterisation of Pearl's rungs of causality (\cref{section:scms}). We develop a unified account of contextual equivalences that recovers the full spectrum of causal model equivalences by varying the class of admissible contexts, e.g.~Rung 3 ($\Lthree$) programs are Rung 3 equivalent ($\equiv_3$) if they behave the same under all twinnings and interventions; Rung 2 equivalent ($\equiv_3^{\mathsf{intv}}$) if under all interventions; Rung 1 equivalent ($\equiv_3^{\mathsf{obs}}$) if they induce the same distribution under no intervention. The subscript $3$ marks that we compare $\Lthree$ programs throughout; the superscript marks the rung of context tested against ($\mathsf{obs}$, $\mathsf{intv}$, or none for full rung-3 twinning). These equivalences form a strict inclusion hierarchy $\equiv_3 \subsetneq \equiv_3^{\mathsf{intv}} \subsetneq \equiv_3^{\mathsf{obs}}$, an analogue of the causal hierarchy's non-collapse \cite{bareinboim:etal20}, i.e.~programs indistinguishable at a lower rung may still differ at a higher one.
+
+In \cref{subsection:relationtoscms} we connect the framework to the theory of SCMs, showing that $\Lthree$ extends SCMs conservatively: each SCM can be compiled into $\Lthree$, preserving the semantics of intervention and twinning (\cref{thm:scmcompilationcorrectness}). Through this compilation, we show that the hierarchy of SCM equivalences developed by Bongers et al.~\cite{Bongers_2021} is naturally subsumed by our program equivalences (\cref{thm:hierarchyBongers}).
+
+\paragraph{Contribution 2: Typed abstractions and denotational semantics for expressive causal probabilistic programming}
+Our second contribution is the development of $\LHO$, a semantically-founded, expressive, and typed language for higher-order causal probabilistic programming. $\LHO$ has a similar programming model to ChiRho \cite{chirho,lafi-wang}: it is expressive as a programming language (higher order, with control flow) and as a causal calculus (rich, higher order interventions, see \Cref{fig:intvkinds}); we illustrate it with examples such as mediation analysis, which decomposes a causal effect into a direct path and a path through an intermediate variable (\Cref{fig:mediationanalysis}). However, unlike ChiRho, it extends the first-order languages in a semantic-preserving way (\cref{thm:L3LHOsemanticpreservation}). 
+
+Rung 2: To manage interventions, we track intervention labels using \emph{grading} \cite{orchard2020unifying,katsumata2014_graded_strong_monad,dorsch2019graded,fujii2016towards,sarkis2025string}, similarly to the $\mathbf{ImP}$ construction in \cite{liell2025compositional} or intervention points in \cite{lafi-wang}. We define a graded reader monad $\IntvMonad{[\tau_1...\tau_n]}{X} \eqdef \prod_i\tau_i \to \Meas(X)$ graded by lists of intervention types $[\tau_1...\tau_n]$, where $\Meas$ is the unnormalised probability monad. A causal model of type $\IntvMonad{[\tau_1...\tau_n]}{X}$ is an intervenable probabilistic program with $n$ typed intervenable holes, each of type $\tau_i$, and a $\opdo$ intervention on the $i$th hole is simply partial application.
+
+Rung 3: To manage counterfactuals, we first note that we will consider \emph{$n$-world twinning}, which creates $n$ copies of the original model, because general counterfactual reasoning may require more than 2 copies. We now ask: what is the type of a model under twinning? The twinned version of the car model where only \texttt{fuel} is intervenable and \texttt{carStarts} is returned has type $\IntvMonad{[(\Maybe{\booleans})^n]}{\booleans^n}$: an intervenable computation with $n$ intervention labels (one \texttt{fuel} intervention label per world), and returning $n$ copies of \texttt{carStarts}. The trick is to make each causal model carry its behaviour under twinning, for any world count $n$. In other words the \emph{twinnable} car model is a world-polymorphic vectorised computation of type $\forall n. \IntvMonad{[(\Maybe{\booleans})^n]}{\booleans^n}$, where $\forall$ denotes System-F-style polymorphism \cite{reynolds74_system_f,Girard1972InterpretationFE}. Endogenous variables like \texttt{carStarts} become $n$-dimensional vectors, where $n$ is the number of worlds, and compose together using the applicative interface \cite{gibbons2016naperian}. Twinning is then a simple type application. The corresponding technical setting is the functor category $[\Bij, \catc]$, where $\catc$ is the semantic model of the underlying PPL, e.g.~$\catc = \Qbs$ if it is continuous and higher order. Each type $A$ is informally an $n$-indexed family of $\catc$-objects $\sem{A}(n)$, and each function $A \to B$ is interpreted as an $n$-indexed family of morphisms $\sem{A}(n) \to \sem{B}(n)$, i.e.~its behaviour under $n$-world twinning. This use is similar to names in nominal sets \cite{pitts2013nominalsets}.
+
+We derive $\LHO$ by denotational and functional programming techniques. In \cref{section:densem}, we develop a denotational semantics for our hierarchy of languages, which we show equivalent to the operational description (\cref{thm:L2adequacyfullabs,thm:L3adequacyfullabs}). We then turn the categorical abstractions we develop into functional programming abstractions (\cref{section:higherorder}). 
+
+\subsubsection{Prior existing causal languages and libraries}
+Many practical tools like DoWhy (part of the PyWhy ecosystem~\cite{pywhy}) are libraries for manipulating SCMs as graphs and thus have limited expressiveness. DoWhy's GCM module nonetheless reaches rung~3, computing sample-level counterfactuals on fitted mechanisms~\cite{blobaum2024dowhygcm}. Among causal PPLs proper, several stop at rung~2. Brul\'e's Whittemore~\cite{brule2018whittemore}, an early embedded causal DSL, covers rung-2 identification and estimation. Pyro provides a $\opdo$ effect handler~\cite{bingham2018pyro}, the design that ChiRho generalises; PyMC's $\opdo$ performs graph surgery on the computation graph~\cite{abrilpla2023pymc,pymcdo}. Witty et al.~\cite{witty2019synthesis} treat an intervention as a source transformation that replaces subterms, powerful (shift, variance-scaling, mechanism replacement) but non-compositional. In contrast, our languages only expose simple typed holes, which generalise to the same powerful classes of interventions for free at higher-order (\cref{subsection:higherorderintv}). Rung-3 queries can sometimes be re-encoded on such systems by hand by an identifiability argument~\cite{shpitser2012counterfactualstested}.
+
+% Among functional probabilistic languages, 
+Four systems support rung 3 natively~\cite{tavares2021language,chirho,perov2020multiverse,kiesel2023whatif}. \textbf{OmegaC}~\cite{tavares2021language} obtains rung 2 through a non-standard lazy evaluation strategy: a let-binding evaluates the bound expression $e$ to a closure $\langle \Gamma, e \rangle$ and $\opdo(x \mapsto e')$ retroactively modifies that closure $\langle \Gamma[x \mapsto e'], e\rangle$, reminiscent of dynamic binding. Rung 3 is enabled by making each program by construction an SCM-like deterministic function of an explicit exogenous noise $\omega$. OmegaC is limited in expressiveness (sampling and building random variables are separate), and only has an operational semantics. We conjecture our formalism can model OmegaC's core denotationally. \textbf{MultiVerse}~\cite{perov2020multiverse} realises Pearl's abduction--action--prediction recipe as an importance-sampling engine, without a formal semantics. \textbf{ChiRho}~\cite{chirho,tutorialchirho}, built from effect handlers and tensor broadcasting, is both the system closest to ours, and our initial motivation. Its recent distillation into typed functional abstractions~\cite{lafi-wang} bears clear similarities to $\LHO$: intervention \emph{points} tracked in a reader monad (our \emph{labels} leave open how an intervention is consumed), vectorisation used in an applicative way for twinning. Two differences are key. First, our rungs 2 and 3 are decoupled: interventions never create worlds; twinning alone does. Under ChiRho's multi-world handler, by contrast, each intervention doubles the number of worlds. Second, $\LHO$ fixes the number of worlds at twinning time and whether a variable is vectorised ($X$ or $\Endo(X)$) determines whether it is exogenous or endogenous. In contrast, ChiRho vectorises its values by default ($\MVal$ in the typed distillation~\cite{lafi-wang}) and encodes an implicit sharing inference using tensor broadcasting: a random draw is shared wherever broadcasting permits, while sample sites downstream of an intervention will draw fresh noise per world. ChiRho's $\MVal$ thus allows finer control over sharing than $\LHO$, but its relation to Pearl's twinning semantics is less clear. Finally, \textbf{probabilistic logic programming} also reaches rung 3: Kiesel et al.~\cite{kiesel2023whatif} answer counterfactual queries on ProbLog programs by a transformation proved correct against Pearl's semantics.
+
+% \subsection{Summary of my contributions}
+
+% ChiRho (LAFI) and semantics (POPL). 
+
+\subsection{Brief overview of notions of causality}
+
+\subsubsection{Logical, Diagrammatic, Categorical notions of Causality}
+
+\subsubsection{"Causality" in other fields}
+
+
+% \section{From quantum protocols to causality}
+
+% \subsection{Foundations of Quantum Programming}
+% \begin{itemize}
+%     \item QPL, primitives, and semantics in CPTP. 
+%     \item Axiomatisations: CQM -- ZX etc; or computing, -- Sam, Chris etc.
+% \end{itemize}
+
+% \subsection{Distributed Quantum Processes}
+% [Motivation]
+% \begin{itemize}
+%     \item Quantum protocols (teleportation, BB84, etc.) have multiple quantum computers talking to each other. 
+%     \item Distributed quantum computing seen as way of scaling quantum computing. 
+%     \item Programmatically we have programs literally communicating to each other. Teleportation for example is a program like [this], which doesn't capture the communication aspect.
+% \end{itemize}
+% [Approaches and difficulties]
+% \begin{itemize}
+%     \item To capture these things people have developed several approaches, including quantum process calculi. Grammar looks like [get this from my proposal], semantics given by bisimulaton. But operational, lacks denotational foundation, easily makes something that doesn't necessarily respect physics [give lqCCS' example]. 
+%     \item Efforts in making it work but no consensus yet. 
+% \end{itemize}
+% My master's thesis proposed a different approach. 
+% \begin{itemize}
+%     \item Algebraic Effects approach: add effects and study interactions in an algebraic theory. Sam's theory = baseline, I added I/O operations.
+%     \item Study models, in particular give models that are sensible denotationally as well. 
+%     \item Proved these in my masters
+%     \item Recently proved completeness as well w help of Claude.  
+% \end{itemize}
+
+% \subsection{Causality as the underlying phenomenon}
+% [Possible avenues, where I admit I'm not as familiar]
+
+% \subsubsection{Causality and Higher-order quantum computing}
+% \begin{itemize}
+%     \item Higher order quantum processes = combs, nicely written as these string diagrams with holes. Definition of combs based on non-signalling constraints. 
+%     \item Programs with I/O can sort of be thought of as a class of HO quantum process with definite causal order determined by the I/O trace. Indeed, I conjecture this is the case. This seems to suggest that studying quantum comm, and maybe quantum concurrency, will benefit from studying idea of causality.
+%     \item Indefinite causal order
+% \end{itemize}
+
+% \subsubsection{Causality and Concurrency}
+% \begin{itemize}
+%     \item "Causal" Models of concurrency, like pomsets. Recently new work on axiomatisation/equational theory like Jack/Cristina's work! 
+%     \item Causal models of concurrency with inconsistencies, like event structures.
+% \end{itemize}
+
+% % \begin{itemize}
+% %     \item Quantum Protocols lit review, esp about ppl not understanding DQC.  
+% %     \item Distributed computing, happens-before, causal ordering with Pomsets
+% %     \item Higher order quantum computing, briefly, and how they could induce interesting things both on the pomset side (logics).
+% % \end{itemize}
+
+\section{Project Proposal}
+\subsection{Summary of the current work done}
+
+\subsection{Developing the field of Causal PPLs}
+\subsubsection{Putting the language into practice}
+\subsubsection{Expressivity}
+
+\subsection{Better understanding our categorical constructions}
+\subsubsection{Relation to other constructions}
+\subsubsection{A more synthetic approach?}
+
+\subsection{Understanding causality using a graph-centered approach}
+
+\subsection{Understanding relationship with `causality' as used in other fields}
+\subsubsection{Concurrency}
+\subsubsection{Higher-order processes and quantum causality}
+
+
+% \subsection{Towards practical causal probabilistic programming}
+% \begin{itemize}
+%     \item [low risk] Building understanding, e.g. Omega
+%     \item [low risk] Putting into practice.
+%     \item [med risk] How to implement Cyclic causality and feedback loops, and how they relate to loops/recursion/laziness in programming. 
+% \end{itemize}
+% \subsection{Understanding DC and QC from the lense of causality.}
+% \begin{itemize}
+%     \item [low risk] Understanding quantum comm using HOQC
+%     \item [med risk] Understanding DQC using process matrices? Clear analogies to be made, understand it categorically. E.g. can I use concurrency things to model quantum switches? Or indeed can I use process matrices generally to do more general concurrency? [Cite Kim as well]
+%     \item [higher risk] Categorically understand how DC and HOQC relate in terms of causality? Can I use DC's abstractions to understand QC? Already work in this direction. 
+% \end{itemize}
+% \subsection{Building a Unified Understanding of Causality?}
+% Two extensional ways of characterising causality, with intervention, and with signalling constraints. Both are shown to have non trivial relationship with having an explicit causal structure. How do they relate? I don't understand this and want to understand this better.
+
+\printbibliography
+\end{document}

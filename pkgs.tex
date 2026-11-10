@@ -1,0 +1,558 @@
+\usepackage{amsmath,amssymb,amsthm}
+% \usepackage{amsthm}
+% \usepackage[margin=2cm]{geometry}
+\usepackage{dsfont}
+\usepackage{tikz}
+\usetikzlibrary{cd}
+\usetikzlibrary{babel,calc}
+\usetikzlibrary{positioning,arrows.meta,fit,backgrounds}
+% \usepackage{tikz-cd}
+% \usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{cleveref}
+% \usepackage{parskip}
+\usepackage{ebproof}
+% \usepackage{quiver}
+\usepackage{stackengine,scalerel}
+% \usepackage{xparse}
+% \usepackage{physics}
+% \usepackage{physics2}
+% \usephysicsmodule{ab,ab.braket}
+% \usepackage{tikzit}
+% \input{smc.tikzstyles}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{array}    % m{} columns + \arraybackslash (combined car-model table)
+\usepackage{booktabs} % \toprule/\midrule/\bottomrule
+
+\usepackage{mathtools}
+\usepackage{stmaryrd}
+\usepackage{subcaption}
+
+\newtheorem*{fact}{Fact}
+
+\crefname{prop}{prop.}{props.}
+\Crefname{prop}{Proposition}{Propositions} % Capitalized version for start of sentences
+
+\crefname{remark}{remark}{remarks}
+\Crefname{remark}{Remark}{Remarks} % Capitalized version for start of sentences
+
+\crefname{appendix}{appendix}{appendices}
+\Crefname{appendix}{Appendix}{Appendices} % Capitalized version for start of sentences
+
+% \crefname{property}{property}{properties}
+% \Crefname{property}{Property}{Properties} % Capitalized version for start of sentences
+
+\crefformat{property}{#2#1#3}
+\Crefformat{property}{#2#1#3}
+
+\crefname{def}{definition}{definitions.}
+\Crefname{def}{Definition}{Definitions} % Capitalized version for start of sentences
+
+\crefformat{section}{#2\S#1#3}
+\Crefformat{section}{#2\S#1#3}
+
+\usepackage{listings}
+
+\usepackage{tcolorbox}
+\tcbuselibrary{listings} % Import listings support
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen}\textit,
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=false,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
+\tcbset{
+    mystyle/.style={
+        listing only,
+        breakable, % Allows box to span pages
+        colback=CodeBack,
+        colframe=CodeFrame,
+        boxrule=0.5pt,
+        sharp corners,
+        listing options={
+            backgroundcolor=\color{backcolour},   
+            commentstyle=\color{codegreen}\textit,
+            keywordstyle=\color{blue},
+            numberstyle=\tiny\color{codegray},
+            stringstyle=\color{codepurple},
+            basicstyle=\ttfamily\footnotesize,
+            breakatwhitespace=false,         
+            breaklines=true,                 
+            captionpos=b,                    
+            keepspaces=true,                 
+            numbers=left,                    
+            numbersep=5pt,                  
+            showspaces=false,                
+            showstringspaces=false,
+            showtabs=false,                  
+            tabsize=2,
+        }
+    }
+}
+
+\newtcblisting{codelisting}[3][]{
+    listing only,
+    % breakable, % Allows box to span pages
+    colback=backcolour,
+    % colframe=CodeFrame,
+    boxrule=0pt,
+    boxsep=0pt,
+    top=1mm,
+    bottom=1mm,
+    sharp corners,
+    notitle,
+    listing options={
+        language=#2,
+        morekeywords= {exo, endo},
+        commentstyle=\color{codegreen}\textit,
+        keywordstyle=\color{blue},
+        numberstyle=\tiny\color{codegray},
+        stringstyle=\color{codepurple},
+        basicstyle=\ttfamily\tiny,
+        breakatwhitespace=false,         
+        breaklines=true,                 
+        captionpos=b,                    
+        keepspaces=true,                 
+        numbers=left,                    
+        numbersep=5pt,                  
+        showspaces=false,                
+        showstringspaces=false,
+        showtabs=false,                  
+        tabsize=2,
+        aboveskip=0pt,  % Removes the space above the code
+        belowskip=0pt,  % Removes the space below the code
+        mathescape=#3,
+        #1               % optional extra listings options (e.g. escapeinside for \cnew)
+    }
+}
+
+% Highlight code that is new relative to the previous rung's program.
+% Use inside a codelisting that passes escapeinside, e.g.
+%   \begin{codelisting}[escapeinside={(*}{*)}]{haskell}{true} ... (*\cnew{new}*) ...
+\definecolor{codenew}{RGB}{255,228,130}
+\newcommand{\cnew}[1]{{\setlength{\fboxsep}{0.6pt}\colorbox{codenew}{\ttfamily #1}}}
+% Coloured (not highlighted) font, for marking new syntax in the grammar figure.
+\newcommand{\cnewm}[1]{\textcolor{blue!65!black}{#1}}
+
+% Theo's Macros
+\newcommand{\naturals}{\mathbb{N}}
+\newcommand{\integers}{\mathbb{Z}}
+\newcommand{\booleans}{\mathbb{B}}
+\newcommand{\indicator}{\mathds{1}}
+\newcommand{\va}{\mathbf{a}}
+\newcommand{\vb}{\mathbf{b}}
+\newcommand{\vx}{\mathbf{x}}
+\newcommand{\vy}{\mathbf{y}}
+\newcommand{\vw}{\mathbf{w}}
+\newcommand{\vz}{\mathbf{z}}
+\newcommand{\vsigma}{\mathbf{\sigma}}
+\newcommand{\reals}{\mathbb{R}}
+\newcommand{\complex}{\mathbb{C}}
+\newcommand{\field}{\mathbb{F}}
+\newcommand{\sign}{\mathrm{sign}}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\newcommand{\true}{\mathsf{True}}
+\newcommand{\false}{\mathsf{False}}
+\newcommand{\brackets}[1]{\{#1\}}
+
+% \newcommand{\bicatb}{\mathcal{B}}
+
+\newcommand{\catc}{\mathbf{C}}
+\newcommand{\catcop}{\catc^{op}}
+\newcommand{\catd}{\mathbf{D}}
+\newcommand{\cate}{\mathcal{E}}
+\newcommand{\eqdef}{\triangleq}
+\newcommand{\id}{\mathbf{id}}
+% \newcommand{\idbicat}{\mathbf{Id}}
+\newcommand{\Id}{\mathbf{Id}}
+\newcommand{\righttop}[1]{\xrightarrow{#1}}
+\newcommand{\lefttop}[1]{\xleftarrow{#1}}
+\newcommand{\Ob}{\mathbf{Ob} \ }
+\newcommand{\Hom}{\mathrm{Hom}}
+% \newcommand{\yo}{\textmc{よ}}
+\newcommand{\yo}{\textbf{y}}
+
+\newcommand{\terminalmorph}{\langle\rangle}
+\newcommand{\prodmorph}[2]{\langle#1, #2\rangle}
+
+\newcommand{\ul}[1]{\underline{#1}}
+\newcommand{\ulyo}{\ul{\yo}}
+\newcommand{\yozero}{\yo(0)}
+\newcommand{\yoone}{\yo(1)}
+\newcommand{\yon}{\yo(n)}
+\newcommand{\yom}{\yo({m})}
+\newcommand{\yop}{\yo(p)}
+% \newcommand{\op}{\mathbf{op}}
+\newcommand{\Ops}{\mathcal{O}}
+% \newcommand{\typing}[3]{#1 \ | \ #2 \vdash #3}
+% \newcommand{\typingfilled}[1]{\Gamma \ | \ \Delta \vdash #1}
+% \newcommand\eye{\ensurestackMath{\stackinset{c}{}{c}{-.33pt}%
+%   {\bullet}{\bigcirc}}}
+% \newcommand\smallereye{\scalerel*{\eye}{x}}
+% \newcommand{\eyemid}{ \ \eye \ }
+
+% Vectors
+\newcommand{\veca}{\Vec{a}}
+\newcommand{\vecb}{\Vec{b}}
+\newcommand{\vecc}{\Vec{c}}
+\newcommand{\vecd}{\Vec{d}}
+\newcommand{\vecx}{\Vec{x}}
+\newcommand{\vecy}{\Vec{y}}
+\newcommand{\vecz}{\Vec{z}}
+
+\newcommand{\alphaequiv}{\simeq_\alpha}
+
+\newcommand{\LHS}{\mathsf{LHS}}
+\newcommand{\RHS}{\mathsf{RHS}}
+
+% Chapter 2 algebraic theories
+\newcommand{\Mon}{\mathsf{Mon}}
+
+\newcommand{\Tree}{\mathsf{Tree}}
+
+\newcommand{\Kl}[1]{\mathsf{Kl}({#1})}
+
+\newcommand{\Name}{\mathcal{N}}
+\newcommand{\Var}{\mathsf{Var}}
+\newcommand{\IPVar}{\mathsf{IPVar}}
+\newcommand{\GroundValue}{\mathsf{GroundValue}}
+\newcommand{\Value}{\mathsf{Value}}
+\newcommand{\Expr}{\mathsf{Expr}}
+
+\newcommand{\bind}{\mathbin{>\!\!\!>\mkern-6.7mu=}}
+\newcommand{\fin}{\mathsf{fin}}
+\newcommand{\MVal}{\mathsf{MVal}}
+\newcommand{\Intervention}{\mathsf{Intv}}
+\newcommand{\MultiWorld}{\mathsf{MultiWorldCounterfactual}}
+\newcommand{\TwinWorld}{\mathsf{TwinWorldCounterfactual}}
+\newcommand{\supp}{\mathsf{supp}}
+
+% ------------- Formal Def ----------------
+\newcommand{\IdealisedChiRho}{\mathsf{ChiRho}}
+\newcommand{\Prob}{\mathsf{Prob}}
+\newcommand{\Dist}{\mathsf{Dist}}
+\newcommand{\Paths}{\mathsf{Paths}}
+\newcommand{\UPaths}{\mathsf{UPaths}}
+\newcommand{\posreals}{\reals_{\geq 0}}
+
+% Syntax
+% \newcommand{\opif}[3]{\mathbf{if} \ #1 \ #2 \ #3}
+% \newcommand{\lift}[1]{\overline{#1}}
+\newcommand{\opprod}{\mathsf{prod}}
+\newcommand{\opscore}{\mathsf{score}}
+\newcommand{\opflip}{\mathsf{flip}}
+\newcommand{\dbernoulli}{\mathbf{bernoulli}}
+\newcommand{\dnormal}{\mathbf{normal}}
+\newcommand{\constr}{\mathbf{constr}}
+\newcommand{\intvnone}{\mathsf{None}}
+\newcommand{\intvsome}{\mathsf{Some}}
+\newcommand{\opskip}{\mathsf{skip}}
+\newcommand{\opsample}{\mathsf{sample}}
+\newcommand{\opintervene}{\mathsf{intervene}}
+\newcommand{\opbroadcast}{\mathsf{broadcast}}
+\newcommand{\optrack}{\mathsf{track}}
+\newcommand{\opdistribute}{\mathsf{distribute}}
+\newcommand{\opif}{\mathbf{if}}
+\newcommand{\ifelse}[3]{\opif \ #1 \ \mathbf{then} \ #2 \ \mathbf{else} \ #3}
+\newcommand{\opthunk}{\mathsf{thunk}}
+\newcommand{\opforce}{\mathsf{force}}
+\newcommand{\returnSymb}{\mathbf{return}}
+\newcommand{\return}[1]{\returnSymb \ #1}
+\newcommand{\returnParam}[2]{\returnSymb_{#1} \ #2}
+\newcommand{\app}{\odot}
+\newcommand{\pureval}{\mathbf{pureVal}}
+\newcommand{\mem}{\mathsf{mem}}
+\newcommand{\letbind}[3]{\mathbf{let} \ #1 = #2 \ \mathbf{in} \ #3}
+\newcommand{\opdo}{\mathsf{do}}
+\newcommand{\rhide}{\mathsf{hide}}
+\newcommand{\rwk}{\mathsf{wk}}
+\newcommand{\rcontr}{\mathsf{contr}}
+\newcommand{\rexch}{\mathsf{exch}}
+\newcommand{\rrename}{\mathsf{rename}}
+\newcommand{\Renamings}{\mathsf{Renamings}}
+\newcommand{\Deltahat}{\widehat{\Delta}}
+\newcommand{\projf}{\pi_{\mathsf{f}}}
+\newcommand{\projcf}{\pi_{\mathsf{cf}}}
+\newcommand{\coerce}[3]{\mathsf{coerce}_{#2}^{#1}[#3]}
+\newcommand{\rv}{\underline{r}}
+\newcommand{\restr}{\rvert}
+\newcommand{\subst}[2]{[#1/#2]}
+\newcommand{\ket}[1]{| #1 \rangle}
+
+% Types
+\newcommand{\tnat}{\mathsf{Nat}}
+\newcommand{\tbool}{\mathsf{Bool}}
+\newcommand{\tint}{\mathsf{Int}}
+\newcommand{\tposreal}{\mathsf{PosReal}}
+\newcommand{\treal}{\mathsf{Real}}
+\newcommand{\tunit}{\mathsf{Unit}}
+\newcommand{\tprod}{\mathsf{Prod}}
+\newcommand{\tP}[2]{P \ #1 \ #2}
+\newcommand{\unitgrade}{[]}
+\newcommand{\rarrow}{\Rightarrow}
+
+% Type system
+\newcommand{\dtyping}[3]{#1 \vdash^d #2: #3}
+\newcommand{\ptyping}[4]{#1 \mid #2 \vdash^p #3: #4}
+\newcommand{\rtyping}[4]{#1 \vdash #2: #3 \rarrow #4}
+
+\newcommand{\ctxequiv}{\simeq_{\mathsf{ctx}}}
+\newcommand{\Values}{\mathsf{Values}}
+
+% DenSem
+% \newcommand{\sem}[1]{\llbracket #1 \rrbracket}
+\newcommand{\subfin}{\subseteq_{\fin}}
+\newcommand{\inj}{\mathbf{inj}}
+\newcommand{\detsem}[1]{[#1]}
+\newcommand{\List}{\mathrm{List}}
+\newcommand{\sIntervention}{\mathrm{Intv}}
+\newcommand{\sP}[2]{\mathbf{P} \ #1 \ #2}
+\newcommand{\sPP}{\mathbf{P}}
+\newcommand{\sVal}{\mathbf{Val}}
+\newcommand{\gradecatsymb}{\mathbb{G}}
+\newcommand{\gradecat}[1]{\gradecatsymb_{#1}}
+\newcommand{\sdist}{\mathrm{dist}}
+\newcommand{\sintervene}{\mathrm{intervene}}
+
+\DeclareMathOperator*{\dom}{dom}
+
+% New language
+\newcommand{\sCaus}{\mathrm{Caus}}
+\newcommand{\Caus}[2]{\sCaus \ #1 \ #2}
+% \newcommand{\Maybe}{\mathsf{Maybe}}
+\newcommand{\opnew}{\mathsf{new}}
+\newcommand{\Caustic}{\mathsf{\lambda_C}}
+\newcommand{\cdtyping}[3]{#1 \vdash^d_{\Caustic} #2: #3}
+\newcommand{\crtyping}[4]{#1 \vdash^r_{\Caustic} #2: #3 \rarrow #4}
+\newcommand{\cptyping}[4]{#1 \vdash^{p}_{\Caustic} #2 :#3 \& #4}
+\newcommand{\cptypingreordered}[4]{\cptyping{#2}{#3}{#4}{#1}}
+
+% Compilation and Logical Relation
+\DeclareMathOperator*{\len}{dom}
+
+\newcommand{\Maybe}[1]{\mathrm{Maybe}({#1})}
+\newcommand{\sem}[1]{\llbracket{#1}\rrbracket}
+\newcommand{\Just}[1]{\mathrm{Just}({#1})}
+\newcommand{\Nothing}{\mathrm{Nothing}}
+
+% Dario's Macros
+\usepackage{bm}
+\renewcommand{\vec}{\bm}
+
+\newcommand{\todo}[1]{\textcolor{blue}{[TODO: #1]}}
+\newcommand{\prompt}[1]{\textcolor{purple}{[PROMPT: #1]}}
+
+\newcommand{\cat}[1]{\mathbb{#1}}
+\newcommand{\catname}[1]{\mathbf{#1}}
+
+\newcommand{\set}{\mathbf{set}}
+\newcommand{\Set}{\catname{Set}}
+
+\newcommand{\concat}{+\!\!+}
+
+\newcommand{\defeq}{\coloneq}
+
+
+\newcommand{\C}{\cat C}
+\newcommand{\G}{\mathcal G}
+
+\newcommand{\op}{\mathrm{op}}
+
+
+\newcommand{\thought}[3]{\marginpar{\tiny\itshape\raggedright\textcolor{#2}{\textbf{#1:} #3}}\ignorespaces} \marginparwidth=1.4cm \marginparsep=0cm
+\newcommand{\jeremy}[1]{\thought{Jeremy}{green!20!black}{#1}}
+
+\newcommand{\IntvInstr}{\mathsf{IntvInstr}}
+\newcommand{\oplookup}{\mathsf{lookup}}
+\newcommand{\oprestrict}{\mathsf{restrict}}
+\newcommand{\FinSet}{\catname{FinSet}}
+\newcommand{\Bij}{\catname{Bij}}
+\newcommand{\Type}{\mathbf{Type}}
+
+\newcommand{\vpure}{\mathbf{pure}}
+\newcommand{\vapp}{\mathbin{\langle * \rangle}}
+% \DeclareMathOperator*{\vapp}{\langle * \rangle}
+\newcommand{\fmap}{\mathbin{\langle \$ \rangle}}
+
+\newcommand{\colorone}[1]{\textcolor{purple}{#1}}
+\newcommand{\colortwo}[1]{\textcolor{blue}{#1}}
+\newcommand{\ParIndex}{\mathsf{ParIndex}}
+\newcommand{\Env}{\mathbf{Env}}
+
+\newcommand{\inl}{\mathbf{inl}}
+\newcommand{\inr}{\mathbf{inr}}
+
+\newcommand{\note}{\textcolor{purple}}
+\newcommand{\cur}{\mathbf{cur}}
+\newcommand{\uncur}{\mathbf{uncur}}
+
+\newcommand{\intvPt}{\mathsf{intvPt}}
+\newcommand{\Endo}{\mathcal{E}}
+\newcommand{\sEndo}{\mathsf{Endo}}
+
+\newcommand{\arrow}{\rightsquigarrow}
+\newcommand{\arrarr}{\mathsf{arr}}
+\newcommand{\arrcomp}{\ggg}
+\newcommand{\arrfirst}{\mathsf{first}}
+
+
+\newcommand{\DarioMonad}{\mathsf{T}_{\mathsf{CBN}}}
+\newcommand{\oprun}{\mathsf{run}}
+\newcommand{\dolet}{\mathbf{let}}
+\newcommand{\doletexpr}[3]{\dolet \ #1 \leftarrow #2 \ \doin \ #3}
+\newcommand{\doletexprParam}[4]{\dolet_{#1} \ #2 \leftarrow #3 \ \doin \ #4}
+\newcommand{\doin}{\mathbf{in}}
+
+\newcommand{\typing}[3]{#1 \vdash #2: #3}
+\newcommand{\wtyping}[4]{#1 \vdash_{#2} #3: #4}
+\newcommand{\polytyping}[3]{#1 \vdash_{[-]} #2: #3}
+\newcommand{\TMon}[2]{T_{#1}\left(#2 \right)}
+
+\newcommand{\catIntv}{\mathbf{IntvStruct}}
+
+\newcommand{\bOne}{\mathds{1}}
+\newcommand{\newEndo}{\mathsf{endo}}
+
+\newcommand{\Meas}{\mathsf{Meas}}
+\newcommand{\perWorld}{\mathsf{perWorld}}
+\newcommand{\valueAt}{\mathsf{valueAt}}
+
+\newcommand{\PSh}{\mathbf{PSh}}
+\newcommand{\PShBij}{\PSh(\Bij)}
+
+\newcommand{\LangName}{\mathsf{\lambda_C}}
+\newcommand{\World}{\mathsf{World}}
+
+\newcommand{\dwtyping}[4]{#1 \mid #2 \vdash^d #3: #4}
+\newcommand{\pwtyping}[5]{#1 \mid #2 \mid #3 \vdash^p #4: #5}
+% \newcommand{\rtyping}[4]{#1 \vdash #2: #3 \rarrow #4}
+
+\newcommand{\Any}{\mathsf{Any}}
+\newcommand{\intvConstr}{\mathsf{intvConstr}}
+\newcommand{\twin}{\mathsf{twin}}
+
+\newcommand{\Functions}{\mathsf{Functions}}
+\newcommand{\Distributions}{\mathsf{Distributions}}
+\newcommand{\Constants}{\mathsf{Constants}}
+
+\newcommand{\rone}[1]{{#1}^{(1)}}
+\newcommand{\rtwo}[1]{{#1}^{(2)}}
+\newcommand{\rthree}[1]{{#1}^{(3)}}
+
+\newcommand{\Lone}{L_1}
+\newcommand{\Ltwo}{L_2}
+\newcommand{\Lthree}{L_3}
+
+\newcommand{\Sbs}{\catname{Sbs}}
+\newcommand{\Qbs}{\catname{Qbs}}
+
+\newcommand{\typingone}[4]{#1 \vdash_{1}^{#4} #2: #3}
+\newcommand{\etypingone}[3]{\typingone{#1}{#2}{#3}{\mathbf{e}}}
+\newcommand{\ttypingone}[3]{\typingone{#1}{#2}{#3}{\mathbf{t}}}
+\newcommand{\qtypingone}[3]{\typingone{#1}{#2}{#3}{\mathbf{q}}}
+
+\newcommand{\typingtwo}[5]{#1 \mid #2 \vdash_{2}^{#5} #3: #4}
+\newcommand{\etypingtwo}[4]{\typingtwo{#1}{#2}{#3}{#4}{\mathbf{e}}}
+\newcommand{\ttypingtwo}[4]{\typingtwo{#1}{#2}{#3}{#4}{\mathbf{t}}}
+% \newcommand{\qtypingtwo}[4]{\typingtwo{#1}{#2}{#3}{#4}{q}}
+
+\newcommand{\etypingthree}[4]{#1 \mid #2 \vdash_{3}^{\mathbf{e}} #3: #4}
+\newcommand{\ttypingthree}[6]{#1; #2 \mid #3; #4 \vdash_{3}^{\mathbf{t}} #5: #6}
+% \newcommand{\qtypingtwo}[4]{\typingtwo{#1}{#2}{#3}{#4}{q}}
+\newcommand{\Gammaexo}{\Gamma_{\mathsf{exo}}}
+\newcommand{\Gammaendo}{\Gamma_{\mathsf{endo}}}
+\newcommand{\Deltaexo}{\Delta_{\mathsf{exo}}}
+\newcommand{\Deltaendo}{\Delta_{\mathsf{endo}}}
+
+\newcommand{\typingHO}[3]{#1 \vdash_{\mathsf{HO}} #2: #3}
+
+
+\newcommand{\scoringquery}[4]{\letbind{#1}{#3}{\opscore(#2)};\ \return{#4}}
+
+\newcommand{\xletbind}[3]{\mathbf{let \ exo} \ #1 = #2 \ \mathbf{in} \ #3}
+\newcommand{\nletbind}[3]{\mathbf{let \ endo} \ #1 = #2 \ \mathbf{in} \ #3}
+
+
+\newcommand{\opdefault}{\mathbf{default}}
+\newcommand{\opcondition}{\mathsf{condition}}
+\newcommand{\opapplyIntv}{\mathsf{applyIntv}}
+\newcommand{\forget}{\mathbf{forget}}
+\newcommand{\semSCM}[1]{\sem{#1}_{\mathsf{SCM}}}
+
+% Section 4
+\newcommand{\IntvConstrName}{\mathbf{IntvC}}
+\newcommand{\semone}[1]{\sem{#1}_{\Lone}}
+\newcommand{\semtwo}[1]{\sem{#1}_{\Ltwo}}
+\newcommand{\semthree}[1]{\sem{#1}_{\Lthree}}
+\newcommand{\semho}[1]{\sem{#1}_{\LHO}}
+\newcommand{\liftedEndo}{\widehat{\Endo}}
+\newcommand{\sliftedEndo}{\sEndo}
+\newcommand{\lift}{\mathsf{lift}}
+\newcommand{\liftEndo}{\mathsf{endo}}
+\newcommand{\catp}{\mathbf{P}}
+\newcommand{\App}{\mathsf{App}}
+\newcommand{\intvLabel}{\mathsf{intvLabel}}
+\newcommand{\ulBij}{\underline{\Bij}}
+
+% Section 5
+\newcommand{\LHO}{L_{\mathsf{HO}}}
+\newcommand{\LthreeHOcompile}[1]{\llparenthesis #1 \rrparenthesis}
+\newcommand{\IntvMonadSymb}{\mathcal{I}}
+\newcommand{\IntvMonad}[2]{\IntvMonadSymb_{#1}\left(#2\right)}
+\newcommand{\Twinned}{\mathcal{T}}
+% \newcommand{\TwinnedIntvT}[1]{\Twinned_{#1} \IntvMonadSymb}
+\newcommand{\sTwinned}{\mathsf{Twinned}}
+\newcommand{\sIntvMonadSymb}{\mathsf{IntvT}}
+\newcommand{\sIntvMonad}[2]{\sIntvMonadSymb_{#1}\left(#2\right)}
+\newcommand{\opnewEndo}{\mathsf{newEndo}}
+\newcommand{\unzip}{\mathsf{unzip}}
+\newcommand{\zip}{\mathsf{zip}}
+
+% commenting
+\colorlet{jyColour}{blue}
+
+\makeatletter
+\patchcmd{\@@addmarginpar}{\ifodd\c@@page}{\ifodd\c@@page\@@tempcnta\m@@ne}{}{}
+\makeatother
+\reversemarginpar
+\newcommand{\sidenote}[3]{\marginpar{\tiny\itshape\raggedright\textcolor{#2}{\textbf{#1:} #3}}\ignorespaces} \marginparwidth=1.4cm \marginparsep=0cm
+\newcommand{\jy}[1]{\sidenote{jy}{jyColour}{#1}}
+
+
+% SCMs
+\DeclarePairedDelimiterX{\parensbar}[1]
+{(\!\delimsize\vert}
+{\delimsize\vert\!)}
+{#1}
+\newcommand{\compileSCM}[1]{\ensuremath{\parensbar{#1}}}
+\newcommand{\scmIntervene}[2]{\ensuremath \mathsf{do}_{#1, #2}}
+\newcommand{\scmTwin}[1]{\ensuremath \mathsf{twin}_{#1}}
+\newcommand{\IntClass}{\ensuremath{\mathsf{Intv}}}
+\newcommand{\DefaultClass}{\ensuremath{\mathsf{Default}}}
+
+\newcommand{\commentcolor}{\textcolor{codegreen}}
+\newcommand{\highlightcolor}{\textcolor{blue}}
+\newcommand{\SCM}{\mathcal{M}}

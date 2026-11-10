@@ -1,0 +1,32 @@
+% Transfer of Status qualifying dissertation.
+% Structure: Introduction; literature review (lit_review.tex);
+% Project Proposal (proposal.tex). Shared preamble in preamble.tex.
+\input{preamble.tex}
+
+
+\title{Semantics of Causal Probabilistic Programming\\[1ex]
+\large Qualifying Dissertation for the Transfer of Status}
+\author{Theo Wang\\ \small Department of Computer Science, University of Oxford\\ \small Supervisor: Sam Staton}
+\date{Michaelmas Term 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+\noindent
+Causal inference asks what would happen if a variable were forced to a value, and the standard answer, Pearl's structural causal models, is a syntactic transformation of a model. Causal probabilistic programming aims to make such interventions primitives of an expressive probabilistic language, and most existing languages do so by evaluation strategies without an account of what they compute. In my first year, with coauthors, I gave that account: a hierarchy of probabilistic languages in which interventions and counterfactual twinning are program transformations, the interventional face of causal structure is defined by a contextual equivalence of programs, and a graded denotational semantics is fully abstract for it over concrete models and extends to higher order. The proposed thesis builds outward from this base in four directions: a practical, vectorised implementation and an extension to cyclic models; a better understanding of the categorical constructions, including a synthetic account in Markov categories; a graph-centred account in which the causal graph rather than the model is primitive, and in which the do-calculus is compared with an equational theory of programs; and, open-endedly, the relation between interventional causality and the notions of causality used in concurrency and in higher-order quantum processes. Sections~\ref{sec:foundations}--\ref{sec:synthesis} review the literature; Section~\ref{sec:proposal} is the proposal.
+\end{abstract}
+
+\tableofcontents
+
+\section{Introduction}\label{sec:intro}
+\input{intro.tex}
+
+\input{lit_review.tex}
+
+\input{proposal.tex}
+
+\printbibliography
+
+\end{document}

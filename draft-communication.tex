@@ -1,0 +1,24 @@
+% Communication-led version: the thesis is the semantics of order and
+% signalling in communicating quantum programs; the interventional work is
+% the finished template; the bridge hypothesis is the spine.
+\input{preamble.tex}
+\title{Order and Signalling in Communicating Quantum Programs:\\ a Semantics of Causality\\[1ex]
+\large Qualifying Dissertation for the Transfer of Status}
+\author{Theo Wang\\ \small Department of Computer Science, University of Oxford\\ \small Supervisor: Sam Staton}
+\date{Michaelmas Term 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent
+A quantum program that sends and receives qubits has a causal structure: the order of its communication events, and the question of which of them can influence which. This thesis develops a programming-language semantics in which that structure is denotational data and is characterised extensionally by the signalling types of higher-order quantum theory. It builds on an algebraic theory of classically controlled quantum communication, begun in my MSc dissertation, whose operational and denotational models are adequate and fully abstract for each other and for which I have a draft proof of completeness; the proposed work gives this semantics its signalling reading as a family of combs, extends it to several channels, and tests a hypothesis that would make the finished semantics of causal probabilistic programming from my first year, in which interventional causal structure is characterised by contextual equivalence, literally a fragment of it: that an intervention is a communication event with the intervener as the environment. Part I reviews the literature the thesis builds on, in programming-language semantics and causal inference, and positions the two neighbouring fields it reaches into, the semantics of concurrency and higher-order quantum processes. Part II states the research plan and is self-contained.
+\end{abstract}
+
+\tableofcontents
+
+\input{review.tex}
+\input{proposal-communication.tex}
+\printbibliography
+
+\end{document}

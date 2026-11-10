@@ -1,0 +1,164 @@
+% =====================================================================
+\part{Thesis Proposal}
+% =====================================================================
+
+\section*{Notation and background in brief}
+\begin{itemize}[nosep]
+\item \emph{Interventional languages} $\Lk{1}\subseteq\Lk{2}\subseteq\Lk{3}$ and $\LHO$: first-order probabilistic languages with intervention labels $\ell$ read by $\mathsf{applyIntv}$, interventions $\dok(\ell\mapsto v)\{t\}$ by substitution, twinning by vectorisation, and a higher-order extension. $\equiv_k$: contextual equivalence at rung $k$. Grading: the denotation of an $\Lk{2}$ program is indexed by the interventions available.
+\item \emph{Communication theory} $\iotq$: the tensor of an I/O theory ($\opin$ receives a qubit, $\opout$ sends one) with Staton's theory $\mathsf{Q}$ ($\opnew$, $\opmeasure$ with two branches, $\applyU{U}$). Binding: $\applyU{U}(\vec a,\ \vec a.\ t)$ applies $U$ to $\vec a$ and continues as $t$; $\mathsf{discard}(q, t)$ measures and ignores. $\approx_q$: operational equivalence against quantum streams. $T(X)=\bigoplus_\sigma \mathrm{qbit}^{|\sigma|}\otimes X$ on $\CPinf$: the free I/O monad; $\llbracket t\rrbracket_\sigma$: the $\sigma$-component of a denotation.
+\item \emph{Signalling}: a \emph{comb} is a process with slots in a fixed order; a \emph{tester} is a sub-normalised family of combs summing to one. $\CausC(\mathcal{C})$: Kissinger and Uijlen's category of higher-order processes over a precausal $\mathcal{C}$, typed by signalling constraints; $\Mat$ and finite-dimensional $\CP$ are (additive) precausal; $\FinStoch$ (stochastic matrices) is the first-order part of $\CausC(\Mat)$; graph types \cite{simmons2024thesis} are the signalling types of an arbitrary DAG. Classical-control and quantum-control circuits: the classes of Wechs et al.\ \cite{wechs2021qcqc}; the switch is in the second and not the first.
+\item \emph{Factorisation}: Markov categories, Bayesian networks as string diagrams, d-separation.
+\item M1--M3: reading milestones in \S\ref{sec:plan}.
+\end{itemize}
+
+\section{Research topic and fundamental challenges}
+
+The thesis will develop a \emph{compositional semantics of causal structure for probabilistic and quantum programs} in which (1) interventional structure is characterised by contextual equivalence, which is done; (2) the order structure of communicating quantum programs is characterised by signalling types, which is the main new technical work; and (3) the two are related by a functorial bridge on their common finite classical fragment. An axiomatic framework in which intervention, signalling and factorisation are all structure on one category is the stretch goal, attempted only once (3) has decided whether it has the right shape. The \emph{minimum viable thesis} is (1), the completeness theorem for $\iotq$, the signalling reading of its single-channel semantics and its extension to independent channels, and the bridge (3).
+
+The fundamental challenges are these. (i) \emph{Finite dimension and sub-normalisation.} Signalling structure is built over compact closed categories of finite-dimensional systems, whereas the interventional semantics is measure-theoretic and the communication semantics uses an infinite-biproduct completion; and both conditioning and measurement branching produce sub-normalised maps, which are not elements of first-order signalling types. (ii) \emph{Parallel composition is not an algebraic operation} \cite{stark:freamp,CSP_van_Glabbeek_2010}, so threads cannot simply be added to $\iotq$ as an operation; and coherent control of order is not an operation with classical continuations at all. (iii) \emph{Completeness and full-abstraction proofs are model-specific and long}: the single-channel completeness proof has taken most of a year and is not yet closed. (iv) \emph{No accepted standard to test against}: the existing behavioural semantics for communicating quantum programs disagree with one another \cite{lqCCS_10.1145/3632885}, so evaluation must be by theorems and by matching known protocols and known physics.
+
+\section{Goal}
+
+I want a mathematical account of what it means for one part of a program to cause another, that works the same way whether ``cause'' means ``if I change this, that changes'', ``this can send a message to that'', or ``these two are independent given those'', and whether the program is classical-probabilistic or quantum.
+
+\section{State of the art and why the problem is hard}
+
+The existing notions of equivalence for causal models (Bongers et al.; causal spaces; causal abstraction) say when two models have the same interventional behaviour, but they are not equivalences of \emph{programs}: there is no notion of context, and no higher order. Causal probabilistic programming languages (OmegaC, ChiRho, MultiVerse) implement interventions and counterfactuals at higher order, but by evaluation strategies, without a denotational or equational account of what they compute. Quantum process calculi (CQP, qCCS, lqCCS) are the only semantic treatment of communicating quantum programs; they are operational, their bisimilarities disagree, and they do not separate communication from concurrency. The theory of higher-order quantum processes (combs, process matrices, the $\CausC$ construction) has a precise account of signalling and of definite versus indefinite order, but it has never been connected to a programming language. Markov categories, the synthetic home of factorisation, have no primitive notion of intervention or of signalling.
+
+The problem is hard for three reasons. Each notion has been developed with its own mathematics, and the natural meeting points---parallel composition, cycles, indefinite order---are precisely where the standard tools (algebraic theories, acyclic graphs, fixed-order combs) stop working. The bases do not match: signalling needs finite dimension and compact closure, the interventional semantics is measure-theoretic, and conditioning and branching produce sub-normalised maps. And the correspondence theorems that would relate the notions are each a substantial proof.
+
+\section{Approach}\label{sec:approach}
+
+\paragraph{Method.} The method is the one that has now worked twice. (1) Fix a small language whose \emph{syntax} carries the intensional causal structure: labels for interventions, I/O operations for communication events. (2) Define an \emph{extensional} equivalence from what an observer may do: quantify over interventional contexts, or over quantum-stream environments. (3) Build a \emph{denotational} model in which the intensional structure becomes an index, a grade or a trace, with a reindexing action. (4) Prove a \emph{correspondence theorem}, full abstraction or completeness, between (2) and (3). Work packages 1 and 2 push each existing instance to its next hard case; work package 3 asks for the common theory.
+
+\paragraph{What is new.} Three things. Causal structure is \emph{defined} by a contextual equivalence of programs, rather than by a property of a graph; this is what makes it compositional and higher-order. The order of communication events is \emph{denotational data}, an index of the model, rather than a label on an operational transition; this is what makes a signalling reading possible. And the bridge between the two is a functor between a graded category and a signalling-typed category, which, if it exists, says that intervening at a hole and plugging a channel into a slot are the same operation seen from two sides.
+
+\paragraph{Two worked examples.} The two examples below are the same statement in two guises, and they are the first thing each work package must preserve.
+
+\emph{Example A (interventional).} In $\Lk{2}$, interventions are exposed as typed free variables $\ell$, the intervention labels, read through $\mathsf{applyIntv}$, which returns the label's value when it is set and the program's own value otherwise. Consider a mediation model:
+\begin{lstlisting}
+let t  = bernoulli 0.5 in              -- treatment
+let t' = applyIntv $\ell$ t in             -- intervenable copy of t
+let m  = bernoulli (f t') in           -- mediator
+let y  = bernoulli (g t' m) in         -- outcome
+let z  = bernoulli 0.3 in              -- unrelated variable
+return (y, z)
+\end{lstlisting}
+An intervention is substitution for the label: under $\dok(\ell\mapsto\mathsf{Just}\ \mathsf{true})\{-\}$ the variable $t'$ denotes the constant $\mathsf{true}$, and the total effect of $t$ on $y$ is the difference between the distributions of $y$ under $\dok(\ell\mapsto\mathsf{Just}\ \mathsf{true})$ and $\dok(\ell\mapsto\mathsf{Just}\ \mathsf{false})$. The natural direct effect---the effect of $t$ on $y$ with the mediator held at the value it \emph{would have taken} under $t=\mathsf{false}$---is a cross-world quantity; in $\LHO$ it is expressed by twinning the program and intervening on the mediator of one world with a value read from the other. The invariance claim is that $z$ has the same distribution in every interventional context: $z$ is causally independent of $t$ because the dataflow does not connect them, and $\equiv_2$ turns this into an equation between programs of the same type, namely that the program above with $\mathtt{return}\ z$ in place of $\mathtt{return}\ (y,z)$ is $\equiv_2$ to $\mathtt{let}\ t' = \mathtt{applyIntv}\ \ell\ \mathtt{true}\ \mathtt{in}\ \mathtt{let}\ z = \mathtt{bernoulli}\ 0.3\ \mathtt{in}\ \mathtt{return}\ z$, in which the label is consumed but ignored. Full abstraction says that the graded denotation detects exactly these equations.
+
+\emph{Example B (communication).} In $\iotq$, $\opin: \langle 0 \mid 1\rangle$ receives a qubit and binds it, $\opout: \langle 1\mid 0\rangle$ sends one, and the operations of $\mathsf{Q}$ are $\opnew$, $\opmeasure$ (which branches on the outcome) and $\applyU{U}$. Consider the term that receives a qubit, prepares a Bell pair locally, performs a Bell measurement on the received qubit and one half of the pair, applies the Pauli correction determined by the two outcomes to the other half, and sends it:
+\begin{align*}
+\mathit{tele} \;=\; \opin\big(q.\ \opnew(a.\ \opnew(b.\ &\applyU{H}(a,\ a.\ \applyU{CX}((a,b),\ (a,b).\\
+&\applyU{CX}((q,a),\ (q,a).\ \applyU{H}(q,\ q.\ \opmeasure(q,\ c_{0},\ c_{1})))))))\big)
+\end{align*}
+where $c_{i} = \opmeasure(a,\ \applyU{Z^{i}}(b,\ b.\ \opout(b, x)),\ \applyU{Z^{i}X}(b,\ b.\ \opout(b, x)))$. Write $T[y]$ for the local part of this term with the continuation $y(b)$ in place of each $\opout(b,x)$; $T[y]$ is a term of $\mathsf{Q}$ alone, its denotation is the identity channel from $q$ to $b$, and Staton's theory is complete \cite{statonpopl15}, so $T[y] = y(q)$ is derivable. Equational derivations are closed under substitution for continuation variables, hence $\mathit{tele} = \opin(q.\ \opout(q, x))$ in $\iotq$: the term is provably equal to a bare relay. Its denotation has a single non-zero trace component, at $\sigma=(\opin,\opout)$, and that component is, up to the Choi correspondence, the identity on one qubit: a comb with one input slot followed by one output slot.
+
+The derivation above uses only the local theory; the \emph{tensor} is exhibited by the following equation from our paper, which holds in $\iotq$ but not in the sum of the two theories:
+\begin{align*}
+&\opnew(q.\ \applyU{H}(q,\ q.\ \opnew(p.\ \applyU{CX}((q,p),\ (q,p).\ \opout(p,\ \mathsf{discard}(q, x))))))\\
+&\quad = \opnew(q.\ \applyU{H}(q,\ q.\ \opmeasure(q,\ \opnew(p.\ \opout(p, x)),\ \opnew(p.\ \applyU{X}(p,\ p.\ \opout(p, x)))))).
+\end{align*}
+Preparing a Bell pair, sending one half and discarding the other is indistinguishable, to any environment, from tossing a fair coin and sending its outcome as a classical bit. The derivation needs the commutation axiom $\opmeasure(a,\ \opout(b,x),\ \opout(b,y)) = \opout(b,\ \opmeasure(a,x,y))$: the measurement of the discarded half and the sending of the other half may be reordered because neither can signal to the other. This is the communication-side counterpart of the invariance claim in Example A.
+
+The teleportation term has one branch and one trace, which hides what makes the signalling reading non-trivial. A term that branches on a measurement, such as $\opnew(a.\ \opout(a,\ \opin(q.\ \opmeasure(q,\ x,\ \opnew(b.\ \opout(b, x))))))$, has an $(\opout,\opin)$-component that is post-selected on the later measurement outcome: it is sub-normalised, and on its own it is not a comb, since its trace depends on the later input. Only the family of components over all traces, with the later wires discarded, satisfies the comb conditions. The right objects are therefore testers and strategies \cite{chiribella2009networks,gutoski2007games}, and the conjecture is:
+\begin{conj}\label{conj:b1}
+For every closed term $t$ of $\iotq$ and every trace $\sigma$, the component $\llbracket t\rrbracket_\sigma$ is a probabilistic comb with slot order $\sigma$, and the family $(\llbracket t\rrbracket_\sigma)_\sigma$ is a variable-length tester: for each $\sigma$, the sum of the components over all extensions of $\sigma$, with the later wires discarded, is a deterministic comb with slot order $\sigma$.
+\end{conj}
+\noindent Stated this way the conjecture is expected to follow by structural induction on terms, since sequencing is comb composition, and its content is the normalisation bookkeeping across traces of different lengths; the question that is genuinely open is the characterisation in Conjecture \ref{conj:b2}.
+
+\paragraph{Work package 1: interventional route---equational theory and cycles.}
+\begin{itemize}[nosep]
+\item[1a] \textit{(medium risk)} Relate the equational theory of contextual equivalence to the normalisation-box equational theories for causal Bayesian networks \cite{jacobsszelesstein2025inference,agrawal2026equational}, and settle whether $\equiv_3$ is strictly finer than two-world counterfactual equivalence. \emph{Done:} a coincidence theorem on the programs definable from causal Bayesian networks, or a separating example; and the strictness answer. \emph{Why it may succeed:} both are equational theories over the same string-diagram semantics. This item is in the plan because it is cheap and because its outcome feeds \WP{3c}.
+\item[1b] \textit{(high risk; medium if restricted to finite cyclic models with unique solutions)} Cyclic SCMs and feedback: identify the fixpoint construct whose denotation is Bongers et al.'s solution function, and what the graded semantics must become to support it. \emph{Done:} a language extension with a sound semantics for the restricted class, and Example A with a feedback edge. \emph{Why it may succeed:} the solution-function semantics is already a fixpoint; the question is which language construct denotes it. Outside the minimum viable thesis.
+\end{itemize}
+
+\paragraph{Work package 2: communication route---multiple channels and signalling.}
+\begin{itemize}[nosep]
+\item[2a] \textit{(medium risk; in the minimum viable thesis)} Independent channels in a sequential program: $\iotq$ with operations $\opin_c$, $\opout_c$ for each channel $c$, where events on different channels commute, so that the monad is indexed by Mazurkiewicz traces over a partially commutative monoid. \emph{Done:} the theory defined, non-degeneracy by a multi-stream operational model, soundness and adequacy of the trace-indexed denotational model; completeness by re-running the single-channel proof, whose reorganisation step and factorisation lemma are channel-agnostic. \emph{Why it may succeed:} the proof architecture is unchanged; what is new is the commutation of independent I/O events, which the quantum-stream model must validate. \emph{Test:} teleportation as a two-party program; entanglement swapping.
+\item[2a$'$] \textit{(high risk; stretch)} Threads: tensor $\iotq$ with the dynamic-threads theory of Kammar et al.\ \cite{kammar2026threads} and ask which of its equations survive the quantum setting, in the manner of the Eckmann--Hilton analysis in my dissertation; traces become pomsets. \emph{Done:} the theory defined and shown non-degenerate; a soundness theorem.
+\item[2b] \textit{(low risk for Conjecture \ref{conj:b1}; medium for Conjecture \ref{conj:b2})} Which fragment of higher-order quantum computation does $\iotq$ axiomatise?
+\begin{conj}\label{conj:b2}
+For each trace $\sigma$, the component $\llbracket t\rrbracket_\sigma$ lands in the comb type for $\sigma$ in $\CausC(\CP)$, the branch family is typed by the coproduct and probabilistic-choice operators of the additive construction \cite{simmons2024thesis}, and the assignment is functorial in sequencing. Every deterministic comb of finite depth with qubit slots is the component of some term, and the equations of $\iotq$ are exactly those validated by the comb types.
+\end{conj}
+\noindent The first sentence is the typing statement; the second is expected to hold by the comb realisation theorem \cite{chiribella2009networks} together with the universality of $\mathsf{Q}$; the third, completeness of $\iotq$ relative to $\CausC$, is the open question, and causal logic \cite{simmons2024thesis,simmons2024completelogic} gives it a sharper form: which fragment of causal logic do the I/O orders of $\iotq$ terms realise, and is every causally consistent wiring in that fragment denotable? The trace index is kept external, so the construction is over finite-dimensional $\CP$, which is additive precausal, and not over $\CPinf$, which fails the finite-causal-basis axiom. \emph{Done:} \ref{conj:b1} proved; the typing functor constructed; the realisation statement proved or refuted; relative completeness answered or reduced to a precisely stated question. \emph{Why it may succeed:} the objects on both sides are finite-dimensional CP maps with the same wire structure, and the single-channel completeness proof already produces the normal forms that a comparison with comb types needs.
+\item[2c] \textit{(high risk; conditional on 2a and 2b)} Distributed quantum computing through process matrices. In the process-matrix picture the local programs are combs and the network that wires them is a process matrix; the conjecture is that the classical-control and quantum-control classes of Wechs et al.\ \cite{wechs2021qcqc} are the right denotational universe for the \emph{network} component of a distributed program, with local programs denoting as in \WP{2b}, so that ``realisable as a circuit with controlled order'' becomes a decidable predicate on denotations; it cannot be a $\CausC$ type, since every process matrix is an affine combination of definite-order ones \cite{simmons2024thesis}. Two hypotheses, in increasing order of content:
+\begin{hyp}\label{hyp:sched}
+A parallel composition of $\iotq$ programs under a classical scheduler whose choices may depend on earlier outcomes denotes a process in the classical-control class, hence a causally separable one; an outcome-independent scheduler denotes a convex mixture of fixed-order combs.
+\end{hyp}
+\begin{hyp}\label{hyp:conv}
+Conversely, every process in the classical-control class is the denotation of some parallel composition under some classical scheduler.
+\end{hyp}
+\noindent Hypothesis \ref{hyp:sched} is close to the definition of the classical-control class and is a formalisation exercise; Hypothesis \ref{hyp:conv} would be a result. \emph{Done:} the translation from parallel compositions to process matrices with Hypothesis \ref{hyp:sched} proved; Hypothesis \ref{hyp:conv} proved or refuted; and, for each protocol in a catalogue (teleportation, entanglement swapping, a BB84 fragment, a two-party comb), a term whose denotation is the known process operator. The switch and the process of Oreshkov, Costa and Brukner are not in the classical-control class, so Hypothesis \ref{hyp:sched} already shows that no such composition denotes them; they are the boundary of the model, not independent tests. \fillin{the Kim reference for this item} \emph{Why it may succeed:} the physics side has already characterised the target classes, and the translation reuses the combs of \WP{2b}.
+\item[2d] \textit{(high risk, exploratory; after 2c)} Generalised switches as quantum schedulers. A pomset over channel events has a set of linear extensions, and a coherent superposition over a subset of the permutations of $N$ single-use nodes is the $N$-party switch with a restricted control state, which lies in the quantum-control class; realisability of pomset-indexed switches is therefore expected to be a corollary rather than a milestone. The questions with content are: (a) which quantum-control processes arise as schedulers over linear extensions, since that class also allows the order to be updated coherently by the operations' outputs, which is strictly more; (b) what a ``quantum scheduler'' primitive in a programming language is, given that coherent control of order is not an algebraic operation with classical continuations, and how it relates to the PBS-calculus \cite{clement2020pbs}, which has the switch as a term; (c) the well-posedness condition that the composed programs act on a shared target or communicate, with identical wiring in every branch so that the control does not leak. \emph{Done:} the definition; the characterisation (a) or a precise separation; a proposal for (b) with a sound semantics for the two-party case recovering the switch.
+\end{itemize}
+
+\paragraph{Work package 3: a unifying categorical account.}
+\begin{itemize}[nosep]
+\item[3a] \textit{(medium risk; in the minimum viable thesis)} A bridge theorem on the common finite classical fragment. Finite stochastic processes live in both worlds: as morphisms of $\FinStoch$, over which the interventional semantics can be instantiated, and as the first-order part of $\CausC(\Mat)$. The reframing that gives the theorem content is that an $\Lk{2}$ program with intervention labels \emph{is} a comb whose slots are the labels: a perfect intervention plugs a state into a slot, a soft intervention plugs a channel, and the tightest $\CausC$ type of a program is determined by its dataflow (tensor for labels with no dataflow between them, sequential for ordered ones). The theorem to prove is that this type assignment is a functor from the graded interventional category into $\CausC(\Mat)$, compatible with composition and with the intervention grades, and that it reflects interventional equivalence; for a single label the two sides coincide by unfolding definitions, and the content is in composition and in the higher-order fragment. Two refinements are built in. First, perfect and soft interventions differ: invariance of $Y$ under all perfect interventions at a slot does not imply invariance under all soft ones, whereas invariance under all soft interventions is exactly no-signalling from the slot; the theorem is stated for soft interventions, and the perfect case is reported as the weaker relation it is. Second, a \emph{factorisation} reading is included: the conditional independences of the Markov-category image, via Fritz and Klingler's synthetic d-separation \cite{fritz2023dseparation}, as the third face of the same functor. A further hypothesis, to be checked early because it would make the interventional route literally a fragment of the communication route: an intervention label is an $\opout$/$\opin$ pair with the intervener as the environment, $\dok(\ell\mapsto v)$ being the stream that ignores the output and returns $v$ and ``no intervention'' the echo stream, so that $\equiv_2$ is equivalence under all memoryless echo-or-replace streams. The higher-order fragment is obstructed by sub-normalisation from conditioning, so the functor is first defined on the normalised fragment and the extension to testers is a stated sub-question. \emph{Done:} the functor and its properties, or a counterexample program; the soft/perfect separation; the factorisation reading. Either outcome is a result: a counterexample is a publishable separation between interventional and signalling independence. Comb disintegration \cite{jacobs2019causal} is the prior work this item must be positioned against; it uses combs to compute with a fixed classical model, whereas here the comb type is assigned to a program and compared with its contextual equivalence.
+\item[3b] \textit{(risk unknown until reading milestone M2)} Recast quantum causal models \cite{barrett2019quantumcausalmodels} in the graded setting over finite-dimensional $\CP$, with nodes as labels. The process operator of a quantum causal model is not in general a comb, since nodes with no path between them form a non-signalling rather than a sequential shape, so the graded category must accommodate DAG-shaped signalling types, for which Simmons's graph types \cite{simmons2024thesis} are the vocabulary. \emph{Done:} the quantum Markov condition recovered as a property of the intervention-graded category, or a precise statement of what is missing. \emph{Why it may succeed:} the quantum causal model's interventions are local instruments at nodes, which is what intervention labels denote.
+\item[3c] \textit{(high risk, stretch; only after 3a)} An axiomatic framework, in the spirit of Markov categories, in which intervention, signalling and factorisation are structures with stated relationships, instantiated by $\FinStoch$ and finite-dimensional $\CP$, such that the existing correspondence theorems become instances of general ones. \emph{Done:} axioms, the two instances, and at least one general theorem specialising to a known one. \emph{Why it may succeed:} both existing semantics are families indexed by an intensional datum with a reindexing action, so the generalisation starts from two worked instances rather than from an abstraction exercise, and 3a decides within one term whether it has the right shape.
+\end{itemize}
+
+\section{Evaluation}
+
+The thesis is theoretical, and its results are evaluated as theorems with the ``done'' criteria stated above: completeness, full abstraction, the typing and realisation statements of \WP{2b}, and the coincidence or separation results of \WP{3a}. Case studies have pass/fail criteria: for the protocol catalogue of \WP{2c}, each protocol either has a term whose denotation is the known process operator or a proof that none does; for the causal-inference examples (mediation, instrumental variables, feedback), each is reproduced in the executable semantics and gives the textbook answer. The Haskell implementation of $\LHO$ \cite{ARTIFACT_wang_2026_23207221} will be extended to each new construct, so that every semantic definition remains executable.
+
+\section{Impact and risks}
+
+If successful, the thesis gives denotational foundations for causal probabilistic programming, and hence for causal machine-learning languages, in which interventions are mathematical operations rather than evaluation strategies; a semantic model of distributed quantum programming in which realisability as a controlled-order circuit is a predicate on denotations; and a dictionary between causal inference and quantum causality, two communities that use the same word for different things.
+
+\begin{table}[ht]
+\centering\small
+\begin{tabularx}{\textwidth}{lcX}
+\toprule
+Item & Risk & Fallback\\
+\midrule
+1a equational theories & medium & a separating example is itself a result\\
+1b cyclic models & high & restrict to finite, unique-solution models; outside the minimum viable thesis\\
+2a independent channels & medium & soundness and adequacy without completeness\\
+2a$'$ threads & high, stretch & dropped without loss\\
+2b comb typing (B1) & low & ---\\
+2b relative completeness (B2) & medium & the typing functor and realisation alone characterise the fragment\\
+2c network semantics & high, conditional & Hypothesis \ref{hyp:sched} and the catalogue alone\\
+2d generalised switches & high, conditional & dropped without loss\\
+3a classical bridge & medium & a counterexample is a publishable separation\\
+3b quantum causal models & unknown until M2 & a precise statement of what is missing\\
+3c axiomatic framework & high, stretch & 3a becomes the unifying chapter\\
+\bottomrule
+\end{tabularx}
+\caption{Risks and fallbacks.}
+\end{table}
+
+The generic risk is breadth. The mitigation is the \emph{minimum viable thesis}: the interventional chapter (done), the communication chapter (the completeness theorem, with the MSc results as background), the signalling reading of \WP{2b} and the independent-channel extension of \WP{2a}, and the bridge theorem of \WP{3a}. Every item in it is rated low or medium. The remaining items are attempted only when their preconditions are met.
+
+\section{Plan of work, milestones, and training}\label{sec:plan}
+
+I am in my fourth term. The baseline schedule is the minimum viable thesis; conditional items are marked.
+
+\begin{table}[ht]
+\centering\small
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+Term & Milestones\\
+\midrule
+MT26 (4) & Transfer of status. POPL revision. Reading milestone M1: Simmons's thesis \cite{simmons2024thesis}, chapters 2--3, and the papers of \S\ref{sec:concurrency}--\ref{sec:hoqc}.\\
+HT27 (5) & Completeness manuscript closed and submitted. Conjecture \ref{conj:b1} proved. Reading milestone M2: quantum causal models \cite{barrett2019quantumcausalmodels}.\\
+TT27 (6) & \WP{2b}: typing functor and realisation. \WP{3a}. \emph{Deliverable:} paper on completeness and the comb reading; 3a answered.\\
+MT27--HT28 (7--8) & \WP{2a}: independent channels. \WP{1a}. Reading milestone M3: concurrency semantics in depth, before any work on 2a$'$. \emph{Deliverable:} paper on the classical bridge or on 2a. \textbf{Confirmation of Status in HT28}, with the minimum viable thesis in hand.\\
+TT28 (9) & Buffer for Confirmation of Status. \WP{3b}. Start of \WP{3c} if 3a succeeded.\\
+MT28 (10) & \WP{2c} if 2a and 2b are complete, otherwise \WP{3c}; \WP{1b} on the restricted class if time permits.\\
+HT29--TT29 (11--12) & \WP{2d} only if 2c is done by MT28; otherwise consolidation. Thesis writing; submission by the end of TT29.\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Consolidation items, not research: an implementation of $\LHO$ beyond MonadBayes if time permits, and a denotational account of OmegaC's core as a worked example. Dissemination targets are POPL, LICS, FoSSaCS, MFPS and QPL.
+
+The thesis will be organised as: 1 Introduction; 2 Background (Part I of this document); 3 Interventional semantics of causal probabilistic programs \fillin{delineate your contribution from coauthors'}; 4 Order semantics of quantum communication, consisting of the completeness theorem and \WP{2a}, with the MSc dissertation as background and not as DPhil material \fillin{confirm reuse rules with supervisor}; 5 Signalling structure and higher-order processes (\WP{2b}--2d); 6 The bridge and the unifying account (\WP{3}); 7 Conclusion.
+
+\paragraph{Training and engagement.} \fillin{required by the assessors' criteria: seminars attended (PL group, quantum group); courses audited; the PLanQC 2025 talk, with a paragraph on it; teaching; planned activities for the coming year}.
+
+\section{Statement of the subject of the thesis}
+
+Compositional semantics of causal structure in probabilistic and quantum programs: interventional, signalling and factorisation characterisations, and the correspondences between them.
+

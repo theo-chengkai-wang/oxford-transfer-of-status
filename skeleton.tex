@@ -1,0 +1,270 @@
+% =====================================================================
+% Transfer-of-Status qualifying dissertation -- SKELETON (v3, after two
+% scrutiny rounds).  Compile: latexmk -pdf skeleton.tex
+%
+% Everything in \sknote{...}, \budget{...}, the strategy section and the
+% scrutiny log is guidance for you and disappears when you set
+% \skeletonnotesfalse below.  Cite keys are real: refs.bib (POPL) and
+% refs-quantum.bib (MSc thesis); [NEW] marks references in neither file.
+% =====================================================================
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2cm]{geometry}
+\usepackage[backend=biber,style=numeric,sorting=nyt,maxbibnames=6]{biblatex}
+\input{pkgs.tex}
+\usepackage{xcolor}
+\usepackage{booktabs,array,tabularx}
+\usepackage{ifthen}
+
+\addbibresource{refs.bib}
+\addbibresource{refs-quantum.bib}
+
+% ---- skeleton machinery ---------------------------------------------
+\newif\ifskeletonnotes
+\skeletonnotestrue            % set to \skeletonnotesfalse before submission
+\newcommand{\sknote}[1]{\ifskeletonnotes{\small\color{blue!60!black}\textit{[#1]}}\fi}
+\newcommand{\budget}[1]{\ifskeletonnotes{\small\color{red!60!black}\textbf{(\textasciitilde#1 words)}}\fi}
+\newcommand{\sknew}[1]{\ifskeletonnotes{\color{purple!70!black}[NEW: #1]}\else#1\fi}
+\newcommand{\skim}{\ifskeletonnotes{\color{purple!70!black}[SKIM]}\fi}
+\newcommand{\skfill}[1]{\ifskeletonnotes{\color{orange!80!black}[FILL: #1]}\fi}
+\newcommand{\risk}[1]{\textsf{\small[#1]}}
+\newcommand{\WP}[1]{\textbf{WP#1}}
+\newcommand{\iotq}{\mathsf{IO}\otimes\mathsf{Q}}   % rename to your macro
+\newcommand{\CPinf}{\mathbf{CP}^{\infty}}
+\providecommand{\LHO}{L_{\mathsf{HO}}}
+
+\title{Semantics of Causality:\\ Interventional, Signalling and Factorisation Structure\\ in Probabilistic and Quantum Programs\\[1ex]
+\large Qualifying Dissertation for the Transfer of Status}
+\author{Theo Wang}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\ifskeletonnotes
+% =====================================================================
+\section*{0. Scoping strategy (for you; not part of the submission)}
+% =====================================================================
+\sknote{Handbook (2026, \S5.2.2 req.\ IV, \S5.2.3): literature review ``around 5000 words (or more)'', a first draft of the thesis' literature-review chapter, showing critical understanding; thesis proposal around 6 pages at $\geq$11pt, answering the six set questions (i)--(vi), with a plan of work and milestones showing submission within 12 terms. The viva concentrates on the proposal, which must be readable on its own. You have chosen a shorter review ($\approx$3500 words); the assessors see the 5000 figure, so make the review dense rather than thin: every section must end in a critical comparison.}
+
+\sknote{Dates (confirm with the GSA): if MT26 is your 4th term the documents are due Wednesday of week 5 = 11 November 2026 (Full Term began Sunday 11 Oct 2026). The Research Integrity Certificate and PRS Course Results form were due Friday of 0th week; check they are in. Confirmation of Status by your 9th term = TT28.}
+
+\sknote{Strip before submission: set \texttt{\textbackslash skeletonnotesfalse}; remove ``Route A/B'' wording if any; keep the one tiering sentence in \S1.}
+
+\paragraph{0.1 The thesis statement that makes the two routes one project (honest version).}
+Causal structure in computation is \emph{intensional} data on the program side: the dataflow of a probabilistic program; the temporal order of I/O events of a communicating program (a word in the single-channel theory, a pomset in general); the DAG of a causal model. Three communities characterise such structure \emph{extensionally}, by what an observer may do: \textbf{intervention} (what survives all $\mathrm{do}$-contexts), \textbf{signalling} (which inputs can influence which outputs), \textbf{factorisation} (which conditional independences hold). Use these three names throughout; ``order'' is the intensional datum, not a fourth notion.
+
+Where the two projects stand, asymmetrically because that is the truth: the interventional route (POPL) has the full picture for one notion---dataflow $\leftrightarrow$ contextual equivalence under interventions, related by full abstraction under conditions on the model. The communication route (MSc thesis, FoSSaCS submission, completeness draft) has a semantics in which the temporal order of I/O events is first-class data, with algebraic $\equiv$ operational $\equiv$ denotational equality, but \emph{not yet} an extensional \emph{causal} reading of that order; giving it one, as signalling structure (\WP{2b}), is part of the proposal.
+
+\emph{The one example that is the same statement in both routes} (use in \S1, \S5 and as the first worked example of the proposal): interventional route---in an $\mathcal{L}_2$ program $\mathtt{let}\ x = \langle\mathit{hole}\rangle\ \mathtt{in}\ \mathtt{let}\ y = e\ \mathtt{in}\ \dots$ with $e$ not depending on $x$, every intervention at the hole leaves the distribution of $y$ invariant: causal independence is \emph{tested by contexts}. Communication route---the tensor axiom $\mathrm{apply}_U(a;\,a.\,\mathrm{in}(q.\,t)) = \mathrm{in}(q.\,\mathrm{apply}_U(a;\,a.\,t))$ says a local operation and an I/O event may be reordered, validated by the quantum-stream equivalence; by contrast $\mathrm{in}$ and $\mathrm{out}$ do not commute, which is exactly why the trace index $\sigma$ is a total order: causal independence is \emph{an equation validated by an observer}. Both say ``no information flows from here to there, so reordering/intervening is unobservable''. The research question is whether this is an instance of a general correspondence (\WP{3}).
+
+\paragraph{0.2 Three tiers for the review (do not print).}
+\begin{center}\small
+\begin{tabularx}{\textwidth}{lXXl}
+\toprule
+Tier & What & Depth & Words\\
+\midrule
+Core & semantics of effects, probabilistic and quantum programs; SCMs; causal PPLs; equivalences of causal models; diagrammatic causal models; quantum process calculi & critical, comparative, precise statements; you can defend every sentence & $\approx$2300\\
+Adjacent & concurrency semantics (pomsets, event structures, CKA, algebraic theories of threads, quantum game semantics); higher-order quantum processes (combs, process matrices, Caus, BV-logic, quantum causal models) & positioning only: main definition and main theorem of each cited paper, why it matters here; no technical claims beyond that & $\approx$800\\
+Horizon & ICO experiments, causal discovery, identifiability, coherent control, actual causality & one sentence each, named as out of scope or as reading milestones & $\approx$100\\
+\bottomrule
+\end{tabularx}
+\end{center}
+The topic is \emph{programming-language semantics} of causality; the core tier is the literature of that topic, which you command. Adjacent fields are where the proposal reaches, so the review positions them and the plan carries explicit reading milestones. Examiners read ``milestone M1'' as planning, not ignorance, provided the adjacent sections make no claim you cannot defend.
+
+\paragraph{0.3 Rules.} (1) Never cite a paper whose introduction you have not skimmed (candidates marked \skim). (2) In adjacent sections write ``X defines \dots\ and proves \dots'', never ``X shows that causality is \dots''; never ``exactly'' about a skimmed paper. (3) Every section ends with 3--5 sentences of ``what this gives us / what it lacks''. (4) Own results appear in the review only as short ``where we stand'' paragraphs with the qualifiers of 0.5. (5) Anything unverified by the deadline goes into the reading plan, not the review.
+
+\paragraph{0.4 Reading budget (one paper + skims; all verified to exist, 3 Nov 2026).}
+\begin{itemize}[nosep]
+\item \textbf{Read first (5 Nov 2026 update):} Will Simmons, \emph{Causal types for higher-order quantum theory}, Oxford DPhil thesis 2024 (Kissinger, Coecke), chapters 2--3: additive precausal categories, seq and graph types, partiality in Caus, affine universality of linear orderings, causal logic; its outlook proposes causal types for send/receive and a link to session types and deadlock freedom. The fullest reference for \WP{2b}, \WP{2c}, \WP{3b}; now cited in draft.tex. PDF saved under the session scratchpad (simmons/simmons-thesis.pdf).\n\item \textbf{Read at M2 (HT27):} Barrett, Lorenz, Oreshkov, \emph{Quantum causal models}, arXiv:1906.10726 (v2 2020; cite as preprint). Connects factorisation, intervention and signalling in the quantum setting; feeds \S5 and \WP{3b}. Lineage: Costa--Shrapnel 2016; Allen, Barrett, Horsman, Lee, Spekkens 2017 (skim abstracts). Sequel: \emph{Cyclic quantum causal models}, Nat.\ Commun.\ 12:885 (2021) (skim).
+\item \textbf{Read the introduction:} Kammar, Liell-Cock, Lindley, Matache, Staton, \emph{An equational axiomatization of dynamic threads via algebraic effects}, POPL 2026, arXiv:2602.05850. A complete axiomatisation of fork/wait/stop/atomic actions \emph{as a parameterised algebraic theory}; closed terms correspond exactly to pomsets. The closest neighbour of the $\iotq$ completeness result (same framework, same theorem shape, pomsets instead of words). Cite in \S2.1, \S4.4, \WP{2a}.
+\item \textbf{Skim in one sitting:} Oreshkov--Costa--Brukner 2012 (process matrices, Nat.\ Commun.\ 3:1092); Chiribella--D'Ariano--Perinotti--Valiron 2013 (quantum SWITCH, PRA 88:022318); Oreshkov--Giarmatzi 2016 (causal separability); Wechs--Dourdent--Abbott--Branciard, PRX Quantum 2:030335 (2021), arXiv:2101.08796 (QC-CC / QC-QC: the realisable classes; needed for \WP{2c}/\WP{2d}); Oreshkov, Quantum 3:206 (2019) (time-delocalised subsystems; optional); Simmons--Kissinger, MFCS 2022 (Caus models BV-logic; the non-commutative connective is one-way signalling---say ``BV'', not ``pomset logic''); Coecke, \emph{Terminality implies no-signalling}; Clairambault--de Visme--Winskel, POPL 2019 (quantum game semantics); Pratt 1986 and Gischer 1988 (pomsets); Kapp\'e--Brunet--Silva--Zanasi, ESOP 2018 (CKA completeness); Fritz--Klingler, JMLR 2023 (synthetic d-separation).
+\end{itemize}
+
+\paragraph{0.5 Qualifiers you must keep on your own results.}
+\begin{itemize}[nosep]
+\item Completeness of the $\CPinf$ model: ``draft proof, manuscript in preparation''---\texttt{completeness/main.tex} still has two open \texttt{\textbackslash todo}s (ll.\,145, 213). Never ``proved''.
+\item POPL: ``submitted / under revision'' \skfill{exact status}; full abstraction ``under suitable conditions on the model''; Bongers' hierarchy recovered ``for representable acyclic SCMs''; strictness of $\equiv_3$ vs two-world is \emph{open}.
+\item The thesis \emph{asks} how the I/O monad relates to Caus; write ``a question raised in the thesis, sharpened here into Conjecture B1''.
+\item $\sigma$ is a \emph{temporal} order; calling it causal in the signalling sense is what \WP{2b} would prove.
+\item MSc reuse: thesis chapter 4 must be ``completeness + \WP{2}, with the MSc as background''; check the reuse rules with your supervisor. Expect ``how much of chapter 4 is your MSc?''.
+\end{itemize}
+\fi
+
+% =====================================================================
+\part*{Part I --- Literature Review}
+% =====================================================================
+\sknote{Target $\approx$3500 words. Section budgets below.}
+
+\section{Introduction}\budget{300}
+\begin{itemize}[nosep]
+\item ``Causality'' names several things: intervention, signalling, factorisation (studied here); the CQM usage ``causal'' $=$ discard-preserving \cite{PQP_Coecke_Kissinger_2017,kissinger2019categorical}, which implies no-signalling \sknew{Coecke, Terminality implies no-signalling}; Fritz's ``causal'' Markov categories \cite{fritz2020synthetic} \sknote{check definition number}; Halpern--Pearl actual causality \sknew{Halpern 2016}, out of scope. The clash is itself evidence that a semantic account is missing.
+\item Viewpoint: causality as a property of program semantics; intensional datum vs extensional characterisation; the honest asymmetry between the two routes (0.1).
+\item The one example in both routes, in four sentences.
+\item Roadmap and the tiering sentence: ``Sections 2--4.3 treat the literature the thesis builds on; \S4.4--4.5 position two neighbouring fields that the research plan reaches into, whose detailed survey is a milestone of that plan.''
+\end{itemize}
+
+\section{Semantic foundations shared by both routes}\budget{800}
+\subsection{Monads, algebraic theories, and their combinations}\budget{300}
+\begin{itemize}[nosep]
+\item \cite{MOGGI199155,moggi1991monadicmetalanguage,plotkin_power_2002,PlotkinPower04CompEffectsOverview,lawveretheories_monads_HYLAND2007437,sums_tensors_HYLAND200670,bauer2019algebraicalgebraiceffectshandlers}; parameterised algebraic theories \cite{statonlics13,statonpopl15}; the POPL 2026 dynamic-threads PAT with pomset completeness \sknew{Kammar et al.\ 2026}; \cite{stark:freamp}; premonoidal categories \cite{premonoidal_cat_POWER_ROBINSON_1997,PowerRobinson97premonoidal}; comodels and runners \cite{model_comodel_PLOTKIN2008295,runners_10.1007/978-3-030-44914-8_2}.
+\item \emph{Critical point:} the tensor encodes independence of effects (commutation), the sum that order matters. In $\iotq$ the tensor makes I/O commute with local quantum operations but $\mathrm{in}$ and $\mathrm{out}$ do not commute with each other; that is why the I/O index is a total order. State the link to causality as an observation to be made precise in the proposal, not as a result.
+\item Where we stand: sums and tensors exist for PATs \cite{wang_algebraic_2024}.
+\end{itemize}
+\subsection{Semantics of probabilistic programs}\budget{300}
+\begin{itemize}[nosep]
+\item \cite{kock72,semantics_ppl_staton2016,Heunen_2017,vandemeent2021introductionprobabilisticprogramming,lazyppl,monadbayes1,monadbayes2,becker26genjax}; full abstraction via probabilistic coherence spaces \sknew{Ehrhard--Pagani--Tasson}\skim\ (one sentence: it is the recurring theorem shape).
+\item Markov categories \cite{fritz2020synthetic,fritz2019probability}; conditionals and Bayesian inversion \sknew{Cho--Jacobs 2019} (not \cite{jacobs2019causal}, which is surgery); synthetic d-separation \sknew{Fritz--Klingler 2023}.
+\item Graded monads and categories \cite{katsumata2014_graded_strong_monad,orchard2020unifying,fujii2016towards,dorsch2019graded,sarkis2025string,levy2019locallygraded}; the ImP construction \cite{liell2025compositional}; graded monads for trace semantics \sknew{Milius--Pattinson--Schr\"oder 2015}\skim.
+\item \emph{Critical point:} Markov categories give synthetic \textbf{factorisation} but no primitive intervention; Jacobs--Kissinger--Zanasi add it by surgery (\S3.3).
+\end{itemize}
+\subsection{Semantics of quantum programs}\budget{200}
+\begin{itemize}[nosep]
+\item \cite{QPL_SELINGER_2004,selinger_dagger_compact_closed_cat_cp_maps,SemOperatorAlgebra,abramsky2007categoricalsemanticsquantumprotocols,heunen_vicary_book,PQP_Coecke_Kissinger_2017,statonpopl15,Quantum_PI_Carette_2024,PaganiSV13,D_Completion_ZHAO20102167,sati2023quantummonadology,QIO_Altenkirch_Green_2009}; ZX-family and QWIRE/Quipper/Silq in one sentence each; quantum game semantics \sknew{Clairambault--de Visme--Winskel 2019; Winskel 2013}\skim.
+\item \emph{Critical point:} the ``causality'' axiom (unique discard) implies no-signalling from the future \sknew{Coecke}; it is the base condition for Caus, which needs further precausality axioms (\S4.5).
+\end{itemize}
+
+\section{Causality as intervention}\budget{1000}
+\subsection{Structural causal models and the ladder}\budget{250}
+\begin{itemize}[nosep]
+\item \cite{pearl2009causality,Pearl2018_book_of_why,bareinboim:etal20,rubin1974,ibeling2023comparing,Balke1994}; single-world intervention graphs \sknew{Richardson--Robins 2013}\skim\ (node-splitting resembling typed holes); soft interventions \cite{dawid2002_stoch_intv,didelez2006_stoch_mech_intv,Eberhardt_Scheines_2007,levis2024stochasticinterventionssensitivityanalysis}.
+\item Scope: fully specified models, Bayesian inference; identifiability \cite{JMLR:v9:shpitser08a,shpitser2012counterfactualstested} and discovery \cite{spirtes2000causation,peters_janzing_schoelkopf_2017_book} are horizon.
+\item \emph{Critical point:} intervention is a syntactic transformation; the causal structure is the model's dataflow; ``same structure'' is answered extensionally (\S3.2).
+\end{itemize}
+\subsection{Equivalences of causal models and logical accounts}\budget{250}
+\begin{itemize}[nosep]
+\item \cite{Bongers_2021} (observational/interventional/counterfactual equivalence; cyclic SCMs via solution functions); \cite{verma1990equivalence}; \cite{ibeling2020hierarchy,icard2017programs,ibeling2019openuniverse}; causal spaces \cite{park2024measuretheoreticaxiomatisationcausality,buchholz2024products}; causal abstraction \cite{rubenstein2017consistency,beckers2019abstracting,lorenztull2026abstraction,englberger2025causalabstractionscategoricallyunified}, \sknew{Rischel--Weichwald 2021}.
+\item \emph{Critical point (safe wording):} none is formulated as a contextual equivalence of programs, and none treats higher-order models.
+\end{itemize}
+\subsection{Diagrammatic and categorical causal models}\budget{250}
+\begin{itemize}[nosep]
+\item Fong's causal theories \sknew{Fong 2012, arXiv:1301.6201}\skim; \cite{jacobs2019causal,lorenz2023causalmodelsstringdiagrams,jacobsszelesstein2025inference,agrawal2026equational,zhang2026semanticseparation}; one sentence that invariance under all interventions on $X$ is a noninterference property \sknew{Goguen--Meseguer 1982; Abadi et al.\ 1999}.
+\item \emph{Critical point:} compositional, gives factorisation and intervention-by-surgery, but equational theories are per-graph and there is no notion of program context. The closest existing bridge between factorisation and intervention; where \WP{3} starts.
+\end{itemize}
+\subsection{Causal probabilistic programming languages}\budget{150}
+\begin{itemize}[nosep]
+\item \cite{tavares2021language,chirho,perov2020multiverse,bingham2018pyro,abrilpla2023pymc,witty2019synthesis,witty2023bayesian,brule2018whittemore,pywhy,blobaum2024dowhygcm,kiesel2023whatif,lafi-wang}.
+\item \emph{Critical point (softened):} rung 3 via non-standard evaluation; they lack \emph{denotational and equational} foundations (Kiesel et al.\ do prove correctness against Pearl, so not ``unprincipled''); relation to Pearl's definitions not always clear.
+\end{itemize}
+\subsection{Where we stand}\budget{100}
+$\mathcal{L}_1$--$\mathcal{L}_3$; intervention as substitution, twinning as vectorisation; contextual equivalences recovering Bongers' hierarchy for representable acyclic SCMs; graded denotational semantics, fully abstract under conditions on the model; $\LHO$ and the Haskell artifact \cite{ARTIFACT_wang_2026_23207221}. Open: strictness of $\equiv_3$ vs two-world; cyclic models; relation to normalisation-box equational theories.
+
+\section{Causality as order and signalling in communicating quantum programs}\budget{1200}
+\subsection{Quantum communication and distributed quantum computing}\budget{120}
+\cite{Teleportation_PhysRevLett.70.1895,BB84_BENNETT20147,DQC_survey_Caleffi_2024}. \emph{Critical point (sourced):} DQC programming models are circuit-level; on the semantics side ``no accepted standard has emerged'' for the syntax or behavioural semantics of quantum process calculi---cite \cite{lqCCS_10.1145/3632885} for that sentence.
+\subsection{Quantum process calculi}\budget{250}
+\cite{CQP_gay2004communicatingquantumprocesses,QPAlg_lalire2004processalgebraicapproachconcurrent,qCCS_ying2010algebraquantumprocesses,lqCCS_10.1145/3632885,ceragiolicoalgebraic}; classical background \cite{ccs_10.5555/539036,CSP_10.1145/359576.359585,pi_calc_MILNER19921}; parallel composition not algebraic \cite{stark:freamp,CSP_van_Glabbeek_2010} \sknote{check this key says that}, \cite{Cooperative_Threads_DBLP:journals/corr/abs-1009-2405}. \emph{Critical point:} bisimilarities diverge subtly; operational only; concurrency and communication entangled. Our work isolates communication.
+\subsection{Where we stand}\budget{150}
+$\iotq$ as tensor of I/O with \cite{statonpopl15}; quantum streams; free I/O monad on $\CPinf$; adequacy and full abstraction \cite{wang_algebraic_2024}; \textbf{draft proof of the conjectured completeness} (manuscript in preparation): model in $\mathrm{Kl}(T)^{\mathrm{op}}$, $T(X)=\bigoplus_\sigma \mathrm{qbit}^{|\sigma|}\otimes X$; induction on I/O depth, reorganisation step, factorisation lemma on CP maps. Observation: $\sigma$ is a \emph{temporal} order exposed in the denotation; whether it is a \emph{causal} order in the signalling sense is Conjecture B1 (\WP{2b}).
+\subsection{Order in concurrency theory}\budget{350}\sknote{adjacent tier}
+\begin{itemize}[nosep]
+\item \sknew{Lamport 1978}; pomsets \sknew{Pratt 1986; Gischer 1988}; event structures \sknew{Winskel 1986; Nielsen--Plotkin--Winskel 1981; Winskel--Nielsen 1995}; Mazurkiewicz traces (one sentence); CKA \sknew{Hoare--M\"oller--Struth--Wehrman 2009/2011; Kapp\'e et al.\ 2018; Laurence--Struth 2014}; algebraic theories of threads \sknew{Kammar et al.\ POPL 2026; Dvir--Kammar--Lahav 2022/2025}; \sknew{Clairambault--de Visme--Winskel 2019}.
+\item Checkable claims only: pomsets are labelled partial orders up to iso with series/parallel composition; Gischer axiomatises the equational theory of sp-pomsets \sknote{verify on reading}; CKA $=$ Kleene algebra with a commutative parallel operator and the exchange law; Kapp\'e et al.: closed sp-pomset languages are the free model, by reduction to bi-Kleene completeness; Kammar et al.: a PAT whose closed terms are pomsets, with completeness.
+\item Positioning: (a) the $\sigma$-indexed monad is the single-channel case (words); multi-channel I/O would index by pomsets over channel events, and the POPL 2026 theory is a PAT one can tensor with; (b) completeness results here also go through free models; whether techniques transfer is milestone M1 (never ``exactly the same technique''); (c) ``parallel composition is not algebraic'' is where the extension meets this literature.
+\end{itemize}
+\subsection{Higher-order quantum processes and signalling}\budget{350}\sknote{adjacent tier}
+\begin{itemize}[nosep]
+\item Combs \cite{quantum_circuit_architecture_Chiribella_2008} and \sknew{Chiribella--D'Ariano--Perinotti 2009}; HOQC hierarchy \sknew{Perinotti 2017; Bisio--Perinotti 2019}; process matrices \sknew{Oreshkov--Costa--Brukner 2012}; causal (non-)separability \sknew{Oreshkov--Giarmatzi 2016}; the switch \sknew{Chiribella et al.\ 2013}; physical realisability of indefinite order: quantum circuits with classical vs quantum control of causal order (QC-CC / QC-QC) \sknew{Wechs--Dourdent--Abbott--Branciard, PRX Quantum 2021 (erratum 2023)}\skim, time-delocalised subsystems \sknew{Oreshkov, Quantum 2019}\skim; Caus \cite{kissinger2019categorical}; BV-logic \sknew{Simmons--Kissinger 2022}; quantum causal models \sknew{Costa--Shrapnel 2016; Allen et al.\ 2017; Barrett--Lorenz--Oreshkov 2019}, cyclic \sknew{BLO 2021}; coherent control \cite{coherent_control_channel_Abbott_2020,resource_theory_comm_Kristjánsson_2020}.
+\item Checkable claims only: a comb is a process with holes in a fixed causal order; Caus$(\mathcal{C})$ over a \emph{precausal} category types higher-order processes by signalling constraints and is $*$-autonomous; Simmons--Kissinger: Caus models BV with the non-commutative connective read as one-way signalling; process matrices are the most general multipartite process operators compatible with local quantum mechanics, some \emph{causally non-separable}; the switch is causally non-separable and has been implemented experimentally (not ``realisable''); Wechs et al.: circuits with \emph{quantum} control of causal order (QC-QC) are physically realisable, include every known realisable indefinite-order process including the switch, and generate only causal correlations---so ``realisable'' has a precise, existing answer to build on; BLO: state only what you verified after reading.
+\item Positioning: (a) a question raised in the thesis, sharpened into Conjecture B1: the $\sigma$-component of a closed term's denotation satisfies the comb-causality constraint for $\sigma$ \sknote{state precisely which wires are inputs/outputs first}; (b) signalling types are the extensional face of order, as interventional equivalence is of dataflow; (c) the analogy between parallel composition and indefinite causal order, stated so that it survives a quantum-foundations assessor: \textbf{parallel composition $P \parallel Q$ leaves the order of events \emph{unspecified}; a scheduler resolves it. A classical scheduler yields a choice among definite interleavings, i.e.\ a causally \emph{separable} process; the quantum switch is a \emph{coherent} scheduler, a higher-order process consuming two unordered (non-signalling) components and producing a definite-order one, and is causally non-separable. So the analogy is between $\parallel$ and the \emph{type} of the switch's arguments, not between $\parallel$ and the switch itself.} This is what makes ``generalised switches as quantum schedulers'' (\WP{2d}) well-posed: a pomset over channel events has a set of linear extensions, and a generalised switch is coherent control over them. Never write ``indefinite order is the quantum analogue of parallel composition'' without this unpacking.
+\end{itemize}
+\subsection{Horizon}\budget{80}
+One sentence each: ICO experiments; causal discovery; identifiability; actual causality; coherently controlled I/O as a language primitive; optics for combs.
+
+\section{Synthesis: three notions of causality and the gap}\budget{350}
+\begin{center}\small
+\begin{tabularx}{\textwidth}{lXXX}
+\toprule
+ & Intervention & Signalling & Factorisation\\
+\midrule
+Intensional datum & dataflow / SCM & temporal order of events: $\sigma$, comb order, pomset & DAG\\
+Extensional characterisation & contextual equivalence under interventions & signalling types (Caus); causal (non-)separability & conditional independence / d-separation\\
+Correspondence theorem & full abstraction, under conditions (POPL) & completeness (draft) + full abstraction relate three \emph{equalities}; the signalling reading is Conjecture B1 & d-separation soundness/completeness; synthetic in Fritz--Klingler\\
+Compositional semantics with programs? & yes (ours), acyclic & yes (ours), single channel & Markov categories; no interventions natively\\
+Next hard case & cyclic SCMs & multi-channel; non-separable processes (generalised switches, realisability) & cyclic / quantum causal models\\
+\bottomrule
+\end{tabularx}
+\end{center}
+\begin{enumerate}[nosep]
+\item The shared example and the honest asymmetry: one notion fully worked out, one semantics with order as first-class data awaiting its signalling reading.
+\item Non-DAG structure is the next hard case in every column, but the cases differ: feedback, causal non-separability, parallel composition. Do not call them all ``cycles''.
+\item The gap: no framework in which the three columns are structure on one category; the only work relating all three (BLO) is neither compositional nor about programs; Markov categories cover column 3 and, via surgery, part of column 1; Caus covers column 2. Our two semantics cover columns 1 and 2 separately with the same tools.
+\item An obstruction to display, not hide: the first-order interventional semantics lives over a normalised probability monad; the higher-order language widens to unnormalised measures to internalise conditioning, whose Kleisli category lacks unique discard, so it is not precausal and Caus does not apply directly. Normalisation boxes (\S3.3) are the known tool. Column 3 is the thinnest for us: say so.
+\end{enumerate}
+
+% =====================================================================
+\part*{Part II --- Thesis Proposal}
+% =====================================================================
+\sknote{$\approx$6 pages, self-contained. Headings follow the handbook's questions (i)--(vi).}
+
+\section{Research topic and fundamental challenges}\sknote{(i); $\frac12$ page}
+\begin{itemize}[nosep]
+\item Topic $=$ the \textbf{minimum viable thesis}: a compositional semantics of causal structure for probabilistic and quantum programs in which (1) interventional structure is characterised by contextual equivalence [done], (2) the order structure of communicating quantum programs is characterised by signalling types [\WP{2a/2b}], and (3) the two are related by a functorial bridge on their common classical fragment [\WP{3a}]. A general axiomatic framework (\WP{3c}) is the stretch goal.
+\item Challenges: (1) the higher-order interventional semantics lives over unnormalised measures, which lack unique discard, whereas signalling structure requires it; (2) parallel composition is not an algebraic operation \cite{stark:freamp,CSP_van_Glabbeek_2010}, so multi-channel communication cannot be added as a theory operation; (3) completeness and full-abstraction proofs are model-specific and long (single-channel completeness took a year); (4) no accepted behavioural semantics for communicating quantum programs to test against \cite{lqCCS_10.1145/3632885}.
+\end{itemize}
+
+\section{Goal}\sknote{(ii), jargon-free; $\frac14$ page}
+``I want a mathematical account of what it means for one part of a program to cause another, that works the same way whether `cause' means `if I change this, that changes', `this can send a message to that', or `these two are independent given those', and whether the program is classical-probabilistic or quantum.''
+
+\section{State of the art and why the problem is hard}\sknote{(iii); $\frac12$ page, readable without Part I}
+SCM equivalences are not contextual equivalences of programs and are first-order; causal PPLs lack denotational and equational foundations; quantum process calculi are operational, with diverging bisimilarities, and entangle concurrency with communication; higher-order quantum processes are not connected to programs; Markov categories lack intervention and signalling. Cite \S5 for support only.
+
+\section{Approach, with two worked examples}\sknote{(iv); $2\frac12$ pages}
+\paragraph{Method.} The one that worked twice: (1) a small language whose syntax carries the intensional causal structure; (2) an extensional equivalence from what an observer may do; (3) a denotational model with graded/indexed monads over a base with a probability-like monad; (4) a correspondence theorem. \WP{1}/\WP{2} push each instance to its next hard case; \WP{3} asks for the common theory.
+\paragraph{Worked examples} (the same statement in two guises): mediation / cross-world intervention in $\LHO$ with an invariance-under-intervention claim; teleportation as an $\iotq$ term with the commutation equations that make its $\sigma$-component a comb. Everything else below is one sentence each.
+
+\paragraph{\WP{1} --- Interventional route: equational theory and cycles.}
+\begin{itemize}[nosep]
+\item[1a] \risk{medium} Relate contextual-equivalence equational theories to normalisation-box / CBN equational theories \cite{jacobsszelesstein2025inference,agrawal2026equational}; settle strictness of $\equiv_3$ vs two-world. \emph{Done} $=$ a coincidence theorem on CBN-definable programs or a separating example, plus the strictness answer. \emph{Why it may succeed:} both are equational theories over the same string-diagram semantics.
+\item[1b] \risk{high; medium if restricted to unique-solution finite cyclic models} Cyclic SCMs and feedback: which fixpoint construct denotes Bongers' solution functions, and what the graded semantics must become. \emph{Done} $=$ a language extension with a sound semantics for the restricted class. \emph{Why:} the solution-function semantics is already a fixpoint; the question is which construct denotes it.
+\end{itemize}
+\paragraph{\WP{2} --- Communication route: multi-channel order and signalling.}
+\begin{itemize}[nosep]
+\item[2a] \risk{high} Multi-channel $\iotq$: index the I/O monad by pomsets over channel events; start by tensoring $\iotq$ with the POPL 2026 dynamic-threads PAT and ask which equations survive the quantum setting (cf.\ Eckmann--Hilton collapse). \emph{Done} $=$ theory defined, non-degenerate by an operational model, and a soundness theorem; completeness is a stretch. \emph{Why:} the single-channel inductive step (reorganisation + factorisation lemma) is what we would try to re-use.
+\item[2b] \risk{medium} Which fragment of HOQC does $\iotq$ axiomatise? Conjecture B1 (comb-causality of $\sigma$-components, stated precisely); Conjecture B2 in the safe form: the denotational semantics factors through a Caus-style construction on $\CPinf$ (a functor into one-way-signalling types), and we ask whether it is full. \emph{Done} $=$ B1 proved or refuted; the functor constructed; fullness answered or reduced to a stated question.
+\item[2c] \risk{high; only if 2a/2b complete by end TT27} \textbf{Distributed quantum computing through process matrices: what is physically realisable.} Conjecture: the process-matrix formalism, restricted to the physically realisable classes (QC-CC, QC-QC of Wechs et al.), is the right denotational universe for \emph{distributed} quantum programs, in the way $\CPinf$ is for communicating ones; a DQC program denotes a process matrix, and ``realisable'' becomes a type. Hypothesis to test first: parallel composition of $\iotq$ programs (with a classical scheduler) yields only causally separable processes. \emph{Done} $=$ (i) a translation from parallel compositions of multi-channel $\iotq$ programs into process matrices, with a proof that its image lies in QC-CC; (ii) for each of $\approx$6 protocols (teleportation, entanglement swapping, a BB84 fragment, a two-party comb, the switch, one OCB-type process) either a term whose denotation is the known process operator, or a proof that none exists. \emph{Why it may succeed:} the realisability question already has a precise physics-side answer (QC-QC) to match against, and Caus gives the categorical home. \skfill{the Kim reference you had in mind for this item}
+\item[2d] \risk{high, exploratory; after 2c(i)} \textbf{Generalised switches as quantum schedulers.} A pomset over channel events has a set of linear extensions; a generalised switch is coherent control over which linear extension is executed (the standard switch is the two-element antichain). Questions: which process matrices arise this way; whether they are exactly the QC-QC processes over a given pomset; and, conversely, whether a ``quantum scheduler'' primitive added to multi-channel $\iotq$ (\WP{2a}) gives a programming language whose denotations are exactly those processes. \emph{Done} $=$ a definition of pomset-indexed switches, a proof that they are realisable (lie in QC-QC) or a counterexample, and the two-element case recovering the standard switch. \emph{Why it may succeed:} it reduces to combining two existing objects, linear extensions of pomsets (concurrency) and QC-QC circuits (physics), and the degenerate cases are known.
+\end{itemize}
+\paragraph{\WP{3} --- Unifying: a categorical account.}
+\begin{itemize}[nosep]
+\item[3a] \risk{medium} Bridge theorem on the common classical fragment: a functor from the graded interventional category (over $\mathbf{Stoch}$ / $\mathbf{Mat}(\mathbb{R}^+)$) into a Caus-style construction on $\mathbf{Mat}(\mathbb{R}^+)$ \sknote{check Caus paper: $\mathbf{Mat}(\mathbb{R}^+)$ precausal}, sending intervention grades to signalling types; compatibility with composition and with higher-order programs; perfect interventions first, then soft ones. \emph{Done} $=$ the functor and its properties, or a counterexample program. For a single first-order hole the two conditions coincide by unfolding definitions; the content is structural.
+\item[3b] \risk{high until M2; then medium} Recast Barrett--Lorenz--Oreshkov quantum causal models in the graded setting over $\CPinf$. \emph{Done} $=$ their Markov condition recovered as a property of the intervention-graded category, or a precise statement of what is missing.
+\item[3c] \risk{high, stretch; only after 3a} Axiomatic framework in which intervention, signalling and factorisation are structures with stated relationships, instantiated by $\mathbf{Stoch}$ and $\CPinf$. \emph{Done} $=$ axioms, two instances, one general theorem specialising to a known one. \emph{Why it might succeed:} both existing semantics use the same tools, so the generalisation starts from two worked instances, and 3a decides in one term whether 3c has the right shape.
+\end{itemize}
+
+\section{Evaluation}\sknote{(v); $\frac14$ page}
+Theorems with the done-criteria above. Case studies with pass/fail criteria: the protocol catalogue (term with the right denotation, or impossibility proof) and causal-inference examples (mediation, instrumental variables, feedback) reproduced in the executable semantics. Artefacts: the Haskell implementation extended to each new construct. \sknote{Do not list peer review as evaluation; venues go under dissemination in the plan.}
+
+\section{Impact and risks}\sknote{(vi); $\frac12$ page}
+Impact: denotational foundations for causal ML languages; a semantic model of distributed quantum programming and of physical realisability; a dictionary between causal inference and quantum causality. Risk table \skfill{one row per item: rating, fallback}. Fallbacks: if 3c fails, 3a is the unifying chapter; if 2a yields only soundness, 2b still characterises the single-channel fragment; if 3a gives a counterexample, that is a publishable separation. Generic risk: breadth; mitigation: the minimum-viable-thesis baseline and the rule that 2c/2d/3c are conditional. If 2d fails, 2c(i) alone still gives a realisability result for distributed programs.
+
+\section{Plan of work, milestones, and training}\sknote{$\frac12$ page; 12 terms, you are in term 4; baseline $=$ MVT, conditional items marked}
+\begin{itemize}[nosep]
+\item \textbf{MT26:} transfer; completeness manuscript closed and submitted; POPL revision; reading M1 (list in 0.4).
+\item \textbf{HT27:} M3 concurrency reading, then \WP{2a} theory and non-degeneracy; \WP{1a}. \textbf{TT27:} \WP{2a} soundness; \WP{2b} B1; \WP{3a}. Deliverable: paper on completeness + comb-causality; \WP{3a} answered.
+\item \textbf{MT27--HT28:} \WP{3b} after M2; \WP{3c} first attempt; \WP{1b} restricted class. \textbf{Confirmation of Status by TT28 (term 9).} \textbf{TT28:} \WP{2c} if 2a/2b complete, else \WP{3c}. \textbf{MT28:} \WP{2d} if 2c(i) done.
+\item \textbf{MT28--TT29:} consolidation, writing, submission by end TT29 (term 12).
+\item Consolidation (not research): implementation beyond MonadBayes if time; OmegaC core as a worked example. Dissemination: POPL/LICS/FoSSaCS/MFPS/QPL.
+\item Training and engagement: seminars \skfill{}, courses to audit \skfill{}, talks given (PLanQC 2025) and planned \skfill{}, teaching \skfill{}.
+\item Thesis outline: 1 Introduction; 2 Background (Part I); 3 Interventional semantics; 4 Order semantics of quantum communication (completeness + \WP{2}, MSc as background); 5 Signalling structure and higher-order processes; 6 Bridge and unifying account; 7 Conclusion.
+\end{itemize}
+
+\section{Statement of the subject of the thesis}
+Compositional semantics of causal structure in probabilistic and quantum programs: interventional, signalling and factorisation characterisations and the correspondences between them.
+
+\printbibliography
+
+\ifskeletonnotes
+% =====================================================================
+\section*{Scrutiny log (not part of the submission)}
+% =====================================================================
+\paragraph{Round 1 --- coherence and honesty of scope (self-review of v1).}
+(1) \WP{1} looked like a separate causal-PPL project: publication/implementation/OmegaC moved to consolidation; two \WP{1} items kept, both feeding \WP{3}. (2) Eleven work items cut to eight plus consolidation; minimum-viable-thesis device added. (3) Over-claim ``commutation is a signalling condition'' rephrased as an observation. (4) \S5 table conflated program equivalence with causal order for the communication route; first patched with a ``declared vs tested'' row, replaced in round 2. (5) Factorisation column is thin; said so. (6) Deadline is about a week away; reading plan compressed to this week. (7) All eleven unverified references checked by search on 3 Nov 2026, including the correct attribution of the threads work (Kammar, Liell-Cock, Lindley, Matache, Staton, POPL 2026) and the MT26 dates.
+
+\paragraph{Round 2 --- independent examiner's read (handbook + skeleton + your project files, without my conclusions) and what changed.}
+Accepted: (1) unification was asserted, not argued: three notions named consistently, ``same theorem shape'' replaced by the honest asymmetry, the shared worked example added, MVT promoted to be the project. (2) \WP{3a} was near-tautological and did not involve the communication route: restated as a functorial-embedding question, perfect vs soft interventions distinguished; routes meet through HOQC (2b) and the bridge (3a). (3) Hidden obstruction (unnormalised measures vs unique discard): verified against the POPL sources---first-order semantics is over the normalised probability monad, only the higher-order section widens---and stated in \S5 and as challenge (1). (4) ``Cycles'' conflated three things; now ``non-DAG structure, differing per column''. (5) Own results over-claimed: completeness note has two open todos, so ``draft proof''; strictness open; full abstraction conditional; ``representable acyclic''; thesis question not conjecture; $\sigma$ temporal. Collected in 0.5. (6) Parallel-composition/indefinite-order analogy was backwards; replaced with causal separability as the test. (7) Wording: BV not pomset logic; precausal axioms beyond unique discard; CKA not ``exactly''; Gischer hedged; \S3.2, \S3.4, P.3 softened; \S4.1 sourced to lqCCS; Cho--Jacobs for conditionals. (8) Handbook gaps: two worked examples instead of six; ``why it will succeed'' per WP; pass/fail evaluation, peer review removed; P.3 self-contained; training lines; consolidation moved to the plan; dangling WP labels fixed; 0th-week forms flagged. (9) Plan: \WP{2a}, \WP{1b}, \WP{3b} re-rated high; done-criteria everywhere; \WP{1a} earlier; 2c/3c conditional; Confirmation of Status dated TT28. (10) Literature added as one-sentence skims: Clairambault--de Visme--Winskel; Winskel 2013; Coecke terminality; Chiribella--D'Ariano--Perinotti 2009/2010; Perinotti; Bisio--Perinotti; Oreshkov--Giarmatzi; Costa--Shrapnel; Allen et al.; Fritz--Klingler; Rischel--Weichwald; Cho--Jacobs; Richardson--Robins; Halpern; Goguen--Meseguer/DCC; Ehrhard--Pagani--Tasson; Milius--Pattinson--Schr\"oder; Winskel--Nielsen. (11) MSc reuse flagged for the supervisor.
+Rejected: ``cite BLO as 2019 only'' (v2 is Nov 2020, no journal version found; cited as preprint); ``the Liell-Cock threads paper cannot be identified'' (it exists: POPL 2026, verified).
+
+\paragraph{Round 2, correction after author feedback.} The examiner's point (6) had been over-applied: it demoted two of the author's research ideas (generalised switches via parallel composition; distributed quantum computing with indefinite causal order) to an ``expected to fail'' test. Restored as \WP{2c} (DQC through process matrices, with physical realisability made precise via the QC-CC/QC-QC classes of Wechs et al.\ 2021, verified) and \WP{2d} (generalised switches as coherent schedulers over the linear extensions of a pomset). The analogy is now stated at the level of \emph{types}: $\parallel$ corresponds to the unordered arguments of a switch, a classical scheduler to causally separable processes, the switch to a coherent scheduler. Both items remain conditional and high-risk, with done-criteria.
+\fi
+
+\end{document}

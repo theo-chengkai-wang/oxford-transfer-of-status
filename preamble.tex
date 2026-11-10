@@ -1,0 +1,38 @@
+% =====================================================================
+% Shared preamble for draft.tex, draft-communication.tex, draft-interventional.tex
+% Orange [FILL: ...] marks facts only you can supply. See skeleton.tex
+% section 0.5 for the qualifiers that must survive editing.
+% =====================================================================
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage[backend=biber,style=numeric,sorting=nyt,maxbibnames=6,giveninits=true]{biblatex}
+\input{pkgs.tex}
+\usepackage{xcolor}
+\usepackage{booktabs,array,tabularx}
+\usepackage{listings}
+\lstset{basicstyle=\ttfamily\small,mathescape=true,columns=fullflexible,keepspaces=true}
+
+\addbibresource{refs.bib}
+\addbibresource{refs-quantum.bib}
+\addbibresource{refs-new.bib}
+\setcounter{biburlnumpenalty}{100}\setcounter{biburlucpenalty}{100}\setcounter{biburllcpenalty}{100}
+
+\newcommand{\fillin}[1]{{\color{orange!80!black}[FILL: #1]}}
+\newcommand{\iotq}{\mathsf{IO}\otimes\mathsf{Q}}
+\newcommand{\CPinf}{\mathbf{CP}^{\infty}}
+\newcommand{\CP}{\mathbf{CP}}
+\providecommand{\LHO}{L_{\mathsf{HO}}}
+\newcommand{\Lk}[1]{L_{#1}}
+\newcommand{\CausC}{\mathbf{Caus}}
+\newcommand{\FinStoch}{\mathbf{FinStoch}}
+\newcommand{\Mat}{\mathbf{Mat}(\mathbb{R}_{\geq 0})}
+\newcommand{\WP}[1]{WP\,#1}
+\newcommand{\opin}{\mathsf{in}}
+\newcommand{\opout}{\mathsf{out}}
+\providecommand{\opnew}{\mathsf{new}}
+\newcommand{\opmeasure}{\mathsf{measure}}
+\newcommand{\applyU}[1]{\mathsf{apply}_{#1}}
+\newcommand{\dok}{\mathsf{do}}
+\newtheorem{conj}{Conjecture}
+\newtheorem{hyp}{Hypothesis}
+

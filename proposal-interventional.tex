@@ -1,0 +1,140 @@
+% =====================================================================
+\part{Thesis Proposal}
+% =====================================================================
+% Interventional-led framing: the thesis is the semantics of causal
+% probabilistic programming; the quantum communication work is work to
+% date and an outlook, not the main line.
+
+\section*{Notation and background in brief}
+\begin{itemize}[nosep]
+\item \emph{Interventional languages} $\Lk{1}\subseteq\Lk{2}\subseteq\Lk{3}$ and $\LHO$: first-order probabilistic languages with intervention labels $\ell$ read by $\mathsf{applyIntv}$, interventions $\dok(\ell\mapsto v)\{t\}$ by substitution, and twinning $\mathsf{twin}_n$ as a vectorisation from $\Lk{3}$ to $\Lk{2}$; $\LHO$ is the higher-order extension with cross-world interventions. $\equiv_k$: contextual equivalence at rung $k$ with respect to rung-1 denotational equality; $\equiv_3^{\mathrm{obs}}, \equiv_3^{\mathrm{intv}}, \equiv_3^{\text{2-world}}$: the restricted equivalences matching Bongers et al.
+\item \emph{Graded semantics}: the denotation of an $\Lk{2}$ program is indexed by the interventions available, in a construction reminiscent of $\mathbf{ImP}$ \cite{liell2025compositional}; a model is \emph{concrete} when values are global elements and global elements separate morphisms. Full abstraction holds for concrete models.
+\item \emph{Factorisation}: Markov categories; Bayesian networks as string diagrams; d-separation; normalisation boxes \cite{jacobsszelesstein2025inference} and the equational principles for causal Bayesian networks derived from them \cite{agrawal2026equational}.
+\item \emph{Cyclic models}: Bongers et al.'s SCMs with cycles, interpreted through solution functions.
+\item \emph{Communication theory} $\iotq$ and its trace-indexed semantics (\S\ref{sec:order-wherewestand}): work to date, referred to in \WP{5} only.
+\end{itemize}
+
+\section{Research topic and fundamental challenges}
+
+The thesis will develop the \emph{semantics of causal probabilistic programming}: a programming-language account of Pearl's causal models in which causal structure is defined by a contextual equivalence of programs, interventions and counterfactuals are mathematical operations on denotations rather than evaluation strategies, and the account extends to the three places where existing causal models stop: higher order, cycles, and abstraction between models. The finished work of \S\ref{sec:intv-wherewestand} establishes the base: the hierarchy of languages, the contextual equivalences and their correspondence with Bongers et al., the graded semantics and its full abstraction, and the higher-order language. The thesis builds outward from it in four directions, each in literature I already command: the equational theory and its relation to the factorisation face (Markov categories), cyclic models as fixpoints, relations between models (abstraction and query logics), and a practical language with a vectorised implementation.
+
+The fundamental challenges are these. (i) \emph{Two equational theories for one object.} The contextual equivalences of programs and the normalisation-box equations of causal Bayesian networks are both equational theories of interventional structure, defined in different ways; relating them is a comparison of a program-level and a graph-level theory. (ii) \emph{Cycles.} Bongers et al.'s cyclic SCMs have semantics only through solution functions under solvability conditions; nothing in the graded semantics handles fixpoints, and feedback interacts with interventions in ways acyclic models never exhibit. (iii) \emph{Abstraction is not an equivalence.} Causal abstraction is a directed relation between models of different granularity; making it a program transformation that commutes with interventions requires the graded semantics to be functorial in the model, not just in the program. (iv) \emph{Scale.} The existing implementation is a definitional interpreter over MonadBayes; realistic causal inference needs vectorised inference, and the type-level guarantees of $\LHO$ may not survive the move.
+
+\section{Goal}
+
+I want a mathematical account of what it means for one part of a program to cause another, in the sense that changing it changes the other, that works for programs with higher-order functions, feedback loops and different levels of description, and that can be run.
+
+\section{State of the art and why the problem is hard}
+
+The existing notions of equivalence for causal models, Bongers et al.'s hierarchy, causal spaces and causal abstraction, say when two models have the same interventional behaviour, but they are not equivalences of \emph{programs}: there is no notion of context and no higher order. Causal probabilistic programming languages, OmegaC, ChiRho and MultiVerse, implement interventions and counterfactuals at higher order by evaluation strategies, without a denotational or equational account of what they compute. The diagrammatic line, string-diagram surgery and normalisation boxes, has equational principles for causal Bayesian networks but states them per graph, with no notion of program. Cyclic causal models have a semantics only through solution functions. The logical characterisation of the hierarchy by Ibeling and Icard organises queries where the programming-language account organises models, and the two have not been related.
+
+The problem is hard because each extension breaks something the base relies on. Higher order breaks the correspondence with graphs; cycles break the dataflow reading of causal structure; abstraction breaks the fixed-model assumption; and scale breaks the definitional implementation. The base result shows that contextual equivalence survives higher order; the thesis asks whether it survives the other three.
+
+\section{Approach}\label{sec:approach}
+
+\paragraph{Method.} The method is the one that produced the base result. (1) Fix a small language whose \emph{syntax} carries the causal structure: intervention labels in the dataflow. (2) Define an \emph{extensional} equivalence from what an observer may do: quantify over interventional contexts. (3) Build a \emph{denotational} model in which the available interventions are a grade, with reindexing. (4) Prove a \emph{correspondence theorem}, full abstraction, between (2) and (3). Each work package adds one feature to the language, re-derives the equivalence and the grade, and re-proves the correspondence.
+
+\paragraph{What is new.} Causal structure is \emph{defined} by a contextual equivalence of programs rather than by a property of a graph, which is what lets it survive higher order, cycles and abstraction; the equational theory of causal models becomes a theory of program equations, comparable with the graph-level theories; and the whole account is executable, so that every semantic definition is also an implementation.
+
+\paragraph{Worked example 1: mediation.} In $\Lk{2}$, interventions are exposed as typed free variables $\ell$ read through $\mathsf{applyIntv}$, which returns the label's value when it is set and the program's own value otherwise:
+\begin{lstlisting}
+let t  = bernoulli 0.5 in              -- treatment
+let t' = applyIntv $\ell$ t in             -- intervenable copy of t
+let m  = bernoulli (f t') in           -- mediator
+let y  = bernoulli (g t' m) in         -- outcome
+let z  = bernoulli 0.3 in              -- unrelated variable
+return (y, z)
+\end{lstlisting}
+Under $\dok(\ell\mapsto\mathsf{Just}\ \mathsf{true})\{-\}$ the variable $t'$ denotes the constant $\mathsf{true}$, and the total effect of $t$ on $y$ is the difference between the distributions of $y$ under the two perfect interventions. The natural direct effect, the effect of $t$ on $y$ with the mediator held at the value it would have taken under $t=\mathsf{false}$, is a cross-world quantity; in $\LHO$ it is expressed by twinning the program and intervening on the mediator of one world with a value read from the other. The variable $z$ has the same distribution in every interventional context, and $\equiv_2$ makes this an equation between programs of the same type: the program with $\mathtt{return}\ z$ in place of $\mathtt{return}\ (y,z)$ is $\equiv_2$ to $\mathtt{let}\ t' = \mathtt{applyIntv}\ \ell\ \mathtt{true}\ \mathtt{in}\ \mathtt{let}\ z = \mathtt{bernoulli}\ 0.3\ \mathtt{in}\ \mathtt{return}\ z$, in which the label is consumed but ignored. Full abstraction says that the graded denotation detects exactly these equations. The same program, drawn as a string diagram in a Markov category, is a causal Bayesian network, and the same independence is a d-separation; \WP{1} asks whether the two equational theories agree.
+
+\paragraph{Worked example 2: feedback.} Replace the mediator's equation by one that reads the outcome, $m = \mathtt{bernoulli}\ (f\ t'\ y)$, so that $m$ and $y$ depend on each other. No acyclic program denotes this; Bongers et al.\ interpret it through a solution function, a distribution over $(m, y)$ that satisfies both equations when one exists and is unique. In a language with a fixpoint construct $\mathtt{fix}\ (m, y).\ (\dots)$ the model is a program again, and the question of \WP{2} is which fixpoint construct denotes the solution function, and what intervening on $m$ means when $m$ is defined by a fixpoint: Bongers et al.\ answer by cutting the equation and re-solving, and the program-level answer must agree with it on the models where both are defined.
+
+\paragraph{Work package 1: the equational theory and the factorisation face.}
+\begin{itemize}[nosep]
+\item[1a] \textit{(medium risk; in the minimum viable thesis)} Relate the equational theory of $\equiv_2$ to the normalisation-box equational theories for causal Bayesian networks \cite{jacobsszelesstein2025inference,agrawal2026equational}. \emph{Done:} a coincidence theorem on the programs definable from causal Bayesian networks, or a separating example. \emph{Why it may succeed:} both are equational theories over the same string-diagram semantics, differing in whether equations are indexed by programs or by graphs.
+\item[1b] \textit{(low risk)} Settle whether $\equiv_3$ is strictly finer than $\equiv_3^{\text{2-world}}$. \emph{Done:} a separating pair of programs or a collapse proof.
+\item[1c] \textit{(medium risk)} The factorisation reading: show that the conditional independences of a program's Markov-category denotation, via Fritz and Klingler's synthetic d-separation \cite{fritz2023dseparation}, are those implied by $\equiv_2$-invariance under interventions, and characterise the gap (interventional independence is strictly stronger than conditional independence in general). \emph{Done:} the implication proved and the gap characterised by examples. \emph{Why it matters:} it is the precise sense in which the intervention face and the factorisation face are two readings of one semantics.
+\end{itemize}
+
+\paragraph{Work package 2: cycles and feedback.}
+\begin{itemize}[nosep]
+\item[2a] \textit{(medium risk; in the minimum viable thesis)} Finite cyclic models with unique solutions: add a fixpoint construct to $\Lk{2}$ whose denotation is Bongers et al.'s solution function on the class of finite models with unique solutions; define interventions on fixpoint-bound variables by cutting and re-solving; extend the grade and prove adequacy. \emph{Done:} the extension, its semantics, adequacy, and Worked example 2 reproduced. \emph{Why it may succeed:} the solution-function semantics is already a fixpoint; the question is which construct denotes it.
+\item[2b] \textit{(high risk)} The general case: existence and uniqueness of solutions as a semantic side condition; full abstraction for the cyclic language; the relation to recursion and laziness in the host language, since lazy evaluation is how OmegaC implements its retroactive interventions. \emph{Done:} full abstraction on the restricted class, or a precise obstruction.
+\end{itemize}
+
+\paragraph{Work package 3: relations between models.}
+\begin{itemize}[nosep]
+\item[3a] \textit{(medium risk)} Causal abstraction as a program transformation: a coarsening map between $\Lk{2}$ programs that commutes with interventions, compared with the categorical abstraction line \cite{rischel2021abstraction,lorenztull2026abstraction,englberger2025causalabstractionscategoricallyunified}. \emph{Done:} a definition at the program level, a proof that it specialises to the model-level definitions on compiled SCMs, and a worked example (two variables coarsened into one).
+\item[3b] \textit{(medium risk)} The Ibeling--Icard correspondence: show that each of their three logics induces, by indistinguishability under all sentences, exactly the corresponding contextual equivalence on compiled SCMs. \emph{Done:} the correspondence theorem or a separation. \emph{Why it may succeed:} both hierarchies are built from Pearl's operations; they organise queries and models respectively, and indistinguishability is the standard way to turn one into the other.
+\end{itemize}
+
+\paragraph{Work package 4: a practical language.}
+\begin{itemize}[nosep]
+\item[4a] \textit{(low risk; in the minimum viable thesis)} Semantics for existing languages in $\LHO$: a denotational model of OmegaC's core, in which its lazy-closure interventions are shown to compute $\dok$, and an account of ChiRho's multi-world values as $\LHO$ twinnings. \emph{Done:} the translations and their correctness statements, with the paper's examples reproduced.
+\item[4b] \textit{(medium risk)} A vectorised implementation over a Python host with efficient inference, keeping as much of $\LHO$'s typing as the host allows. \emph{Done:} the implementation, the paper's examples at realistic scale, and a comparison with ChiRho on a small benchmark set. \fillin{benchmark set to be agreed with supervisor}
+\end{itemize}
+
+\paragraph{Work package 5 (outlook): the signalling face.} The quantum communication work of \S\ref{sec:order-wherewestand}, whose completeness theorem I expect to close and submit this year, is the second place where causal structure appears as denotational data, as the order of I/O events. The signalling reading that Part I refers to is the following statement, which I expect to follow by structural induction but do not pursue in this plan:
+\begin{conj}\label{conj:b1}
+For every closed term $t$ of $\iotq$ and every trace $\sigma$, the component $\llbracket t\rrbracket_\sigma$ is a probabilistic comb with slot order $\sigma$, and the family $(\llbracket t\rrbracket_\sigma)_\sigma$ is a variable-length tester: for each $\sigma$, the sum of the components over all extensions of $\sigma$, with the later wires discarded, is a deterministic comb with slot order $\sigma$.
+\end{conj}
+\noindent The hypothesis that an intervention label is a send/receive pair with the intervener as environment, so that $\equiv_2$ is operational equivalence under a class of streams, would make the interventional semantics a fragment of the communication one; I state it as the thesis's outlook and will check it on paper, but it is not a work package of this plan.
+
+\section{Evaluation}
+
+The thesis is theoretical with an executable component. Theorems are evaluated by the ``done'' criteria above: coincidence or separation of equational theories, adequacy and full abstraction for the cyclic language, specialisation theorems for abstraction and for the logical correspondence, and correctness of the translations of OmegaC and ChiRho. The implementation is evaluated by reproducing the textbook causal-inference examples (mediation, instrumental variables, feedback) at realistic scale and by a comparison with ChiRho on an agreed benchmark set. The Haskell implementation \cite{ARTIFACT_wang_2026_23207221} is extended with every construct so that every definition remains executable.
+
+\section{Impact and risks}
+
+If successful, the thesis gives denotational foundations for causal probabilistic programming, and hence for causal machine-learning languages, in which interventions are mathematical operations rather than evaluation strategies, with the first program-level treatment of cyclic models and of abstraction, and a practical language whose semantics is the specification of its implementation.
+
+\begin{table}[ht]
+\centering\small
+\begin{tabularx}{\textwidth}{lcX}
+\toprule
+Item & Risk & Fallback\\
+\midrule
+1a equational theories & medium & a separating example is itself a result\\
+1b strictness & low & ---\\
+1c factorisation reading & medium & the implication alone, with the gap by example\\
+2a cycles, restricted class & medium & finite models with unique solutions only\\
+2b cycles, general & high & a precise obstruction\\
+3a abstraction & medium & the compiled-SCM case only\\
+3b logical correspondence & medium & one direction\\
+4a semantics for existing languages & low & OmegaC alone\\
+4b implementation & medium & the examples without the benchmark comparison\\
+\bottomrule
+\end{tabularx}
+\caption{Risks and fallbacks.}
+\end{table}
+
+The generic risk is that the extensions are closer to existing lines than the base result was. The mitigation is the \emph{minimum viable thesis}, \WP{1a}, \WP{2a} and \WP{4a}, every item rated low or medium and each a program-level treatment of something that exists only at the model level; the originality lies in the program-level account, not in the choice of topics.
+
+\section{Plan of work, milestones, and training}\label{sec:plan}
+
+I am in my fourth term. The baseline schedule is the minimum viable thesis; conditional items are marked.
+
+\begin{table}[ht]
+\centering\small
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+Term & Milestones\\
+\midrule
+MT26 (4) & Transfer of status. POPL revision. Completeness manuscript for $\iotq$ (work to date) closed and submitted. Reading milestone M1: normalisation boxes and the equational principles for causal Bayesian networks; Bongers et al.\ on cyclic models in depth.\\
+HT27 (5) & \WP{1a}, \WP{1b}. \WP{4a}: OmegaC core. \emph{Deliverable:} note on the equational theories.\\
+TT27 (6) & \WP{2a}. \WP{1c}. \emph{Deliverable:} paper on cycles and the equational theory.\\
+MT27--HT28 (7--8) & \WP{3a}, \WP{3b}. \WP{4b} begun. \textbf{Confirmation of Status in HT28}, with the minimum viable thesis in hand.\\
+TT28 (9) & Buffer for Confirmation of Status. \WP{2b}. \emph{Deliverable:} paper on abstraction and the logical correspondence.\\
+MT28 (10) & \WP{4b} completed and evaluated. The outlook hypothesis of \WP{5} checked on paper.\\
+HT29--TT29 (11--12) & Consolidation. Thesis writing; submission by the end of TT29.\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Dissemination targets are POPL, PLDI, LICS, MFPS and UAI. The thesis will be organised as: 1 Introduction; 2 Background (Part I of this document); 3 Causal probabilistic programs: the hierarchy, contextual equivalence and the graded semantics \fillin{delineate your contribution from coauthors'}; 4 The equational theory and the factorisation face; 5 Cycles; 6 Abstraction and logics; 7 A practical language; 8 Outlook: order and signalling in quantum communication, with the completeness theorem as work to date \fillin{confirm MSc reuse rules with supervisor}; 9 Conclusion.
+
+\paragraph{Training and engagement.} \fillin{required by the assessors' criteria: seminars attended (PL group, quantum group); courses audited; the PLanQC 2025 talk, with a paragraph on it; teaching; planned activities for the coming year}.
+
+\section{Statement of the subject of the thesis}
+
+The semantics of causal probabilistic programming: contextual equivalence as the definition of causal structure, extended to higher order, cycles and abstraction, and made executable.

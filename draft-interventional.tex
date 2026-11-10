@@ -1,0 +1,24 @@
+% Interventional-led version: the thesis is the semantics of causal
+% probabilistic programming; the quantum communication work is work to
+% date and an outlook.
+\input{preamble.tex}
+\title{Semantics of Causal Probabilistic Programming:\\ Interventions, Equations and Cycles\\[1ex]
+\large Qualifying Dissertation for the Transfer of Status}
+\author{Theo Wang\\ \small Department of Computer Science, University of Oxford\\ \small Supervisor: Sam Staton}
+\date{Michaelmas Term 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent
+Causal inference asks what would happen if a variable were forced to a value, and the standard answer, Pearl's structural causal models, is a syntactic transformation of a model. Causal probabilistic programming aims to make such interventions primitives of an expressive probabilistic language, and existing languages do so by evaluation strategies without an account of what they compute. In my first year, with coauthors, I gave that account: a hierarchy of probabilistic languages in which interventions and counterfactual twinning are program transformations, causal structure is defined by a contextual equivalence of programs, and a graded denotational semantics is fully abstract for it and extends to higher order. The proposed thesis builds outward from this base in the three places where causal models stop---the equational theory and its relation to factorisation, cyclic models as fixpoints, and abstraction between models---and makes the result practical with a vectorised implementation. A second line of work, an algebraic theory of quantum communication in which the order of events is denotational data, is reported as work to date and as the thesis's outlook. Part I reviews the literature the thesis builds on; Part II states the research plan and is self-contained.
+\end{abstract}
+
+\tableofcontents
+
+\input{review.tex}
+\input{proposal-interventional.tex}
+\printbibliography
+
+\end{document}

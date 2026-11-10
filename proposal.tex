@@ -1,0 +1,186 @@
+% =====================================================================
+\section{Project Proposal}\label{sec:proposal}
+% =====================================================================
+% Structure follows main.tex: four directions, then evaluation/risks
+% and the plan. The handbook's questions (i)--(vi) are answered in the
+% opening subsection and in the two closing ones; each item in the four
+% directions carries a risk rating and a "done" criterion.
+
+\subsection{Topic, goal, state of the art, and method}
+
+\paragraph{Research topic and fundamental challenges.}
+The thesis is on the \emph{semantics of causal probabilistic programming}: a programming-language account of causal models in which the interventional face of causal structure is defined by a contextual equivalence of programs, interventions and counterfactuals are mathematical operations on denotations rather than evaluation strategies, and the account is executable. The finished work of \S\ref{sec:intv-wherewestand} is the base. The thesis builds outward from it in four directions, which are the four subsections below: making the language practical and more expressive; understanding the categorical constructions it rests on; taking the causal graph, rather than the model, as the primitive; and relating the interventional notion of causality to the notions used in concurrency and in higher-order quantum processes. The fundamental challenges are, respectively: (i) cycles, since nothing in the graded semantics handles feedback, and feedback interacts with interventions in ways acyclic models never exhibit; (ii) the semantics is parametric in a list of categorical assumptions rather than in a synthetic axiomatisation, and its relation to the other extensional accounts, causal spaces, causal abstraction and the lazy semantics of OmegaC, is unproven; (iii) the extensional notion $\equiv_2$ is blind to fine-tuned dependence, so a graph-centred account must add intensional structure to the types or to the semantics, and then show how the do-calculus lives there; (iv) the signalling notion of causality is formulated in compact closed categories over finite-dimensional processes, and the interventional one in cartesian closed categories over measure-theoretic ones, so a relation between them must cross that divide.
+
+\paragraph{Goal.}
+I want a mathematical account of what it means for one part of a program to cause another, in the sense that changing it changes the other. It should work for programs that pass procedures around and for programs that loop back on themselves; it should run on the software that statisticians actually use; and it should explain why the same word, cause, is used for the ability to send a message between parts of a quantum process and for the order of events in a concurrent one.
+
+\paragraph{State of the art and why it is hard.}
+The existing notions of equivalence for causal models, Bongers et al.'s hierarchy, causal spaces and causal abstraction, say when two models have the same interventional behaviour, but they are not equivalences of programs. Causal probabilistic programming languages, OmegaC, ChiRho and MultiVerse, implement interventions and counterfactuals at higher order by evaluation strategies without an account of what they compute, and ChiRho alone runs at scale. The diagrammatic line has equational principles for causal Bayesian networks and a diagrammatic do-calculus, stated per graph, with no notion of program. Cyclic models have a semantics only at the model level, by solution functions or by unrolling in time. On the other side, higher-order quantum processes have a type-theoretic account of signalling, and concurrency has explicit causal graphs, with no account of intervention in either. The problem is hard because each extension breaks something the base relies on: cycles break the dataflow reading; a synthetic setting removes the global elements that full abstraction used; a graph-centred account must reinstate exactly what contextual equivalence abstracts away; and the signalling setting lacks the function spaces that the higher-order semantics lives in.
+
+\paragraph{Method and what is new.}
+The method is the one that produced the base result. (1) Fix a small language whose \emph{syntax} carries the causal structure. (2) Define an \emph{extensional} equivalence from what an observer may do. (3) Build a \emph{denotational} model in which the available observations are a grade. (4) Prove a correspondence theorem between (2) and (3). What is new is that the interventional face of causal structure is \emph{defined} by a contextual equivalence of programs rather than by a property of a graph, which is what lets the account survive higher order, cycles and abstraction, and that every semantic definition is also an implementation. Where the direction is open-ended (\S\ref{sec:prop-other}), I say so and commit to reading and a position rather than to a theorem.
+
+\paragraph{Running example.} In $\Lk{2}$, interventions are exposed as typed free variables $\ell$ read through $\mathsf{applyIntv}$, which returns the label's value when it is set and the program's own value otherwise:
+\begin{lstlisting}
+let t  = bernoulli 0.5 in              -- treatment
+let t' = applyIntv $\ell$ t in             -- intervenable copy of t
+let m  = bernoulli (f t') in           -- mediator
+let y  = bernoulli (g t' m) in         -- outcome
+let z  = bernoulli 0.3 in              -- unrelated variable
+return (y, z)
+\end{lstlisting}
+Under $\dok(\ell\mapsto\mathsf{Just}\ \mathsf{true})\{-\}$ the variable $t'$ denotes the constant $\mathsf{true}$, and the total effect of $t$ on $y$ is the difference between the distributions of $y$ under the two perfect interventions. The natural direct effect, a cross-world quantity, is expressed in $\LHO$ by twinning the program and intervening on the mediator of one world with a value read from the other. The variable $z$ has the same distribution in every interventional context, and $\equiv_2$ makes this an equation between programs. Each direction below modifies this example: adding feedback ($m$ reads $y$), coarsening ($t$ and $m$ into one variable), fine tuning ($y$ reads $t'$ but no intervention shows it), and reading $\ell$ as the slot of a higher-order process.
+
+% ---------------------------------------------------------------------
+\subsection{Developing the field of causal probabilistic programming}
+
+\subsubsection{Putting the language into practice}\label{sec:prop-practice}
+
+The existing implementation is a definitional library in Haskell over MonadBayes, a shallow embedding that handles small examples only. Realistic causal inference needs vectorised inference, and the candidate host is Python, on top of NumPyro or JAX directly (\S\ref{sec:foundations}), which gives an inference engine that is efficient by construction and the user base that causal machine learning actually has. The point is not a port but a \emph{library with guarantees}: the operations of $\LHO$, intervention labels, $\dok$, twinning and cross-world interventions, implemented as program transformations whose correctness is the denotational semantics, with as much of the typing discipline (linearity of labels, world indices) as the host allows, enforced statically where Python's type hints permit and dynamically otherwise.
+\begin{itemize}[nosep]
+\item[A1] \textit{(low risk; minimum viable thesis)} The library: $\LHO$'s constructs over a vectorised host, with twinning implemented as a batch dimension realising $\LHO$'s world-indexed types, ChiRho's tensor broadcasting being the point of comparison. \emph{Done:} the paper's examples at realistic scale, and the semantics stated as the specification of each construct. \emph{Why it may succeed:} the semantics already is a vectorisation, so the batch dimension is its direct image.
+\item[A2] \textit{(medium risk)} Evaluation against ChiRho on a benchmark set \fillin{to be agreed with supervisor}. \emph{Done:} the set fixed; accuracy and wall-clock time measured on it; a table of which $\LHO$ guarantees survive the host, statically, dynamically, or not at all.
+\end{itemize}
+
+\subsubsection{Expressivity: cycles, feedback and recursion}\label{sec:prop-expressivity}
+
+Replace the mediator's and outcome's equations in the running example by ones that read each other, with the noise drawn outside the loop: $\mathtt{let}\ u_m = \mathtt{uniform}\ \mathtt{in}\ \mathtt{let}\ u_y = \mathtt{uniform}\ \mathtt{in}\ \mathtt{fix}\ (m,y).\ (u_m < f\ t'\ y,\ u_y < g\ t'\ m)$, so that $m$ and $y$ depend on each other. No acyclic program denotes this, and for Boolean $m, y$ the system has a unique solution only for some $f, g$ and some values of the noise, which is the first thing a semantics must say. The review (\S\ref{sec:intv}) distinguishes two readings of such a cycle, and the proposal is to give both a programming-language semantics and to relate them.
+
+\emph{Reading 1: equations.} The randomness is drawn once and the cycle is a fixpoint of deterministic equations; this is Bongers et al.'s solution-function semantics and the equilibrium reading of Mooij et al. In a language with a fixpoint construct $\mathtt{fix}\ (m,y).\ (\dots)$ over an explicit noise variable, the model is a program again. This reading is easier precisely because the model is \emph{equational}: an SCM in $\Lk{3}$ already separates exogenous from endogenous bindings, so the fixpoint is taken over the endogenous ones with the noise fixed; the body of the fixpoint must be deterministic in the noise, as in the example, since $\Lk{3}$ allows endogenous bindings that sample, and those are kept out of the loop in the first instance. Intervening on a fixpoint-bound variable is cutting its equation and re-solving, which requires unique solvability after every intervention, Bongers et al.'s \emph{simple} SCMs, and the program-level definition must agree with theirs where both are defined. The same construction, closing an output onto an input, is a \emph{feedback loop} in a compact closed category, which is how processes without definite order arise in the quantum setting and how Barrett, Lorenz and Oreshkov's cyclic quantum causal models are built (\S\ref{sec:hoqc}); the relation is pursued in \S\ref{sec:prop-hoqc}.
+
+\emph{Reading 2: recursion.} The randomness is resampled at each pass through the cycle, so that the model is a stochastic process, and the cycle is a loop or a recursive definition in the probabilistic language, with Vákár, Kammar and Staton's domain theory as the natural semantics and laziness, as in LazyPPL and in OmegaC's retroactive interventions, as the natural implementation. Recursive types, streams in particular, and mutual recursion are the constructs to examine: a cyclic model over streams of variables is an acyclic model unrolled in time, which is the dynamic-Bayesian-network reading. The question for interventions is which pass one intervenes on, and whether an intervention on a stream is itself a stream of interventions.
+\begin{itemize}[nosep]
+\item[A3] \textit{(medium risk; minimum viable thesis)} Reading 1 on finite simple models: a fixpoint construct over $\Lk{3}$ with noise-deterministic bodies, its denotation as the solution function, interventions by cutting and re-solving, the grade extended, adequacy proved, and full abstraction proved over $\mathbf{Set}$-models, where finiteness makes concreteness free. \emph{Done:} the extension, the two theorems, and the feedback example reproduced for the $f, g$ that make it simple. \emph{Failure:} full abstraction fails for the cyclic language, which would show that cycles need a new observable. \emph{Why it may succeed:} the solution-function semantics is already a fixpoint; the question is which construct denotes it.
+\item[A4] \textit{(high risk; contingent on A3)} Reading 2, and the relation between the readings: a recursive $\Lk{2}$ over $\omega$-quasi-Borel spaces with intervention labels on streams, with denotational $\Lk{1}$-equality in that model as the observable. \emph{Done:} the agreement theorem, that the two readings coincide on deterministic equilibria, stated and proved, with a characterisation of where they differ; full abstraction for the recursive language, or a precise obstruction.
+\end{itemize}
+
+% ---------------------------------------------------------------------
+\subsection{Better understanding our categorical constructions}
+
+\subsubsection{Relation to other constructions}\label{sec:prop-relations}
+
+The graded interventional construction and its higher-order internalisation are new objects, and I do not yet know how expressive they are or how they relate to the other extensional accounts in \S\ref{sec:intv}. Three relations are concrete enough to state.
+
+\emph{OmegaC.} My hypothesis is that OmegaC's lazy semantics is the interventional monad applied \emph{pointwise to each value}: where my semantics threads the intervention environment through a program's dataflow once, a lazy semantics attaches it to every thunk, so that a retroactive modification of a closure is a reindexing of the grade at the point of forcing. If so, OmegaC's core has a denotational model in the same construction, its evaluation strategy computes $\dok$, and the two semantics are related by a call-by-need translation.
+\begin{itemize}[nosep]
+\item[B1] \textit{(medium risk; the OmegaC half in the minimum viable thesis)} A formal operational semantics for OmegaC's core, a denotational model of it in the graded construction, and the correctness of its lazy evaluation strategy with respect to $\dok$. For ChiRho, whose worlds are made by tensor broadcasting with each intervention doubling the world count, the expected result is a precise \emph{mismatch} theorem: which values ChiRho shares across worlds that $\LHO$ twinning does not, and conversely. \emph{Done:} the translations, their correctness or mismatch statements, and the papers' examples reproduced. \emph{Why it may succeed:} OmegaC is by construction a deterministic function of explicit noise, which is what $\Lk{3}$'s exogenous/endogenous split formalises; ChiRho's broadcasting rule is a computable function of the execution trace, which is all a mismatch theorem needs.
+\end{itemize}
+\emph{Causal spaces.} A causal space is a probability space with a causal kernel for every sub-$\sigma$-algebra. The denotation of a closed $\Lk{2}$ program at the full grade is a distribution together with a reindexing action for every set of labels, which looks like a causal space on the $\sigma$-algebra generated by the labelled variables.
+\begin{itemize}[nosep]
+\item[B2] \textit{(medium risk)} A functor from $\Lk{2}$ denotations to causal spaces, and a characterisation of its image. \emph{Done:} the functor, with the consistency axioms of causal spaces derived from the laws of the grade, or a counterexample showing which axiom the grade does not force.
+\end{itemize}
+\emph{Causal abstraction.} Coarsening $t$ and $m$ of the running example into a single variable is an abstraction. At the program level it is a transformation between $\Lk{2}$ programs that commutes with interventions on the coarse labels.
+\begin{itemize}[nosep]
+\item[B3] \textit{(medium risk)} Causal abstraction as a program transformation, specialising to the model-level definitions \cite{rischel2021abstraction,lorenztull2026abstraction} on compiled SCMs, which asks the graded semantics to be functorial in the model and not only in the program. \emph{Done:} the definition, the specialisation theorem, and the worked example.
+\end{itemize}
+
+\subsubsection{A more synthetic approach?}\label{sec:prop-synthetic}
+
+The semantics is stated for an ``$\Lk{1}$-model'': a distributive category with a commutative affine probability monad and the structure needed for the base language, with cartesian closure for the higher-order part, instantiated at $\mathbf{Set}$, standard Borel spaces and quasi-Borel spaces. This is a shopping list. The synthetic alternative is to work in a Markov category, where the \emph{factorisation} face of causality is already native and interventions are diagram surgery: the intervention label $\ell$ becomes an open input wire, $\mathsf{applyIntv}$ a diagram that merges it with the program's own value, and the grade the set of wires left open. The representable Markov categories of Fritz et al.\ \cite{fritz2023representable}, Kleisli categories of affine monads, are where the two presentations meet. What may be lost is full abstraction, which used global elements to separate morphisms; in a Markov category the substitute is a well-pointedness or enough-points axiom, and finding the weakest one that suffices is the content.
+\begin{itemize}[nosep]
+\item[B4] \textit{(medium risk; minimum viable thesis)} The graded interventional construction over a Markov category, agreeing with the current one on representable Markov categories, with the axioms needed for adequacy and for full abstraction identified. \emph{Done:} the construction, the agreement theorem, and the axiom list, which replaces the shopping list and will include finite coproducts with distributivity, since Maybe-typed labels and $\mathsf{applyIntv}$ need them. \emph{Why it may succeed:} the ingredients the proofs use, copying, discarding and value separation, are each a named axiom in the Markov-category literature. \emph{Failure:} if no axiom weaker than concreteness suffices for full abstraction, that is the result.
+\end{itemize}
+
+% ---------------------------------------------------------------------
+\subsection{Understanding causality using a graph-centred approach}\label{sec:prop-graph}
+
+\paragraph{The graph as primitive.} Barrett, Lorenz and Oreshkov's example (\S\ref{sec:intv}) in the running language: $y = \mathtt{xor}\ t'\ \lambda$ with $\lambda$ uniform. The program reads $t'$, so the graph has an arrow from $t$ to $y$; no intervention on $\ell$ changes the distribution of the output, so the program is $\equiv_2$ to one that never reads $t'$. Contextual equivalence is a \emph{signalling} notion, with perfect interventions as the signals, and it is blind to fine tuning. Separate the signature into the built-ins ($\mathtt{if}$, $\mathsf{applyIntv}$, arithmetic) and the \emph{model symbols}, the mechanisms $f, g$ and the priors, whose interpretation the base semantics leaves open; write the example with the prior of $\lambda$ as a model symbol $p$, realised at $\mathtt{bernoulli}\ 0.5$. A \emph{realisation} is an interpretation of the model symbols. An arrow of the dataflow graph is \emph{faithful} when some realisation lets an intervention on its source be detected at its target, and \emph{unfaithful} at a given realisation when the dependence is genuine but invisible there; the arrow from $t$ to $y$ is faithful, since any realisation of $p$ other than the uniform one reveals it, and the program at the uniform realisation is fine tuned. The interventional base result characterises invariance at a fixed realisation only. A graph-centred account takes the graph as the datum and asks what structure in the language or the semantics carries it. Two options are available, and the proposal tries both on the first-order language.
+
+\emph{Graph in the semantics.} Fong's causal theories and the string-diagram models of Jacobs et al.\ and Lorenz and Tull take the graph as the generating data of a category and the model as a functor; a program's denotation would then be a functor out of the free Markov category on its dataflow graph, and two programs would be equivalent when their dataflow graphs coincide and the functors agree, which identifies strictly less than $\equiv_2$ and is, deliberately, close to syntactic equality of mechanisms.
+
+\emph{Graph in the types.} A dependency type system, in the tradition of the dependency core calculus \cite{abadi1999dcc}, records in the type of each variable which labels it depends on; Simmons's graph types for higher-order processes (\S\ref{sec:hoqc}) are the quantum analogue, with a DAG of signalling relations as a type. A graph-typed $\Lk{2}$ would have a soundness theorem, that a typed edge implies signalling under some realisation, and fine tuning would be exactly the gap between the typed graph and $\equiv_2$ at a fixed realisation.
+\begin{itemize}[nosep]
+\item[C1] \textit{(medium risk)} A graph-typed first-order language with both semantics, the functorial one and the graded one, related by a theorem: there is an edge from $X$ to $Y$ in the typed graph iff some realisation of the program exhibits signalling from $X$ to $Y$. \emph{Done:} the type system, the two semantics, the relating theorem, and the fine-tuning example as the separating case. \emph{Why it may succeed:} the typed graph is a dependency analysis, and dependency analyses are sound for noninterference by standard arguments \cite{abadi1999dcc}; the content is the converse.
+\end{itemize}
+
+\paragraph{Identifiability as an equational theory.} The do-calculus is an equational theory of interventional queries indexed by a graph, and it is interesting only when one has a causal structure and nothing more; its diagrammatic forms are comb disintegration, Lorenz and Tull's identifiability, and the normalisation-box equations (\S\ref{sec:diagrammatic}). None of these is an algebraic theory of \emph{operations}. The proposal is a parameterised algebraic theory with three kinds of operation: sampling, as in Staton's theory of probability; intervention, with labels as parameters; and normalisation, as a \emph{scoped} operation in the sense of Piróg et al.\ \cite{pirog2018scoped}, delimiting the sub-computation to be renormalised after conditioning, in the manner of Stein and Staton's exact conditioning \cite{stein2021exact}. Everything is then in one framework: for terms annotated with a given DAG, the graph being a parameter of the theory as in Fong's causal theories, the Markov conditions and d-separation become equations of the theory, and the three rules of the do-calculus become candidate derived rules; C1's type system is what later \emph{infers} the annotation, so C2 does not depend on C1. The prerequisites, the Markov conditions, d-separation and the calculus itself, are covered by the first reading milestone M1.
+\begin{itemize}[nosep]
+\item[C2] \textit{(medium risk; minimum viable thesis)} The theory, parameterised by a DAG, with a sound interpretation in Markov categories with conditionals, and Agrawal et al.'s equational principles for causal Bayesian networks, obtained from normalisation boxes, derived in it. \emph{Done:} the theory, the soundness theorem, and the derivations. \emph{Failure:} a principle of Agrawal et al.\ that is not derivable, which would locate a missing equation. \emph{Why it may succeed:} normalisation as a scoped operation already has an algebraic treatment \cite{pirog2018scoped}, and exact conditioning already has a sound one \cite{stein2021exact}; the theory combines them with surgery.
+\item[C3] \textit{(medium--high risk)} Admissibility of the three do-calculus rules for DAG-annotated terms, each rule's d-separation side condition becoming a condition on the annotation. \emph{Done:} the admissibility theorem, or a precise statement of which rule fails and why. \emph{Why it may succeed:} the soundness of each rule should follow from Fritz and Klingler's synthetic d-separation together with a surgery lemma for the intervention operation, which C2 must prove in any case; the open question is whether the theory's equations suffice to derive the rules, which is why the rating is medium--high.
+\end{itemize}
+
+% ---------------------------------------------------------------------
+\subsection{Understanding the relationship with `causality' as used in other fields}\label{sec:prop-other}
+
+This direction is deliberately open-ended. Its goal is a categorical account that can speak of causality in the interventional, the concurrent and the higher-order quantum sense at once, and the honest statement of its status is that I have a semantics on one side and an analogy on the other. I commit here to reading milestones, to one classical theorem, and to a position; anything beyond that is a stretch goal.
+
+\subsubsection{Concurrency}\label{sec:prop-concurrency}
+
+Concurrency has the causal graph \emph{explicitly}: a pomset is a graph of events, and event structures add conflict, so that causal inconsistency, an event that both requires and excludes another, is representable. The interventional line has the opposite profile, an implicit graph with an extensional characterisation, and the two have not been put side by side. Two questions. First, what is an intervention on an event, and is the order of a pomset the least order compatible with every interventional realisation, as C1 asks of a program's graph? Second, is there a contextual equivalence of concurrent programs, in the sense of \S\ref{sec:intv-wherewestand}, whose extensional content is a signalling structure, so that the pomset semantics of Kammar et al.\ and the signalling types of \S\ref{sec:hoqc} are the intensional and extensional faces of one notion?
+\begin{itemize}[nosep]
+\item[D1] \textit{(reading; position)} Pomsets and event structures from the interventional side: a position paper on what intervening on an event means and on the two questions above, informed by the threads theory of Kammar et al.\ \cite{kammar2026threads} and by Simmons's causal logic.
+\end{itemize}
+
+\subsubsection{Higher-order processes and quantum causality}\label{sec:prop-hoqc}
+
+Higher-order quantum processes and my higher-order causal models are two generalisations of the same first-order object, in different directions. My dependent interventions live in a \emph{cartesian closed} category $[\mathbf{Bij},\mathcal C]$ generalising the base category $\mathcal C$; higher-order processes live in a \emph{compact closed} category generalising the \emph{Kleisli} category of the probability monad, the way $\CP$ generalises the deterministic processes $\mathrm{CPTP}$, and there is a classical version of every construction over $\Mat$ in which first-order processes are stochastic maps. The signalling notion of causality of Kissinger and Uijlen is defined on this compact closed side, and it is the interventional notion in disguise: a signalling constraint says that a local intervention at one node is undetectable at another. Three facts from the review line up with facts about my semantics. The signalling notion is strictly coarser than the causal structure, by fine tuning, exactly as $\equiv_2$ is coarser than dataflow. Quantum causal models are second-order processes, with nodes as slots, exactly as a program with intervention labels is a process with slots. And indefinite causal order is related to cyclic causal models \cite{barrett2021cyclic}, exactly as feedback is to fixpoints (\S\ref{sec:prop-expressivity}).
+
+The precise form of the analogy is the following hypothesis. An intervention label is a \emph{slot} of a comb, and the intervener is the environment that fills it: $\dok(\ell\mapsto v)$ is the environment that discards what the program offers at the slot and returns $v$; no intervention is the environment that returns what it was offered; and, on $\Lk{2}$ extended with a first-order \emph{dependent} label kind $X\to P X$, the first-order shadow of the dependent intervention kind of $\LHO$, the contextual equivalence $\equiv_2^{\mathrm{dep}}$ under substitution of closed stochastic maps is equality of the combs obtained by leaving every label open, the slot being the $\mathsf{applyIntv}$ site. In the comb reading an environment is any stochastic map, and comb pairing is affine in it, which is why invariance transfers. Perfect interventions, the identity and the constant environments, affinely span the stochastic maps on a Boolean type (three points for a two-dimensional polytope) but not in general ($k+1$ points against a $k(k-1)$-dimensional polytope), so $\equiv_2$ with perfect interventions is strictly coarser than comb equality and perfect-intervention invariance strictly weaker than non-signalling from the slot. The POPL paper defines $\equiv_2$ for $\mathsf{Maybe}$-typed labels only, so $\equiv_2^{\mathrm{dep}}$ is a definition this item must supply. On the classical finite fragment this is a statement about stochastic maps and combs over $\Mat$, with no quantum theory in it, and it can be checked on paper with what I already know.
+\begin{itemize}[nosep]
+\item[D2] \textit{(medium risk)} The classical bridge: $\equiv_2^{\mathrm{dep}}$ defined, and a functor from finite $\Lk{2}$ denotations to combs over $\Mat$, in the $\CausC$ construction, with one slot per label, under which $\equiv_2^{\mathrm{dep}}$ becomes equality of combs and invariance under dependent interventions becomes non-signalling from the slot, with the perfect-intervention $\equiv_2$ characterised as the coarser equivalence it is. \emph{Done:} the functor, the two correspondence statements, and the separating example for perfect interventions. \emph{Why it may succeed:} it uses only Kissinger and Uijlen's first-order and one-way-signalling types over $\Mat$, which I know, and no quantum theory; it does not wait on the reading milestone M3.
+\item[D3] \textit{(reading; stretch)} Quantum causal models \cite{barrett2019quantumcausalmodels,barrett2021cyclic} and Simmons's thesis in depth, towards the stretch goal: one category in which graph types, intervention grades and signalling types are three structures on the same objects, with the fine-tuning gap as the common theorem.
+\end{itemize}
+
+% ---------------------------------------------------------------------
+\subsection{Evaluation, impact and risks}\label{sec:prop-risks}
+
+\paragraph{Evaluation.} The thesis is theoretical with an executable component. Theorems are evaluated by the ``done'' criteria above: adequacy and, where a contextual equivalence is defined, full abstraction for each extended language (the POPL paper defines none for $\LHO$, so A1 is evaluated by differential testing of the library against the Haskell definitional implementation on the paper's examples), agreement theorems with the existing model-level notions (solution functions, causal spaces, abstraction, OmegaC's evaluation strategy), soundness of the algebraic theory of identification and admissibility of the do-calculus rules, and the correspondence statements of the classical bridge. The implementation is evaluated by reproducing the textbook causal-inference examples (mediation, instrumental variables, feedback) at realistic scale, by a comparison with ChiRho on an agreed benchmark set, and by the statement of which guarantees survive the host. The Haskell artifact \cite{ARTIFACT_wang_2026_23207221} is extended with every new construct so that every definition remains executable.
+
+\paragraph{Impact.} If successful, the thesis gives denotational foundations for causal probabilistic programming, and hence for causal machine-learning languages, in which interventions are mathematical operations rather than evaluation strategies; the first program-level treatment of cyclic models, of abstraction and of identification; a practical library whose semantics is the specification of its implementation; and a precise account, on the classical fragment at least, of why signalling, interventional and concurrent causality are one notion with three intensional data.
+
+\begin{table}[ht]
+\centering\small
+\begin{tabularx}{\textwidth}{llX}
+\toprule
+Item & Risk & Fallback\\
+\midrule
+A1 library & low & the examples without the benchmark comparison\\
+A2 benchmark & medium & a qualitative comparison\\
+A3 cycles, reading 1 & medium & $\mathbf{Set}$-models only; interventions on a fixed subset of the cycle variables\\
+A4 cycles, reading 2 & high & a precise obstruction\\
+B1 OmegaC, ChiRho & medium & OmegaC alone\\
+B2 causal spaces & medium & the counterexample is itself a result\\
+B3 abstraction & medium & the compiled-SCM case only\\
+B4 synthetic & medium & representable Markov categories only\\
+C1 graph types & medium & one of the two semantics\\
+C2 algebraic theory & medium & soundness without the normalisation-box equations\\
+C3 do-calculus & medium--high & admissibility of rules 1 and 2 only\\
+D2 classical bridge & medium & one direction\\
+D1, D3 & reading & a position chapter\\
+\bottomrule
+\end{tabularx}
+\caption{Risks and fallbacks.}\label{tab:risks}
+\end{table}
+
+Table \ref{tab:risks} gives a fallback for each item. The generic risk is that the extensions are closer to existing lines than the base result was. The mitigation is the \emph{minimum viable thesis}: A1, A3, B1, B4 and C2, every item rated low or medium and each a program-level treatment of something that exists only at the model level; the originality lies in the program-level account, not in the choice of topics. The second risk is breadth, since the fourth direction reaches into two fields that \S\ref{sec:order} positions rather than surveys; the mitigation is that it is explicitly open-ended, that its deliverables are a position and one classical theorem, and that it can be cut to the classical bridge D2 without loss to the rest.
+
+% ---------------------------------------------------------------------
+\subsection{Plan of work, milestones, and training}\label{sec:plan}
+
+I am in my fourth term. The baseline schedule is the minimum viable thesis; conditional items are marked. Reading milestones are M1 (the do-calculus, Markov conditions and d-separation; normalisation boxes; Bongers et al.\ and Forré--Mooij on cyclic models), M2 (Barrett, Lorenz and Oreshkov's quantum causal models, acyclic and cyclic), and M3 (Simmons's thesis, chapters 2--3; Kammar et al.\ on threads).
+
+\begin{center}\small
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+Term & Milestones\\
+\midrule
+MT26 (4) & Transfer of status. POPL revision. Reading M1.\\
+HT27 (5) & A1 prototype. B1 (OmegaC). \emph{Deliverable:} note on the semantics of OmegaC and ChiRho.\\
+TT27 (6) & A3. B2. C2 designed. Reading M2. \emph{Deliverable:} paper on cycles.\\
+MT27--HT28 (7--8) & C2 soundness; C3 begun. B4. A2. \textbf{Confirmation of Status in HT28}, with the minimum viable thesis in hand.\\
+TT28 (9) & Buffer for Confirmation of Status. C1. C3 completed. D2. \emph{Deliverable:} paper on the graph-centred account.\\
+MT28 (10) & B3. Reading M3. A4 if A3 has landed, otherwise dropped.\\
+HT29 (11) & D1, D3 as a position chapter. Consolidation.\\
+TT29 (12) & Thesis writing only; submission by the end of TT29.\\
+\bottomrule
+\end{tabularx}
+\end{center}
+\noindent If the POPL submission needs a further round, it displaces A1's prototype to TT27 and nothing else; D2 depends on no reading milestone.
+
+Dissemination targets are POPL, PLDI, LICS, MFPS and UAI. The thesis will be organised as: 1 Introduction; 2 Background (\S\ref{sec:foundations}--\ref{sec:synthesis} of this document); 3 Causal probabilistic programs: the hierarchy, contextual equivalence and the graded semantics \fillin{delineate your contribution from coauthors'}; 4 A practical language, and cycles; 5 The categorical constructions: relations and a synthetic account; 6 The graph-centred account and identification; 7 Causality in other fields: concurrency and higher-order processes; 8 Conclusion.
+
+\paragraph{Training and engagement.} \fillin{required by the assessors' criteria: seminars attended (PL group, quantum group); courses audited; the PLanQC 2025 talk, with a paragraph on it; teaching; planned activities for the coming year}.
+
+\subsection*{Statement of the subject of the thesis}
+
+The semantics of causal probabilistic programming: contextual equivalence as the definition of interventional causal structure, made practical, extended to cycles and to a graph-centred account of identification, and related to signalling and concurrent causality.

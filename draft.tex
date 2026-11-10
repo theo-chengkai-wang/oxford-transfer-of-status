@@ -1,0 +1,88 @@
+% Balanced version (both routes with equal weight). Scrutiny log at the end.
+\input{preamble.tex}
+\title{Semantics of Causality:\\ Interventional, Signalling and Factorisation Structure\\ in Probabilistic and Quantum Programs\\[1ex]
+\large Qualifying Dissertation for the Transfer of Status}
+\author{Theo Wang\\ \small Department of Computer Science, University of Oxford\\ \small Supervisor: Sam Staton}
+\date{Michaelmas Term 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent
+The word \emph{causality} names several different things. In causal inference it means invariance under \emph{interventions}; in quantum foundations it means the absence or presence of \emph{signalling}; in probabilistic modelling it means a \emph{factorisation} of a joint distribution along a graph. All three are extensional characterisations of an intensional datum that programs carry explicitly: the dataflow of a probabilistic program, the order of communication events of a communicating program, the graph of a causal model. Two lines of work precede this proposal. The first, carried out during my first year with coauthors, is a hierarchy of causal probabilistic programming languages in which interventional causal structure is characterised by contextual equivalence. The second, begun in my MSc dissertation and continued this year, is an algebraic theory of classically controlled quantum communication in which the order of I/O events is first-class semantic data. The proposed thesis is to give the second setting its signalling reading, to relate the two by a functorial bridge on their common finite classical fragment, and, as a stretch goal, to axiomatise a categorical framework in which all three notions of causality are structure on one category. Part I reviews the literature the thesis builds on and positions the two neighbouring fields it reaches into; Part II states the research plan and is self-contained.
+\end{abstract}
+
+\tableofcontents
+
+\input{review.tex}
+\input{proposal-balanced.tex}
+\printbibliography
+
+\end{document}
+
+
+% =====================================================================
+% SCRUTINY LOG (draft.tex)
+% =====================================================================
+% Round 1 (self-review against the source files, 3 Nov 2026):
+%  - The lqCCS quotation supplied by an earlier examiner pass is not in
+%    that paper; replaced by a paraphrase of its abstract.
+%  - The intro's commutation axiom was schematic; replaced by axiom (V)
+%    of the FoSSaCS paper, with (Z) used in Example B.
+%  - Example B credited the tensor axioms for a derivation that uses only
+%    Q-completeness plus substitution; the tensor is now exhibited by the
+%    paper's own Bell-pair/coin equation (an instance of (Z)).
+%  - Example A rewritten in the paper's label/applyIntv/do syntax.
+%  - Confirmed: L_HO widens to the unnormalised measure monad for
+%    conditioning; the first-order semantics is over Prob.
+% Round 2 (two independent examiner reads, 3-5 Nov 2026):
+%  PL-semantics examiner, verified against sources and applied:
+%   twinning is L3 -> L2, not into L3; the Bongers correspondence is on
+%   compiled L3 programs (obs/intv/2-world); full abstraction needs a
+%   concrete model; L3 -> L_HO is semantics-preserving, not conservative;
+%   the intro's <=_2 equation was ill-typed (labels are linear) and is now
+%   between programs of the same type; the MSc results are not first-year
+%   work (abstract and S1 fixed); the operational equivalence is not
+%   contextual (said, with the open question); completeness moved to term
+%   5; milestones renumbered; Confirmation of Status in term 8 with 9 as
+%   buffer; 2a split into independent channels (Mazurkiewicz traces,
+%   medium, in the MVT) and threads (high, stretch); risk table and MVT
+%   now agree; "what is new" paragraph and a notation box added to Part
+%   II; S9 made self-contained; the factorisation face given a deliverable
+%   in 3a; the intervener-as-environment hypothesis added to 3a; comb
+%   disintegration, centrality, Mazurkiewicz traces added to the review;
+%   joint-work delineation and training left as FILLs.
+%  Quantum-foundations / causal-inference examiner, applied:
+%   Conjecture B1 was false as stated (branch components are
+%   post-selected); restated as a tester/strategy property with the
+%   counterexample shown; B2 restated over finite-dimensional CP with the
+%   trace external, realisation and relative completeness separated; the
+%   "unnormalised => not precausal" obstruction was wrong (Mat(R>=0) is
+%   Kissinger-Uijlen's own precausal example) and is replaced by finite
+%   dimension / compact closure and sub-normalisation; Wechs et al.
+%   stated exactly (three nested classes; switch in quantum-control but
+%   not classical-control; classical-control => separable; quantum-control
+%   => causal correlations; exhaustiveness is a proposal); causal
+%   inequalities and the switch/OCB distinction added; realisability of
+%   the switch hedged and cited; Caus types corrected (the indefinite-order
+%   type contains all process matrices; separability is not a type);
+%   Simmons-Kissinger: "additives" dropped; quantum causal models
+%   described at the level of their definitions; cyclic models hedged;
+%   CDP 2010 cited for the causality axiom and Coecke's result stated
+%   correctly; Fritz-Klingler: soundness only; conditionals as an extra
+%   axiom; abduction-action-prediction; SWIGs single-world caveat;
+%   Lorenz-Tull attribution fixed; 2c reframed (programs are combs, the
+%   network is the process matrix; Hyp. 1 near-definitional, Hyp. 2 the
+%   result; "realisable" is a predicate, not a type; switch and OCB are
+%   the boundary); 2d reframed (realisability a corollary of the N-switch;
+%   "exactly quantum-control" dropped; coherent control not algebraic;
+%   PBS-calculus cited; shared-target condition); 3a reframed (labels as
+%   comb slots; soft vs perfect; FinStoch).
+% Addition (5 Nov 2026): Simmons's DPhil thesis (Causal types for higher-order
+%  quantum theory, Oxford 2024) worked into S4.4, S4.5, S5, the notation box,
+%  B2, 2c, 3b and the reading plan; it supplies the additives, graph types,
+%  partiality survey, the affine-universality corollary and causal logic.
+%  Not applied: the suggestion to drop "factorisation" from the title
+%   (kept, with a deliverable in 3a instead); experimental-switch papers
+%   beyond one citation.
