@@ -1,7 +1,7 @@
 \documentclass[11pt,a4paper]{article}
 
 
-\usepackage[margin=2cm]{geometry}
+\usepackage[margin=3cm]{geometry}
 \usepackage{biblatex}
 \input{pkgs.tex}
 \title{Qualifying Dissertation for the Transfer of Status}
@@ -41,7 +41,7 @@ The problem of inferring the exact conditional distribution from a probabilistic
 
 \todo{Write program}
 
-\paragraph{Semantics of PPLs} The semantics of probabilistic programming languages are generally given in a category $\catc$ that `supports probability theory' with a normalised probability monad $\Prob$. In the discrete case, one considers $\Set$ and the finitely supported distributions monad. Because $\Set$ is cartesian-closed, one can not only interpret first order programs, but also higher order ones like $(X \to \Prob(Y)) \to \Prob(Z)$. In the more general continuous case, one often uses categories like the category of measurable spaces $\Meas$ (or subcategories thereof) with the Giry monad $G: \Meas \to \Meas$ \todo{cite}. Because $\Meas$ is famously not cartesian-closed, several works \cite{semantics_ppl_staton2016,Heunen_2017} have developed the category of quasi-Borel spaces (QBS) as an alternative in which higher order probabilistic programming is possible. Many extensions to QBS have since been developed, such as $\omega$QBS \todo{cite}, which enables recursion, and quasi-Borel families (QBFs), which enable dependent types \todo{cite}. 
+\paragraph{Semantics of PPLs} The semantics of probabilistic programming languages are generally given in a category $\catc$ that `supports probability theory' with a normalised probability monad $\Prob$ \todo{Kock}. In the discrete case, one considers $\Set$ and the finitely supported distributions monad. Because $\Set$ is cartesian-closed, one can not only interpret first order programs, but also higher order ones like $(X \to \Prob(Y)) \to \Prob(Z)$. In the more general continuous case, one often uses categories like the category of measurable spaces $\Meas$ (or subcategories thereof) with the Giry monad $G: \Meas \to \Meas$ \todo{cite}. Because $\Meas$ is famously not cartesian-closed, several works \cite{semantics_ppl_staton2016,Heunen_2017} have developed the category of quasi-Borel spaces (QBS) as an alternative in which higher order probabilistic programming is possible. Many extensions to QBS have since been developed, such as $\omega$QBS \todo{cite}, which enables recursion, and quasi-Borel families (QBFs), which enable dependent types \todo{cite}. 
 
 Normalised probability monads only allow one to interpret sampling; interpreting conditioning (or scoring in general) will require \emph{unnormalised} probability monads $\Dist$. An unnormalised probability monad should be a super-monad of the normalised counterpart. Without going into too much detail, there are many possible choices for $\Dist$ with different trade-offs. For instance, we can consider $\Dist(X) = \Prob(X \times \reals^+)$, which enables general scoring using a writer effect; or indeed the subdistribution monad $\Dist(X) = \Prob(X + 1)$, which only supports (hard) conditioning. Finally, in this context, Bayesian inference can be thought of as a normalisation map $\opnorm: \Dist(X) \to \Prob(X) + 1$ (e.g. \cite{semantics_ppl_staton2016}), where the additional $+1$ outcome is because the input distribution could be everywhere-zero. 
 
@@ -52,7 +52,9 @@ Many PPLs exploit the monadic interface in their implementation, if not their fo
 \end{itemize}
 
 
-\paragraph{Synthetic Foundations} In parallel to 
+\paragraph{Synthetic Foundations} In parallel to probabilistic programming, \emph{Markov categories} present a synthetic approach to probability theory. Markov categories axiomatise the categorical structure essential to probability theory without measure theory: a symmetric monoidal category (intuitively, a category of stochastic maps), along with a commutative comonoid on each object, i.e. a co-multiplication operation $\delta_A: A \to A \otimes A$ and a co-unit $\epsilon_A: A \to I$, such that $\epsilon_A$ is natural with respect to $A$. Intuitively, one thinks of $\delta_A$ as the operation of taking an $A$ and copying it, and $\epsilon_A$ as the operation of discarding the result of type $A$. \todo{citations}. Markov categories provide a unifying account of many categories in which one can do probability theory, notably $\mathsf{FinStoch}$, the category of (finite) stochastic matries; $\mathsf{Stoch}$, the category of measurable spaces and Markov kernels; and the Kleisli categories of the probability monads that we mentioned above. For example, $\mathsf{Stoch}$ is the Kleisli category of the Giry monad on $\Meas$. The correspondence betwen Kleisli categories of affine commutative monads and a certain subclass of Markov categories coined `representable' is studied in \todo{Fritz, Gonda, Perrone, Rischel 2023}. 
+
+Markov categories provide an elegant framework to formalise probability theory concepts, notably: deterministic morphisms, almost sure equality, conditionals, stochastic independence, Disintegration, and Bayesian inversion \todo{citations}. More relevant to us are also analyses of graphical properties used in causal inference like $d$-seperation \todo{cite Fritz and Klingler}, which we will elaborate on later.
 
 % \subsubsection{Monadic Probabilistic Programming}
 
@@ -76,7 +78,20 @@ Many PPLs exploit the monadic interface in their implementation, if not their fo
 
 \subsection{Foundations of Causal Modelling}
 
+Causal inference \cite{pearl2009causality,Pearl2018_book_of_why}, pioneered by Pearl, is a statistical toolkit that allows one to reason beyond correlation, about causation and counterfactuals. In this section we give a primer of Pearl's framework for Causality, which will serve as motivation to causal probabilistic programming. Part of the section is adapted from the term paper \cite{wang2026causalppl}. 
+
 \subsubsection{Pearl's Three Rungs of Causality}
+
+\paragraph{Rung 1: Observation, Bayesian Networks}
+
+\paragraph{Rung 2: Intervention, Causal Bayesian Networks}
+
+\begin{itemize}
+    \item What is intervention and how is it more intensional than CBNs.
+    \item Stochastic, Soft interventions
+\end{itemize}
+
+\paragraph{Rung 3: Counterfactuals, Structural Causal Models}
 
 \subsubsection{Semantics of Causality}
 
