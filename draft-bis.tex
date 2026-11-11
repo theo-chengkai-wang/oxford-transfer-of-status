@@ -35,15 +35,24 @@ For instance consider the scenario where we are trying to model a car, which has
 
 \todo{Draw Bayesian Network}
 
-Probabilistic Programming languages can be seen as a compositional generalisation of Bayesian networks: they provide a compositional syntax for specifying probabilistic models and performing inference on them. Like for Bayesian networks, we can write program represent joint distributions, like in \todo{}. Unlike Bayesian networks, we can also record observations like $\mathsf{carStarts}=\true$ using the $\opcondition: \booleans \to 1$ operation, like in \todo{}, or more general `soft' conditioning using $\opscore: \reals^+ \to 1$. \todo{Describe 2 conditionings Operationally}. Finally, general inference algorithms like \todo{} allows one to sample from the conditional distribution that the program represents. 
+Probabilistic Programming languages can be seen as a compositional generalisation of Bayesian networks: they provide a compositional syntax for specifying probabilistic models and performing inference on them. Like for Bayesian networks, we can write program represent joint distributions, like in \todo{}. Unlike Bayesian networks, we can also record observations like $\mathsf{carStarts}=\true$ using the $\opcondition: \booleans \to 1$ operation, like in \todo{}, or more general `soft' conditioning using $\opscore: \reals^+ \to 1$. Operationally, every (probabilistic) run of a probabilistic program carries a \emph{weight}. Soft conditioning multiplies the weight, and hard conditioning discards any run where the boolean condition evaluates to $\false$, i.e. scores it by $0$. \todo{cite.} The conditional distribution that the program represents is then obtained from a weighted normalisation of the runs. 
+
+The problem of inferring the exact conditional distribution from a probabilistic program is undecidable in general \todo{cite}, and intractable to say the least. This is why inference is often solved using approximate algorithms like \todo{cite}.
 
 \todo{Write program}
 
 \paragraph{Semantics of PPLs} The semantics of probabilistic programming languages are generally given in a category $\catc$ that `supports probability theory' with a normalised probability monad $\Prob$. In the discrete case, one considers $\Set$ and the finitely supported distributions monad. Because $\Set$ is cartesian-closed, one can not only interpret first order programs, but also higher order ones like $(X \to \Prob(Y)) \to \Prob(Z)$. In the more general continuous case, one often uses categories like the category of measurable spaces $\Meas$ (or subcategories thereof) with the Giry monad $G: \Meas \to \Meas$ \todo{cite}. Because $\Meas$ is famously not cartesian-closed, several works \cite{semantics_ppl_staton2016,Heunen_2017} have developed the category of quasi-Borel spaces (QBS) as an alternative in which higher order probabilistic programming is possible. Many extensions to QBS have since been developed, such as $\omega$QBS \todo{cite}, which enables recursion, and quasi-Borel families (QBFs), which enable dependent types \todo{cite}. 
 
-Normalised probability monads only allow one to interpret sampling; interpreting conditioning (or scoring in general) will require \emph{unnormalised} probability monads $\Dist$. An unnormalised probability monad should be a super-monad of the normalised counterpart. Without going into too much detail, there are many possible choices for $\Dist$ with different trade-offs. For instance, we can consider $\Dist(X) = \Prob(X \times \reals^+)$, which enables general scoring using a writer effect; or indeed the subdistribution monad $\Dist(X) = \Prob(X + 1)$, which only supports (hard) conditioning. \todo{Normalisation can be thought of as...}
+Normalised probability monads only allow one to interpret sampling; interpreting conditioning (or scoring in general) will require \emph{unnormalised} probability monads $\Dist$. An unnormalised probability monad should be a super-monad of the normalised counterpart. Without going into too much detail, there are many possible choices for $\Dist$ with different trade-offs. For instance, we can consider $\Dist(X) = \Prob(X \times \reals^+)$, which enables general scoring using a writer effect; or indeed the subdistribution monad $\Dist(X) = \Prob(X + 1)$, which only supports (hard) conditioning. Finally, in this context, Bayesian inference can be thought of as a normalisation map $\opnorm: \Dist(X) \to \Prob(X) + 1$ (e.g. \cite{semantics_ppl_staton2016}), where the additional $+1$ outcome is because the input distribution could be everywhere-zero. 
 
-\paragraph{Synthetic Foundations}
+Many PPLs exploit the monadic interface in their implementation, if not their formal analysis. To name a few: \begin{itemize}
+    \item MonadBayes \cite{monadbayes1,monadbayes2,monadbayes3} encodes the monadic interface using Haskell's type classes, so that programs can be written independently of the choice of inference algorithm.
+    \item LazyPPL \cite{lazyppl} exploits Haskell's laziness for both efficient inference and inference on coinductive data like streams. 
+    \item GenJAX \cite{becker26genjax} is a vectorised probabilistic programming language built on top of Jax \todo{cite}, and has its formal analysis based on the monadic language.
+\end{itemize}
+
+
+\paragraph{Synthetic Foundations} In parallel to 
 
 % \subsubsection{Monadic Probabilistic Programming}
 
