@@ -172,19 +172,89 @@ The distinction between CBNs and BNs lies in the fact that the additional operat
     \label{fig:rung2equiv}
 \end{figure}
 
+One possible intuition behind interventions is that of scientific experiments, where setting a parameter is akin to performing an intervention. \todo{cite} So far we only considered \emph{perfect} interventions: forcefully sets a variable at a precise value. Many other types of interventions have since been considered. A few examples include:
+\begin{itemize}
+    \item 
+\end{itemize}
 \todo{stochastic, soft interventions.}
 
-\paragraph{Rung 3: Counterfactuals, Structural Causal Models} \todo{write section.}
+\paragraph{Rung 3: Counterfactuals, Structural Causal Models} At rung 3, we consider queries that reason jointly about multiple `worlds' at the same time. Our example query \emph{given that the car didn't start, would it have started had we filled the tank?} explicitly reasons about two worlds: a factual world, in which we observe that the car did not in fact start, and a counterfactual world, where we fill the tank using an intervention and ask whether it would have started. Philosophically, we also want the two worlds to be very correlated: only the intervened variable should differ in the two worlds, and everything else should be kept the same. Therefore, we naturally consider defining an operation that takes a causal model and attempts to create two adequately correlated copies of it -- what Pearl would call \emph{twinning}. However, unfortunately, the data of a causal Bayesian network (e.g. the model in \cref{fig:rung1car}) does not determine a canonical twinning \cite{Balke1994}: there are different choices whether to share and how to share randomness between the two copies of the model. 
 
+Pearl's answer is to consider an even more intensional class of causal models called \emph{structural causal models} \cite{pearl2009causality} so that twinning is always well-defined. The following definition is adapted from \cite{Bongers_2021}. 
+\begin{definition}[Structural Causal Model]
+    An SCM is a tuple $\mathcal{M} = \langle \mathbf{U}, \mathbf{V}, \vec{X}, \vec{Y}, \vec{f}, \mathbb{P}_{\vec{X}} \rangle$  where
+\begin{enumerate}
+    \item $\mathbf{U}$ is a finite set of exogenous variables.
+    \item $\mathbf{V}$ is a finite set of endogenous variables, disjoint from $\mathbf{U}$.
+    \item $\vec{X}$: for each exogenous variable $u \in \mathbf{U}$, its domain space $X_u \in \Ob(\catc)$
+    \item $\vec{Y}$: for each endogenous variable $v \in \mathbf{V}$, its domain, a measurable space $Y_v$. 
+    \item $\vec{f}:$ for each $v \in \mathbf{V}$, a tuple $(U_v \subseteq \mathbf{U}, V_v \subseteq \mathbf{V} \backslash \{v\}, f_v: \prod_{u \in U_v} X_u \times \prod_{v' \in V_v} Y_{v'} \to Y_v)$ where $f_v$ is measurable. Intuitively these correspond to structural equations of the form $v = f_v(U_v, V_v)$.
+    \item $\mathbb{P}_{\vec{X}}$: a distribution over the exogenous variables.
+\end{enumerate}
+\end{definition}
+It is clear that each acyclic SCM is a particular class of CBNs which factor into an exogenous part that contains all the randomness (intuitively what is shared across the worlds), and an endogenous part that is fully deterministic and contains the causal structure (what is copied to different worlds). Thanks to this factorisation, twinning can then be defined as the operation of creating 2 (or, in general, $n$) copies of the endogenous part and sharing the exogenous part. For example, one might define a car model SCM as \cref{fig:rung3scm}, and its twinned version becomes \cref{fig:rung3twin}. Once we have the twinned model, we can then treat it as a CBN and perform the $\opdo(\mathsf{fuel}'=\true)$ intervention on the counterfactual copy, and condition by $\mathsf{carStarts}=\false$ on the factual copy, to compute the result to our query: $\Pr(\textsf{carStarts}'\mid\neg\textsf{carStarts}, \opdo(\mathsf{fuel}'=\true))=\tfrac{9}{14}\approx0.64$. 
 
-Rung 3 queries reason about hypothetical worlds in the light of what actually happened: given that the car did not start, would it have started had we filled the tank? Answering them requires relating the factual world to the counterfactual one. A causal Bayesian network cannot do this: its mechanisms are stochastic, so it does not say whether the randomness behind a variable is the same in both worlds. \emph{Structural causal models} (SCMs; also called structural equation models or functional causal models) \cite{pearl2009causality,Bongers_2021} fix this by separating each mechanism into a deterministic function and a source of noise. Variables are split into \emph{exogenous} variables $U$, which are independent random variables modelling background factors, and \emph{endogenous} variables $V$, each defined by a structural equation $V := f_V(\mathrm{pa}(V), U_V)$. Our car model becomes $\mathsf{fuel} := U_{\mathsf{fuel}}$, $\mathsf{battery} := U_{\mathsf{battery}}$ and $\mathsf{carStarts} := \mathsf{fuel} \wedge \mathsf{battery}$, with $U_{\mathsf{fuel}} \sim \mathrm{Bern}(0.8)$ and $U_{\mathsf{battery}} \sim \mathrm{Bern}(0.9)$. Behind this lies a philosophical assumption: the model is a \emph{closed world}. All uncertainty is uncertainty about the exogenous background, and once the background is fixed, everything else follows deterministically. The background is therefore shared by every world, actual or hypothetical, which licenses an additional operation, \emph{twinning} \cite{Balke1994}. We take two copies of the endogenous variables, one factual and one counterfactual, over the same exogenous variables. We condition on the factual copy, intervene on the counterfactual copy, and query the counterfactual copy. In our example, observing that the car did not start makes a flat battery more likely, so $\Pr(\mathsf{carStarts}' \mid \neg\mathsf{carStarts}, \opdo(\mathsf{fuel}' = \true)) = 9/14 \approx 0.64$, below the interventional $0.9$.
+\begin{figure}
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \begin{tikzpicture}[>=stealth]
+        \node[exo]  (uf) at (0,2.4) {$U_{\mathsf{fuel}}$};
+        \node[exo]  (ub) at (3,2.4) {$U_{\mathsf{battery}}$};
+        \node[endo] (f)  at (0,1.2) {$\mathsf{fuel}$};
+        \node[endo] (b)  at (3,1.2) {$\mathsf{battery}$};
+        \node[endo] (s)  at (1.5,0) {$\mathsf{carStarts}$};
+        \draw[->] (uf)--(f); \draw[->] (ub)--(b);
+        \draw[->] (f)--(s);  \draw[->] (b)--(s);
+        \end{tikzpicture}
+    \end{minipage}%
+    \begin{minipage}{0.45\textwidth}
+        \begin{align*}
+            U_{\mathsf{fuel}} &\sim \mathrm{Bern}(0.8) \\
+            U_{\mathsf{battery}} &\sim \mathrm{Bern}(0.9) \\
+            \mathsf{fuel} &:= U_{\mathsf{fuel}} \\
+            \mathsf{battery} &:= U_{\mathsf{battery}} \\
+            \mathsf{carStarts} &:= \mathsf{fuel} \wedge \mathsf{battery}
+        \end{align*}
+    \end{minipage}
+    \caption{The car model as an SCM: graph (left) and structural equations (right). Exogenous variables are dashed (orange), endogenous variables solid (blue).}
+    \label{fig:rung3scm}
+\end{figure}
 
+\begin{figure}
+    \centering
+    \begin{tikzpicture}[>=stealth]
+    % shared exogenous variables
+    \node[exo]  (uf) at (0,1.4) {$U_{\mathsf{fuel}}$};
+    \node[exo]  (ub) at (0,0)   {$U_{\mathsf{battery}}$};
+    % factual copy
+    \node[endo] (f)  at (-2.6,1.4) {$\mathsf{fuel}$};
+    \node[endo] (b)  at (-2.6,0)   {$\mathsf{battery}$};
+    \node[endo] (s)  at (-5,0.7)   {$\mathsf{carStarts}$};
+    % counterfactual copy
+    \node[endo] (fc) at (2.6,1.4) {$\mathsf{fuel}'$};
+    \node[endo] (bc) at (2.6,0)   {$\mathsf{battery}'$};
+    \node[endo] (sc) at (5,0.7)   {$\mathsf{carStarts}'$};
+    \draw[->] (uf)--(f);  \draw[->] (ub)--(b);
+    \draw[->] (uf)--(fc); \draw[->] (ub)--(bc);
+    \draw[->] (f)--(s);   \draw[->] (b)--(s);
+    \draw[->] (fc)--(sc); \draw[->] (bc)--(sc);
+    \begin{scope}[on background layer]
+        \node[world, fit=(f)(b)(s), label={above:{\small Factual world}}] {};
+        \node[world, fit=(fc)(bc)(sc), label={above:{\small Counterfactual world}}] {};
+    \end{scope}
+    \end{tikzpicture}
+    \caption{The twinned car SCM. The endogenous variables are copied into a factual and a counterfactual world, while the exogenous variables, and hence all the randomness, are shared between them.}
+    \label{fig:rung3twin}
+\end{figure}
+
+\todo{finish extra intension explanation: CBNs equivalent but diff as SCMs}
 The extra intension is \emph{how the randomness is generated}. Every SCM induces a causal Bayesian network by pushing the noise through the structural equations, but different SCMs can induce the same one. Take $X := U_X$ and $U_X, U_Y \sim \mathrm{Bern}(1/2)$ in two models, with $Y := U_Y$ in the first and $Y := X \oplus U_Y$ in the second. In both, $Y$ is a fair coin under every intervention on $X$, so they are equivalent as causal Bayesian networks. They are not equivalent as SCMs: having observed $X = Y = 1$, had $X$ been $0$, $Y$ would still have been $1$ in the first model, but $0$ in the second.
 
-\paragraph{Rung 3: Counterfactuals, Structural Causal Models}
+
+% Rung 3 queries reason about hypothetical worlds in the light of what actually happened: given that the car did not start, would it have started had we filled the tank? Answering them requires relating the factual world to the counterfactual one. A causal Bayesian network cannot do this: its mechanisms are stochastic, so it does not say whether the randomness behind a variable is the same in both worlds. \emph{Structural causal models} (SCMs; also called structural equation models or functional causal models) \cite{pearl2009causality,Bongers_2021} fix this by separating each mechanism into a deterministic function and a source of noise. Variables are split into \emph{exogenous} variables $U$, which are independent random variables modelling background factors, and \emph{endogenous} variables $V$, each defined by a structural equation $V := f_V(\mathrm{pa}(V), U_V)$. Our car model becomes $\mathsf{fuel} := U_{\mathsf{fuel}}$, $\mathsf{battery} := U_{\mathsf{battery}}$ and $\mathsf{carStarts} := \mathsf{fuel} \wedge \mathsf{battery}$, with $U_{\mathsf{fuel}} \sim \mathrm{Bern}(0.8)$ and $U_{\mathsf{battery}} \sim \mathrm{Bern}(0.9)$. Behind this lies a philosophical assumption: the model is a \emph{closed world}. All uncertainty is uncertainty about the exogenous background, and once the background is fixed, everything else follows deterministically. The background is therefore shared by every world, actual or hypothetical, which licenses an additional operation, \emph{twinning} \cite{Balke1994}. We take two copies of the endogenous variables, one factual and one counterfactual, over the same exogenous variables. We condition on the factual copy, intervene on the counterfactual copy, and query the counterfactual copy. In our example, observing that the car did not start makes a flat battery more likely, so $\Pr(\mathsf{carStarts}' \mid \neg\mathsf{carStarts}, \opdo(\mathsf{fuel}' = \true)) = 9/14 \approx 0.64$, below the interventional $0.9$.
 
 \subsubsection{Semantics of Causality}
-
 \paragraph{Causal Models}
 
 \paragraph{Causal Structures}
