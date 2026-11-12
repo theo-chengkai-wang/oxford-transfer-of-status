@@ -31,15 +31,36 @@
 \paragraph{From Bayesian Networks to Probabilistic Programming} A central tool in Bayesian probabilistic modelling is Bayesian networks \todo{cite}, a graphical representation of a joint distribution. Formally, a Bayesian network over a certain set of variables $V$ is a directed acyclic graph over $V$, a domain $D_x$ for each variable $x \in V$, and for each variable $v \in V$, a conditional distribution $P(x \mid \mathsf{Parents}(x))$. This data can be seen as a Markov factorisation of a joint distribution $$P(x_1...x_n) = \prod_{x\in V} P(x \mid \mathsf{Parents}(x))$$
 Bayesian networks are useful because their graphical structure encodes the conditional independencies between variables (a variable is assumed to only depend on its parents), exploited to make Bayesian inference (computing conditional distributions) more efficient. \todo{cite again} 
 
-For instance consider the scenario where we are trying to model a car, which has fuel with probability $0.8$, battery with probability $0.9$, and only starts if it has both fuel and battery. Then we can model the joint distribution between $\mathsf{fuel}$, $\mathsf{battery}$ and $\mathsf{carStarts}$ with the following Bayesian network: 
+For instance consider the scenario where we are trying to model a car, which has fuel with probability $0.8$, battery with probability $0.9$, and only starts if it has both fuel and battery. Then we can model the joint distribution between $\mathsf{fuel}$, $\mathsf{battery}$ and $\mathsf{carStarts}$ with the Bayesian network in \cref{fig:rung1car}. 
 
-\todo{Draw Bayesian Network}
+\begin{figure}
+    \centering
+\begin{tikzpicture}[>=stealth,baseline]
+\node (f) at (0,1.0) {\textsf{fuel}};
+\node (b) at (3,1.0) {\textsf{battery}};
+\node (s) at (1.5,0) {\textsf{carStarts}};
+\draw[->] (f)--(s);\draw[->] (b)--(s);
+\end{tikzpicture}
+    \caption{Graphical representaton of the car model}
+    \label{fig:rung1car}
+\end{figure}
 
-Probabilistic Programming languages can be seen as a compositional generalisation of Bayesian networks: they provide a compositional syntax for specifying probabilistic models and performing inference on them. Like for Bayesian networks, we can write program represent joint distributions, like in \todo{}. Unlike Bayesian networks, we can also record observations like $\mathsf{carStarts}=\true$ using the $\opcondition: \booleans \to 1$ operation, like in \todo{}, or more general `soft' conditioning using $\opscore: \reals^+ \to 1$. Operationally, every (probabilistic) run of a probabilistic program carries a \emph{weight}. Soft conditioning multiplies the weight, and hard conditioning discards any run where the boolean condition evaluates to $\false$, i.e. scores it by $0$. \todo{cite.} The conditional distribution that the program represents is then obtained from a weighted normalisation of the runs. 
+Probabilistic Programming languages can be seen as a compositional generalisation of Bayesian networks: they provide a compositional syntax for specifying probabilistic models and performing inference on them. Our running example, for instance, can be represented by the program in \cref{fig:rung1program}. Like for Bayesian networks, probabilistic programs represent joint distributions (lines 1-3 of \cref{fig:rung1program} represent the joint distribution represented by the Bayesian network). Unlike Bayesian networks, we can also record observations like $\mathsf{carStarts}=\false$ (`the car did not start') using the $\opcondition: \booleans \to 1$ operation (line 4 of \cref{fig:rung1program}), or more general `soft' conditioning using $\opscore: \reals^+ \to 1$. Operationally, every (probabilistic) run of a probabilistic program carries a \emph{weight}. Soft conditioning multiplies the weight, and hard conditioning discards any run where the boolean condition evaluates to $\false$, i.e. scores it by $0$. Clearly, $\opcondition(b) = \opscore(\ifelse{b}{1}{0})$. \todo{cite.} The conditional distribution that the program represents is then obtained from a weighted normalisation of the runs. 
 
 The problem of inferring the exact conditional distribution from a probabilistic program is undecidable in general \todo{cite}, and intractable to say the least. This is why inference is often solved using approximate algorithms like \todo{cite}.
 
-\todo{Write program}
+\begin{figure}
+    \centering
+    \begin{codelisting}{haskell}{false}
+    fuel    <- bernoulli 0.8
+    battery <- bernoulli 0.9 
+    carStarts <- fuel && battery
+    condition (carStarts == False)
+    return (fuel, battery, carStarts)
+    \end{codelisting}
+    \caption{Probabilistic program version of the car model, conditioned by $\mathsf{carStarts} = \false$}
+    \label{fig:rung1program}
+\end{figure}
 
 \paragraph{Semantics of PPLs} The semantics of probabilistic programming languages are generally given in a category $\catc$ that `supports probability theory' with a normalised probability monad $\Prob$ \todo{Kock}. In the discrete case, one considers $\Set$ and the finitely supported distributions monad. Because $\Set$ is cartesian-closed, one can not only interpret first order programs, but also higher order ones like $(X \to \Prob(Y)) \to \Prob(Z)$. In the more general continuous case, one often uses categories like the category of measurable spaces $\Meas$ (or subcategories thereof) with the Giry monad $G: \Meas \to \Meas$ \todo{cite}. Because $\Meas$ is famously not cartesian-closed, several works \cite{semantics_ppl_staton2016,Heunen_2017} have developed the category of quasi-Borel spaces (QBS) as an alternative in which higher order probabilistic programming is possible. Many extensions to QBS have since been developed, such as $\omega$QBS \todo{cite}, which enables recursion, and quasi-Borel families (QBFs), which enable dependent types \todo{cite}. 
 
@@ -82,14 +103,83 @@ Causal inference \cite{pearl2009causality,Pearl2018_book_of_why}, pioneered by P
 
 \subsubsection{Pearl's Three Rungs of Causality}
 
-\paragraph{Rung 1: Observation, Bayesian Networks}
+Pearl \cite{Pearl2018_book_of_why} organises causal questions about the world into three rungs:
+\begin{enumerate}
+    \item Observational: if we observe that the car didn't start, does it have fuel?
+    \item Interventional: if we fill the car's fuel tank, will it start? 
+    \item Counterfactual: given that the car didn't start, would it have started had we filled the tank? 
+\end{enumerate}
+As we shall see, Pearl's rungs are mathematically distinct \cite{pearl2009causality}, and each of these rungs require a new class of graphical models exposing more intension. 
 
-\paragraph{Rung 2: Intervention, Causal Bayesian Networks}
+\paragraph{Rung 1: Observation, Bayesian Networks} 
+Rung 1 queries are simply Bayesian queries, which can be answered using Bayesian inference given any representation of the joint distribution, like a Bayesian network or a probabilistic program. In our example query, we wish to compute $\Pr(\neg \mathsf{fuel} \mid \neg \mathsf{carStarts})$, which we can simply produce by running inference on \cref{fig:rung1program}, or on the corresponding Bayesian network \cref{fig:rung1car}. We then obtain $\Pr(\neg \mathsf{fuel} \mid \neg \mathsf{carStarts}) = 5/7 \approx 0.71$. 
 
-\begin{itemize}
-    \item What is intervention and how is it more intensional than CBNs.
-    \item Stochastic, Soft interventions
-\end{itemize}
+\paragraph{Rung 2: Intervention, Causal Bayesian Networks} Rung 2 queries ask what happens if we \emph{force} a variable to take a value, e.g.\ if we fill the car's tank. This is a question about causation and cannot be simply answered using the joint distribution. 
+
+Pearl's answer is to reinterpret Bayesian networks more intensionally: a \emph{causal Bayesian network} (or \emph{graphical causal model}) is a Bayesian network whose graph is represents a causal structure \cite{pearl2009causality,spirtes2000causation}. That is, an edge $X \to Y$ in a CBN says that $X$ is a direct cause of $Y$, whereas the same edge in a BN only says that $X$ and $Y$ are correlated. Concretely, we can consider CBNs to be BNs with an additional graph-surgery operation called \emph{intervention}: $\opdo(X = x)$ replaces the mechanism of $X$ by the constant $x$, cutting $X$ off from its parents and leaving every other mechanism unchanged. 
+
+For instance, if we reinterpret \cref{fig:rung1car} to be a CBN, we can answer our example query by first intervening on the model ($\opdo(\mathsf{fuel} = \true)$), producing \cref{fig:rung2car}, and then performing inference. We then obtain $\Pr(\mathsf{carStarts} \mid \opdo(\mathsf{fuel} = \true)) = 0.9$. 
+
+\begin{figure}
+    \centering
+    \begin{tikzpicture}[>=stealth,baseline]
+\node (f) at (0,1.0) {\cnew{\textsf{fuel}=$\true$}};
+\node (b) at (3,1.0) {\textsf{battery}};
+\node (s) at (1.5,0) {\textsf{carStarts}};
+\draw[->] (f)--(s);\draw[->] (b)--(s);
+\end{tikzpicture}
+\caption{Car model, intervened with $\opdo(\mathsf{fuel} = \true)$}
+\label{fig:rung2car}
+\end{figure}
+
+The distinction between CBNs and BNs lies in the fact that the additional operation of intervention exposes the intensional, causal structure of the graphical model \todo{cite}. In \cref{fig:rung2equiv}, all three models represent the same joint distribution, so can be seen as equivalent as BNs, or `rung 1 equivalent'. However, they are different as CBNs, because they clearly behave differently under intervention. 
+\begin{figure}
+    \centering
+    \begin{subfigure}[b]{0.3\textwidth}
+        \centering
+        \begin{tikzpicture}[>=stealth]
+        \node (f) at (0,0) {\textsf{fuel}};
+        \node (s) at (2,0) {\textsf{carStarts}};
+        \draw[->] (f)--(s);
+        \end{tikzpicture}
+        \caption{Fuel causes starting}
+        \label{fig:miniforward}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \centering
+        \begin{tikzpicture}[>=stealth]
+        \node (f) at (0,0) {\textsf{fuel}};
+        \node (s) at (2,0) {\textsf{carStarts}};
+        \draw[->] (s)--(f);
+        \end{tikzpicture}
+        \caption{Starting causes fuel}
+        \label{fig:minireversed}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \centering
+        \begin{tikzpicture}[>=stealth]
+        \node (u) at (1,1) {$U$};
+        \node (f) at (0,0) {\textsf{fuel}};
+        \node (s) at (2,0) {\textsf{carStarts}};
+        \draw[->] (u)--(f); \draw[->] (u)--(s);
+        \end{tikzpicture}
+        \caption{Common cause}
+        \label{fig:minicommon}
+    \end{subfigure}
+    \caption{Three causal Bayesian networks over $\mathsf{fuel}$ and $\mathsf{carStarts}$ equivalent as Bayesian networks.}
+    \label{fig:rung2equiv}
+\end{figure}
+
+\todo{stochastic, soft interventions.}
+
+\paragraph{Rung 3: Counterfactuals, Structural Causal Models} \todo{write section.}
+
+
+Rung 3 queries reason about hypothetical worlds in the light of what actually happened: given that the car did not start, would it have started had we filled the tank? Answering them requires relating the factual world to the counterfactual one. A causal Bayesian network cannot do this: its mechanisms are stochastic, so it does not say whether the randomness behind a variable is the same in both worlds. \emph{Structural causal models} (SCMs; also called structural equation models or functional causal models) \cite{pearl2009causality,Bongers_2021} fix this by separating each mechanism into a deterministic function and a source of noise. Variables are split into \emph{exogenous} variables $U$, which are independent random variables modelling background factors, and \emph{endogenous} variables $V$, each defined by a structural equation $V := f_V(\mathrm{pa}(V), U_V)$. Our car model becomes $\mathsf{fuel} := U_{\mathsf{fuel}}$, $\mathsf{battery} := U_{\mathsf{battery}}$ and $\mathsf{carStarts} := \mathsf{fuel} \wedge \mathsf{battery}$, with $U_{\mathsf{fuel}} \sim \mathrm{Bern}(0.8)$ and $U_{\mathsf{battery}} \sim \mathrm{Bern}(0.9)$. Behind this lies a philosophical assumption: the model is a \emph{closed world}. All uncertainty is uncertainty about the exogenous background, and once the background is fixed, everything else follows deterministically. The background is therefore shared by every world, actual or hypothetical, which licenses an additional operation, \emph{twinning} \cite{Balke1994}. We take two copies of the endogenous variables, one factual and one counterfactual, over the same exogenous variables. We condition on the factual copy, intervene on the counterfactual copy, and query the counterfactual copy. In our example, observing that the car did not start makes a flat battery more likely, so $\Pr(\mathsf{carStarts}' \mid \neg\mathsf{carStarts}, \opdo(\mathsf{fuel}' = \true)) = 9/14 \approx 0.64$, below the interventional $0.9$.
+
+The extra intension is \emph{how the randomness is generated}. Every SCM induces a causal Bayesian network by pushing the noise through the structural equations, but different SCMs can induce the same one. Take $X := U_X$ and $U_X, U_Y \sim \mathrm{Bern}(1/2)$ in two models, with $Y := U_Y$ in the first and $Y := X \oplus U_Y$ in the second. In both, $Y$ is a fair coin under every intervention on $X$, so they are equivalent as causal Bayesian networks. They are not equivalent as SCMs: having observed $X = Y = 1$, had $X$ been $0$, $Y$ would still have been $1$ in the first model, but $0$ in the second.
 
 \paragraph{Rung 3: Counterfactuals, Structural Causal Models}
 
@@ -118,7 +208,7 @@ Causal inference \cite{pearl2009causality,Pearl2018_book_of_why}, pioneered by P
 \subsection{Causal Probabilistic Programming Languages}
 
 \subsubsection{Summary of our POPL 2027 paper}
-
+\paragraph{Motivation: Causal models as probabilistic programs, operations as program transformations}
 
 \paragraph{Contribution 1: semantic foundations of causal programming}
 Our first contribution is to develop a semantic foundation of causal models by taking the analogy with probabilistic programs seriously. In \cref{section:hierarchylanguages}, we reconstruct Pearl's rungs of causality as a hierarchy of simple first order probabilistic programming languages $\Lone, \Ltwo, \Lthree$.  Each language exposes more intension than the previous one using syntactic annotations, and causal inference is performed using program transformations that consume these syntactic annotations: $\Lone$ is a standard first order PPL; $\Ltwo$ exposes typed holes named \emph{intervention labels}, canonically of type $\Maybe{A}$, allowing substituting to optionally perform an intervention; $\Lthree$ annotates each let binding with $\mathbf{exo}$ or $\mathbf{endo}$, so that twinning can be formulated as a vectorisation transform. The same idea underlies the intervention-as-program-transformation view of Witty~\cite{witty2021sbi,witty2023bayesian}, the logical account by Ibeling and Icard~\cite{ibeling2020hierarchy}, and the string-diagrammatic accounts of Jacobs et al.~\cite{jacobs2019causal} and Lorenz and Tull~\cite{lorenz2023causalmodelsstringdiagrams}. 
@@ -146,7 +236,7 @@ Four systems support rung 3 natively~\cite{tavares2021language,chirho,perov2020m
 
 % ChiRho (LAFI) and semantics (POPL). 
 
-\subsection{Brief overview of notions of causality}
+\subsection{Brief overview of other notions of causality}
 
 \subsubsection{Logical, Diagrammatic, Categorical notions of Causality}
 
