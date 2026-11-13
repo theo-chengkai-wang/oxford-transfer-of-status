@@ -62,9 +62,9 @@ The problem of inferring the exact conditional distribution from a probabilistic
     \label{fig:rung1program}
 \end{figure}
 
-\paragraph{Semantics of PPLs} The semantics of probabilistic programming languages are generally given in a category $\catc$ that `supports probability theory' with a normalised probability monad $\Prob$ \todo{Kock}. In the discrete case, one considers $\Set$ and the finitely supported distributions monad. Because $\Set$ is cartesian-closed, one can not only interpret first order programs, but also higher order ones like $(X \to \Prob(Y)) \to \Prob(Z)$. In the more general continuous case, one often uses categories like the category of measurable spaces $\Meas$ (or subcategories thereof) with the Giry monad $G: \Meas \to \Meas$ \todo{cite}. Because $\Meas$ is famously not cartesian-closed, several works \cite{semantics_ppl_staton2016,Heunen_2017} have developed the category of quasi-Borel spaces (QBS) as an alternative in which higher order probabilistic programming is possible. Many extensions to QBS have since been developed, such as $\omega$QBS \todo{cite}, which enables recursion, and quasi-Borel families (QBFs), which enable dependent types \todo{cite}. 
+\paragraph{Semantics of PPLs} The semantics of probabilistic programming languages are generally given in a category $\catc$ that `supports probability theory' with a normalised probability monad $\Prob$ \todo{Kock}. In the discrete case, one considers $\Set$ and the finitely supported distributions monad. Because $\Set$ is cartesian-closed, one can not only interpret first order programs, but also higher order ones like $(X \to \Prob(Y)) \to \Prob(Z)$. In the more general continuous case, one often uses categories like the category of measurable spaces $\CatMeas$ (or subcategories thereof) with the Giry monad $G: \CatMeas \to \CatMeas$ \todo{cite}. Because $\CatMeas$ is famously not cartesian-closed, several works \cite{semantics_ppl_staton2016,Heunen_2017} have developed the category of quasi-Borel spaces (QBS) as an alternative in which higher order probabilistic programming is possible. Many extensions to QBS have since been developed, such as $\omega$QBS \todo{cite}, which enables recursion, and quasi-Borel families (QBFs), which enable dependent types \todo{cite}. 
 
-Normalised probability monads only allow one to interpret sampling; interpreting conditioning (or scoring in general) will require \emph{unnormalised} probability monads $\Dist$. An unnormalised probability monad should be a super-monad of the normalised counterpart. Without going into too much detail, there are many possible choices for $\Dist$ with different trade-offs. For instance, we can consider $\Dist(X) = \Prob(X \times \reals^+)$, which enables general scoring using a writer effect; or indeed the subdistribution monad $\Dist(X) = \Prob(X + 1)$, which only supports (hard) conditioning. Finally, in this context, Bayesian inference can be thought of as a normalisation map $\opnorm: \Dist(X) \to \Prob(X) + 1$ (e.g. \cite{semantics_ppl_staton2016}), where the additional $+1$ outcome is because the input distribution could be everywhere-zero. 
+Normalised probability monads only allow one to interpret sampling; interpreting conditioning (or scoring in general) will require \emph{unnormalised} probability monads $\Meas$. An unnormalised probability monad should be a super-monad of the normalised counterpart. Without going into too much detail, there are many possible choices for $\Meas$ with different trade-offs. For instance, we can consider $\Meas(X) = \Prob(X \times \reals^+)$, which enables general scoring using a writer effect; or indeed the subdistribution monad $\Meas(X) = \Prob(X + 1)$, which only supports (hard) conditioning. Finally, in this context, Bayesian inference can be thought of as a normalisation map $\opnorm: \Meas(X) \to \Prob(X) + 1$ (e.g. \cite{semantics_ppl_staton2016}), where the additional $+1$ outcome is because the input distribution could be everywhere-zero. 
 
 Many PPLs exploit the monadic interface in their implementation, if not their formal analysis. To name a few: \begin{itemize}
     \item MonadBayes \cite{monadbayes1,monadbayes2,monadbayes3} encodes the monadic interface using Haskell's type classes, so that programs can be written independently of the choice of inference algorithm.
@@ -73,7 +73,7 @@ Many PPLs exploit the monadic interface in their implementation, if not their fo
 \end{itemize}
 
 
-\paragraph{Synthetic Foundations} In parallel to probabilistic programming, \emph{Markov categories} present a synthetic approach to probability theory. Markov categories axiomatise the categorical structure essential to probability theory without measure theory: a symmetric monoidal category (intuitively, a category of stochastic maps), along with a commutative comonoid on each object, i.e. a co-multiplication operation $\delta_A: A \to A \otimes A$ and a co-unit $\epsilon_A: A \to I$, such that $\epsilon_A$ is natural with respect to $A$. Intuitively, one thinks of $\delta_A$ as the operation of taking an $A$ and copying it, and $\epsilon_A$ as the operation of discarding the result of type $A$. \todo{citations}. Markov categories provide a unifying account of many categories in which one can do probability theory, notably $\mathsf{FinStoch}$, the category of (finite) stochastic matries; $\mathsf{Stoch}$, the category of measurable spaces and Markov kernels; and the Kleisli categories of the probability monads that we mentioned above. For example, $\mathsf{Stoch}$ is the Kleisli category of the Giry monad on $\Meas$. The correspondence betwen Kleisli categories of affine commutative monads and a certain subclass of Markov categories coined `representable' is studied in \todo{Fritz, Gonda, Perrone, Rischel 2023}. 
+\paragraph{Synthetic Foundations} In parallel to probabilistic programming, \emph{Markov categories} present a synthetic approach to probability theory. Markov categories axiomatise the categorical structure essential to probability theory without measure theory: a symmetric monoidal category (intuitively, a category of stochastic maps), along with a commutative comonoid on each object, i.e. a co-multiplication operation $\delta_A: A \to A \otimes A$ and a co-unit $\epsilon_A: A \to I$, such that $\epsilon_A$ is natural with respect to $A$. Intuitively, one thinks of $\delta_A$ as the operation of taking an $A$ and copying it, and $\epsilon_A$ as the operation of discarding the result of type $A$. \todo{citations}. Markov categories provide a unifying account of many categories in which one can do probability theory, notably $\mathsf{FinStoch}$, the category of (finite) stochastic matries; $\mathsf{Stoch}$, the category of measurable spaces and Markov kernels; and the Kleisli categories of the probability monads that we mentioned above. For example, $\mathsf{Stoch}$ is the Kleisli category of the Giry monad on $\CatMeas$. The correspondence betwen Kleisli categories of affine commutative monads and a certain subclass of Markov categories coined `representable' is studied in \todo{Fritz, Gonda, Perrone, Rischel 2023}. 
 
 Markov categories provide an elegant framework to formalise probability theory concepts, notably: deterministic morphisms, almost sure equality, conditionals, stochastic independence, Disintegration, and Bayesian inversion \todo{citations}. More relevant to us are also analyses of graphical properties used in causal inference like $d$-seperation \todo{cite Fritz and Klingler}, which we will elaborate on later.
 
@@ -99,7 +99,7 @@ Markov categories provide an elegant framework to formalise probability theory c
 
 \subsection{Foundations of Causal Modelling}
 
-Causal inference \cite{pearl2009causality,Pearl2018_book_of_why}, pioneered by Pearl, is a statistical toolkit that allows one to reason beyond correlation, about causation and counterfactuals. In this section we give a primer of Pearl's framework for Causality, which will serve as motivation to causal probabilistic programming. Part of the section is adapted from the term paper \cite{wang2026causalppl}. 
+Causal inference \cite{pearl2009causality,Pearl2018_book_of_why}, pioneered by Pearl, is a statistical toolkit that allows one to reason beyond correlation, about causation and counterfactuals. In this section we give a primer of Pearl's framework for Causality. Part of the section is adapted from the term paper \cite{wang2026causalppl}. 
 
 \subsubsection{Pearl's Three Rungs of Causality}
 
@@ -192,7 +192,7 @@ Pearl's answer is to consider an even more intensional class of causal models ca
     \item $\mathbb{P}_{\vec{X}}$: a distribution over the exogenous variables.
 \end{enumerate}
 \end{definition}
-It is clear that each acyclic SCM is a particular class of CBNs which factor into an exogenous part that contains all the randomness (intuitively what is shared across the worlds), and an endogenous part that is fully deterministic and contains the causal structure (what is copied to different worlds). Thanks to this factorisation, twinning can then be defined as the operation of creating 2 (or, in general, $n$) copies of the endogenous part and sharing the exogenous part. For example, one might define a car model SCM as \cref{fig:rung3scm}, and its twinned version becomes \cref{fig:rung3twin}. Once we have the twinned model, we can then treat it as a CBN and perform the $\opdo(\mathsf{fuel}'=\true)$ intervention on the counterfactual copy, and condition by $\mathsf{carStarts}=\false$ on the factual copy, to compute the result to our query: $\Pr(\textsf{carStarts}'\mid\neg\textsf{carStarts}, \opdo(\mathsf{fuel}'=\true))=\tfrac{9}{14}\approx0.64$. 
+Each acyclic SCM is a CBN. It is a special CBN that factors into an exogenous part that contains all the randomness (intuitively what is shared across the worlds), and an endogenous part that is fully deterministic and contains the causal structure (what is copied to different worlds). Thanks to this factorisation, twinning can then be defined as the operation of creating 2 (or, in general, $n$) copies of the endogenous part and sharing the exogenous part. For example, one might define a car model SCM as \cref{fig:rung3scm}, and its twinned version becomes \cref{fig:rung3twin}. Once we have the twinned model, we can then treat it as a CBN and perform the $\opdo(\mathsf{fuel}'=\true)$ intervention on the counterfactual copy, and condition by $\mathsf{carStarts}=\false$ on the factual copy, to compute the result to our query: $\Pr(\textsf{carStarts}'\mid\neg\textsf{carStarts}, \opdo(\mathsf{fuel}'=\true))=\tfrac{9}{14}\approx0.64$. 
 
 \begin{figure}
     \centering
@@ -248,34 +248,84 @@ It is clear that each acyclic SCM is a particular class of CBNs which factor int
     \label{fig:rung3twin}
 \end{figure}
 
-\todo{finish extra intension explanation: CBNs equivalent but diff as SCMs}
-The extra intension is \emph{how the randomness is generated}. Every SCM induces a causal Bayesian network by pushing the noise through the structural equations, but different SCMs can induce the same one. Take $X := U_X$ and $U_X, U_Y \sim \mathrm{Bern}(1/2)$ in two models, with $Y := U_Y$ in the first and $Y := X \oplus U_Y$ in the second. In both, $Y$ is a fair coin under every intervention on $X$, so they are equivalent as causal Bayesian networks. They are not equivalent as SCMs: having observed $X = Y = 1$, had $X$ been $0$, $Y$ would still have been $1$ in the first model, but $0$ in the second.
+However, SCMs can be equivalent as CBNs but different as SCMs. Intuitively, any CBN can be turned into an SCM by taking each of its stochastic dependencies $f: X \to \Prob(Y)$ and factorising it into a noise variable $n : \Prob(N)$ and a deterministic mechanism $f': X \times N \to Y$, \todo{cite reparameterisation trick}. The idea is then to set the original variables of the CBN as endogenous and the new noise variables as exogenous. Different choices of such factorisations will behave the same under interventions, but their twinnings could be different. For a concrete example, the reader may refer to e.g.\ \cite{Balke1994,pearl2009causality}. 
 
+% \todo{finish extra intension explanation: CBNs equivalent but diff as SCMs}
+
+% \begin{figure}
+%     \centering
+%     \begin{subfigure}[t]{0.45\textwidth}
+%         \centering
+%         \begin{tikzpicture}[>=stealth]
+%         \node[exo]  (ux) at (0,1.3) {$U_X$};
+%         \node[exo]  (uy) at (2,1.3) {$U_Y$};
+%         \node[endo] (x)  at (0,0)   {$X$};
+%         \node[endo] (y)  at (2,0)   {$Y$};
+%         \draw[->] (ux)--(x); \draw[->] (uy)--(y);
+%         \end{tikzpicture}
+%         \[
+%         \begin{aligned}
+%             X &:= U_X \\
+%             Y &:= U_Y
+%         \end{aligned}
+%         \]
+%         \small $X = Y = 1 \;\Rightarrow\; U_Y = 1 \;\Rightarrow\; Y' = 1$
+%         \caption{$Y$ ignores $X$.}
+%         \label{fig:scmequiv-ignore}
+%     \end{subfigure}
+%     \hfill
+%     \begin{subfigure}[t]{0.45\textwidth}
+%         \centering
+%         \begin{tikzpicture}[>=stealth]
+%         \node[exo]  (ux) at (0,1.3) {$U_X$};
+%         \node[exo]  (uy) at (2,1.3) {$U_Y$};
+%         \node[endo] (x)  at (0,0)   {$X$};
+%         \node[endo] (y)  at (2,0)   {$Y$};
+%         \draw[->] (ux)--(x); \draw[->] (uy)--(y);
+%         \draw[->] (x)--(y);
+%         \end{tikzpicture}
+%         \[
+%         \begin{aligned}
+%             X &:= U_X \\
+%             Y &:= X \oplus U_Y
+%         \end{aligned}
+%         \]
+%         \small $X = Y = 1 \;\Rightarrow\; U_Y = 0 \;\Rightarrow\; Y' = 0$
+%         \caption{$Y$ is $X$ masked by a fair coin.}
+%         \label{fig:scmequiv-xor}
+%     \end{subfigure}
+%     \caption{Two SCMs with $U_X, U_Y \sim \mathrm{Bern}(1/2)$ that are equivalent as causal Bayesian networks: under every intervention on $X$, $Y$ is a fair coin. They differ as SCMs. The bottom line of each panel answers the counterfactual query: observe $X = Y = 1$ in the factual world, then intervene with $\opdo(X' = 0)$ in the counterfactual world. Abduction recovers different values of the shared noise $U_Y$, so $Y'$ differs.}
+%     \label{fig:scmequiv}
+% \end{figure}
+ 
 
 % Rung 3 queries reason about hypothetical worlds in the light of what actually happened: given that the car did not start, would it have started had we filled the tank? Answering them requires relating the factual world to the counterfactual one. A causal Bayesian network cannot do this: its mechanisms are stochastic, so it does not say whether the randomness behind a variable is the same in both worlds. \emph{Structural causal models} (SCMs; also called structural equation models or functional causal models) \cite{pearl2009causality,Bongers_2021} fix this by separating each mechanism into a deterministic function and a source of noise. Variables are split into \emph{exogenous} variables $U$, which are independent random variables modelling background factors, and \emph{endogenous} variables $V$, each defined by a structural equation $V := f_V(\mathrm{pa}(V), U_V)$. Our car model becomes $\mathsf{fuel} := U_{\mathsf{fuel}}$, $\mathsf{battery} := U_{\mathsf{battery}}$ and $\mathsf{carStarts} := \mathsf{fuel} \wedge \mathsf{battery}$, with $U_{\mathsf{fuel}} \sim \mathrm{Bern}(0.8)$ and $U_{\mathsf{battery}} \sim \mathrm{Bern}(0.9)$. Behind this lies a philosophical assumption: the model is a \emph{closed world}. All uncertainty is uncertainty about the exogenous background, and once the background is fixed, everything else follows deterministically. The background is therefore shared by every world, actual or hypothetical, which licenses an additional operation, \emph{twinning} \cite{Balke1994}. We take two copies of the endogenous variables, one factual and one counterfactual, over the same exogenous variables. We condition on the factual copy, intervene on the counterfactual copy, and query the counterfactual copy. In our example, observing that the car did not start makes a flat battery more likely, so $\Pr(\mathsf{carStarts}' \mid \neg\mathsf{carStarts}, \opdo(\mathsf{fuel}' = \true)) = 9/14 \approx 0.64$, below the interventional $0.9$.
 
-\subsubsection{Semantics of Causality}
-\paragraph{Causal Models}
+\subsubsection{Topics in Causality}
+In this section I give a brief account of selected topics in causal inference that are relevant to the proposal. 
 
-\paragraph{Causal Structures}
+\paragraph{Causal Structures and Identifiability} In causal inference, the central object of study is often not the causal model but the graph of that model, or its causal \emph{structure}. There are two reasons for focusing on the causal structure rather than on a particular model (\todo{cite}). First, a fully specified model is rarely available. Secondly, the structure records the modeller's causal assumptions: an edge $X \to Y$ asserts that $Y$ \emph{may} depend on $X$, and its absence asserts that it does not. A particular model compatible with the structure may realise fewer dependencies than the structure permits, e.g.\ a mechanism may ignore one of its parents, so the structure is the more faithful record of what was assumed~\cite{spirtes2000causation,barrett2020quantumcausalmodels}. 
 
-% \subsubsection{Pearl's causality, in 3 rungs}
+One of the graph-centered inference tasks is \emph{identifiability} \todo{cite}: computing interventional distribution $\Pr(y \mid \opdo(x))$ given assumptions on the causal graph and observational distributions. If doing is is possible, we say that the causal quantity is \emph{identifiable}. Over the years, many sufficient conditions for identifiability based on purely graphical criteria like d-separation have been developed, such as the frontdoor and backdoor criteria \todo{cite}. These tools culminated into the do-calculus. Developed by Pearl \todo{cite}, the do-calculus is a set of three equations for rewriting interventional queries into observational ones when the causal graph satisfies some graphical criterion. \todo{cite} proved that the do-calculus is complete for identification: a causal quantity is uniquely determined by the input observational quantities for every causal model compatible with the causal graph if and only if its expression in terms of the input observational quantities is derivable by the do-calculus. 
 
-% Directly move the explanation of the POPL paper to here.
-% \begin{itemize}
-%     \item Rung 1: Bayesian Networks.
-%     \item Rung 2: Interventions
-%     \item Rung 3: Counterfactuals
-% \end{itemize}
 
-% \subsubsection{Equivalences of causal models}
-% Copy from paper and tweak.
+\paragraph{Equivalence of causal models} Notions of equivalence for causal models come in two families. \emph{Graph} equivalences (e.g.\ Markov equivalence~\cite{verma1990equivalence,pearl2009causality}), where we consider two causal graphs to be equivalent if they encode the same conditional independencies. These equivalences underpin causal discovery (the task of discovering causal structures from data), where algorithms often recover a graph only up to its Markov equivalence class~\cite{spirtes2000causation,peters_janzing_schoelkopf_2017_book}. \emph{Model} equivalences determine when fully-specified causal models are equivalent. \todo{continue adapting this paragraph}. 
 
-% \subsubsection{Logical, diagrammatic, categorical accounts of causality}
+Our contextual equivalences (\cref{section:scms}) live at the level of \emph{models}, in the tradition of observational equivalence for probabilistic programs (e.g.~\cite{barthe2009pRHL,hsu2017probabilisticcouplingsprobabilisticreasoning}). Closest is Bongers et al.~\cite{Bongers_2021}, the principal account reaching rung 3: for the representable acyclic SCMs our compilation covers, \cref{subsection:relationtoscms} shows their observational, interventional and counterfactual equivalences are subsumed by our rung-1, rung-2 and \emph{two-world} rung-3 equivalences, %(coinciding exactly under a mild condition on the semantic model)
+while full $\equiv_3$ quantifies over all $n$-world twinnings; their cyclic models lie beyond our languages. Several more notions sit at rung 2. Pearl's causal Bayesian networks have the form of a family of interventional distributions compatible with one graph~\cite{pearl2009causality}. \emph{Causal
+spaces}~\cite{park2024measuretheoreticaxiomatisationcausality,buchholz2024products} axiomatise it measure-theoretically; their data is essentially a morphism $\prod_i(A_i+1)\to\Prob(\prod_i A_i)$ of our rung-2 graded category at the all-perfect-interventions grade $[\Maybe{A_i}]_i$ (cf.\ the $\mathbf{ImP}$ construction we adapt~\cite{liell2025compositional}). \emph{Causal abstraction} \cite{rubenstein2017consistency,beckers2019abstracting,lorenztull2026abstraction} studies coarsening maps between causal models that must commute with interventions, loosely uni-directional versions of interventional equivalence. Finally, \emph{normalisation boxes} (local normalisation in a Markov category) generalise interventions~\cite{lorenz2023causalmodelsstringdiagrams, jacobsszelesstein2025inference} and yield rung-2 equational principles for causal Bayesian networks~\cite{jacobsszelesstein2025inference,agrawal2026equational}.
 
-% Copy from paper and tweak. Those references are exactly the ones I need to mention. 
+\paragraph{Cyclic models} \todo{Two interpretations}
 
 \subsection{Causal Probabilistic Programming Languages}
+
+\subsubsection{Motivation}
+
+\subsubsection{Existing causal languages and libraries}
+Many practical tools like DoWhy (part of the PyWhy ecosystem~\cite{pywhy}) are libraries for manipulating SCMs as graphs and thus have limited expressiveness. DoWhy's GCM module nonetheless reaches rung~3, computing sample-level counterfactuals on fitted mechanisms~\cite{blobaum2024dowhygcm}. Among causal PPLs proper, several stop at rung~2. Brul\'e's Whittemore~\cite{brule2018whittemore}, an early embedded causal DSL, covers rung-2 identification and estimation. Pyro provides a $\opdo$ effect handler~\cite{bingham2018pyro}, the design that ChiRho generalises; PyMC's $\opdo$ performs graph surgery on the computation graph~\cite{abrilpla2023pymc,pymcdo}. Witty et al.~\cite{witty2019synthesis} treat an intervention as a source transformation that replaces subterms, powerful (shift, variance-scaling, mechanism replacement) but non-compositional. In contrast, our languages only expose simple typed holes, which generalise to the same powerful classes of interventions for free at higher-order (\cref{subsection:higherorderintv}). Rung-3 queries can sometimes be re-encoded on such systems by hand by an identifiability argument~\cite{shpitser2012counterfactualstested}.
+
+% Among functional probabilistic languages, 
+Four systems support rung 3 natively~\cite{tavares2021language,chirho,perov2020multiverse,kiesel2023whatif}. \textbf{OmegaC}~\cite{tavares2021language} obtains rung 2 through a non-standard lazy evaluation strategy: a let-binding evaluates the bound expression $e$ to a closure $\langle \Gamma, e \rangle$ and $\opdo(x \mapsto e')$ retroactively modifies that closure $\langle \Gamma[x \mapsto e'], e\rangle$, reminiscent of dynamic binding. Rung 3 is enabled by making each program by construction an SCM-like deterministic function of an explicit exogenous noise $\omega$. OmegaC is limited in expressiveness (sampling and building random variables are separate), and only has an operational semantics. We conjecture our formalism can model OmegaC's core denotationally. \textbf{MultiVerse}~\cite{perov2020multiverse} realises Pearl's abduction--action--prediction recipe as an importance-sampling engine, without a formal semantics. \textbf{ChiRho}~\cite{chirho,tutorialchirho}, built from effect handlers and tensor broadcasting, is both the system closest to ours, and our initial motivation. Its recent distillation into typed functional abstractions~\cite{lafi-wang} bears clear similarities to $\LHO$: intervention \emph{points} tracked in a reader monad (our \emph{labels} leave open how an intervention is consumed), vectorisation used in an applicative way for twinning. Two differences are key. First, our rungs 2 and 3 are decoupled: interventions never create worlds; twinning alone does. Under ChiRho's multi-world handler, by contrast, each intervention doubles the number of worlds. Second, $\LHO$ fixes the number of worlds at twinning time and whether a variable is vectorised ($X$ or $\Endo(X)$) determines whether it is exogenous or endogenous. In contrast, ChiRho vectorises its values by default ($\MVal$ in the typed distillation~\cite{lafi-wang}) and encodes an implicit sharing inference using tensor broadcasting: a random draw is shared wherever broadcasting permits, while sample sites downstream of an intervention will draw fresh noise per world. ChiRho's $\MVal$ thus allows finer control over sharing than $\LHO$, but its relation to Pearl's twinning semantics is less clear. Finally, \textbf{probabilistic logic programming} also reaches rung 3: Kiesel et al.~\cite{kiesel2023whatif} answer counterfactual queries on ProbLog programs by a transformation proved correct against Pearl's semantics.
 
 \subsubsection{Summary of our POPL 2027 paper}
 \paragraph{Motivation: Causal models as probabilistic programs, operations as program transformations}
@@ -296,19 +346,7 @@ Rung 3: To manage counterfactuals, we first note that we will consider \emph{$n$
 
 We derive $\LHO$ by denotational and functional programming techniques. In \cref{section:densem}, we develop a denotational semantics for our hierarchy of languages, which we show equivalent to the operational description (\cref{thm:L2adequacyfullabs,thm:L3adequacyfullabs}). We then turn the categorical abstractions we develop into functional programming abstractions (\cref{section:higherorder}). 
 
-\subsubsection{Prior existing causal languages and libraries}
-Many practical tools like DoWhy (part of the PyWhy ecosystem~\cite{pywhy}) are libraries for manipulating SCMs as graphs and thus have limited expressiveness. DoWhy's GCM module nonetheless reaches rung~3, computing sample-level counterfactuals on fitted mechanisms~\cite{blobaum2024dowhygcm}. Among causal PPLs proper, several stop at rung~2. Brul\'e's Whittemore~\cite{brule2018whittemore}, an early embedded causal DSL, covers rung-2 identification and estimation. Pyro provides a $\opdo$ effect handler~\cite{bingham2018pyro}, the design that ChiRho generalises; PyMC's $\opdo$ performs graph surgery on the computation graph~\cite{abrilpla2023pymc,pymcdo}. Witty et al.~\cite{witty2019synthesis} treat an intervention as a source transformation that replaces subterms, powerful (shift, variance-scaling, mechanism replacement) but non-compositional. In contrast, our languages only expose simple typed holes, which generalise to the same powerful classes of interventions for free at higher-order (\cref{subsection:higherorderintv}). Rung-3 queries can sometimes be re-encoded on such systems by hand by an identifiability argument~\cite{shpitser2012counterfactualstested}.
-
-% Among functional probabilistic languages, 
-Four systems support rung 3 natively~\cite{tavares2021language,chirho,perov2020multiverse,kiesel2023whatif}. \textbf{OmegaC}~\cite{tavares2021language} obtains rung 2 through a non-standard lazy evaluation strategy: a let-binding evaluates the bound expression $e$ to a closure $\langle \Gamma, e \rangle$ and $\opdo(x \mapsto e')$ retroactively modifies that closure $\langle \Gamma[x \mapsto e'], e\rangle$, reminiscent of dynamic binding. Rung 3 is enabled by making each program by construction an SCM-like deterministic function of an explicit exogenous noise $\omega$. OmegaC is limited in expressiveness (sampling and building random variables are separate), and only has an operational semantics. We conjecture our formalism can model OmegaC's core denotationally. \textbf{MultiVerse}~\cite{perov2020multiverse} realises Pearl's abduction--action--prediction recipe as an importance-sampling engine, without a formal semantics. \textbf{ChiRho}~\cite{chirho,tutorialchirho}, built from effect handlers and tensor broadcasting, is both the system closest to ours, and our initial motivation. Its recent distillation into typed functional abstractions~\cite{lafi-wang} bears clear similarities to $\LHO$: intervention \emph{points} tracked in a reader monad (our \emph{labels} leave open how an intervention is consumed), vectorisation used in an applicative way for twinning. Two differences are key. First, our rungs 2 and 3 are decoupled: interventions never create worlds; twinning alone does. Under ChiRho's multi-world handler, by contrast, each intervention doubles the number of worlds. Second, $\LHO$ fixes the number of worlds at twinning time and whether a variable is vectorised ($X$ or $\Endo(X)$) determines whether it is exogenous or endogenous. In contrast, ChiRho vectorises its values by default ($\MVal$ in the typed distillation~\cite{lafi-wang}) and encodes an implicit sharing inference using tensor broadcasting: a random draw is shared wherever broadcasting permits, while sample sites downstream of an intervention will draw fresh noise per world. ChiRho's $\MVal$ thus allows finer control over sharing than $\LHO$, but its relation to Pearl's twinning semantics is less clear. Finally, \textbf{probabilistic logic programming} also reaches rung 3: Kiesel et al.~\cite{kiesel2023whatif} answer counterfactual queries on ProbLog programs by a transformation proved correct against Pearl's semantics.
-
-% \subsection{Summary of my contributions}
-
-% ChiRho (LAFI) and semantics (POPL). 
-
-\subsection{Brief overview of other notions of causality}
-
-\subsubsection{Logical, Diagrammatic, Categorical notions of Causality}
+\subsection{Logical, Diagrammatic, Categorical notions of Causality}
 
 \paragraph{Functorial Semantics}
 
@@ -316,7 +354,9 @@ Four systems support rung 3 natively~\cite{tavares2021language,chirho,perov2020m
 
 \paragraph{Modulating Normalisation}
 
-\subsubsection{"Causality" in other fields}
+
+\subsection{``Causality" in other fields}
+\todo{say I don't fully understand yet.}
 
 \paragraph{Concurrency}
 
@@ -373,7 +413,6 @@ Four systems support rung 3 natively~\cite{tavares2021language,chirho,perov2020m
 % % \end{itemize}
 
 \section{Project Proposal}
-\subsection{Summary of the current work done}
 
 \subsection{Developing the field of Causal PPLs}
 \subsubsection{Putting the language into practice}
