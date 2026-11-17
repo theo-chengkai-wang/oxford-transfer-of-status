@@ -315,7 +315,7 @@ One of the graph-centered inference tasks is \emph{identifiability} \todo{cite}:
 \emph{Model} equivalences determine when fully-specified causal models are equivalent. Bongers et al.~\cite{Bongers_2021} define a hierarchy of equivalences of structural causal models: they define two SCMs to be \emph{observationally} equivalent if they induce the same distribution; \emph{interventionally} equivalent if they induce the same distribution under all interventions; and \emph{counterfactually} equivalent if they are equivalent under twinning and intervention. These notions are intuitive and have a similar flavour to contextual equivalences in programming language theory; we make the correspondence precise in \todo{cite section}. 
 Several more notions of equivalence sit at rung 2:
 \begin{itemize}
-    \item Pearl defined how CBNs induce a family of interventional distributions ~\cite{pearl2009causality};
+    \item Pearl defined how CBNs induce a family of interventional distributions~\cite{pearl2009causality};
     \item Causal spaces~\cite{park2024measuretheoreticaxiomatisationcausality,buchholz2024products} axiomatise the idea of defining the semantics of causal moedls by their interventional distributions measure-theoretically. A causal space is essentially a morphism $\prod_i(A_i+1)\to\Prob(\prod_i A_i)$ in $\CatMeas$. 
     \item Finally, \emph{normalisation boxes} (local normalisation in a Markov category) generalise interventions~\cite{lorenz2023causalmodelsstringdiagrams, jacobsszelesstein2025inference} and yield rung-2 equational principles for causal Bayesian networks~\cite{jacobsszelesstein2025inference,agrawal2026equational}; we explore it in more detail in \todo{cite section later}. 
 \end{itemize}
@@ -324,32 +324,116 @@ Several more notions of equivalence sit at rung 2:
 
 \subsection{Causal Probabilistic Programming Languages}
 
-\subsubsection{Motivation}
+\subsubsection{Motivation} Causal inference and probabilistic programming are both generalisations of statistical inference methods based on Bayesian networks: causal models enable us to answer questions about causality; probabilistic programming enables us to express richer probabilistic models with control flow and higher order functions compositionally, and systematically perform Bayesian inference on them. Causal probabilistic programming is an emerging field where the goal is to combine these two lines of work and be able to compute causal queries systematically on expressive probabilistic programs. 
+
+Causal probabilistic programming is also a natural direction. Probabilistic programs can already be seen to contain a \emph{causal} structure, i.e. its dataflow, and causal operations like intervention and twinning can naturally be seen as \emph{program transformations}. We revisit our examples in the previous section in \cref{fig:carmodel} (taken directly from the term paper \cite{wang2026causalppl}): the graph editing for intervention amounts to editing the corresponding let binding of the program; the twinning transformation amounts to a program transformation close to vectorisation (see e.g.\ \cite{lew2019trace} for a formal account of vectorisation on probabilistic programs), where each line is duplicated once per counterfactual world.
+
+That said, program transformations can be difficult to reason about and don't always generalise well when interacting with language features like control flow. An important question would then be: how can we give compositional abstractions for performing causal inference on top of probabilistic programs? 
+
+\begin{figure}[t]
+\centering
+\setlength{\tabcolsep}{3pt}\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{@{}m{2.3cm} >{\centering\arraybackslash}m{4.8cm} m{5.7cm}@{}}
+\toprule
+\textbf{Query} & \textbf{Graphical model} & \textbf{Program}\\
+\midrule
+\textbf{Rung 1}\par{\small Observation}\par\smallskip{\footnotesize answer $\tfrac57\!\approx\!0.71$}
+&
+\begin{tikzpicture}[>=stealth,baseline]
+\node (f) at (0,1.0) {\textsf{fuel}};
+\node (b) at (3,1.0) {\textsf{battery}};
+\node (s) at (1.5,0) {\textsf{carStarts}};
+\draw[->] (f)--(s);\draw[->] (b)--(s);
+\end{tikzpicture}
+&
+\begin{codelisting}{haskell}{false}
+let fuel    = bernoulli 0.8 in
+let battery = bernoulli 0.9 in
+let carStarts = fuel && battery in
+return (fuel, battery, carStarts)
+\end{codelisting}
+\\ \midrule
+\textbf{Rung 2}\par{\small Intervention}\par\smallskip{\footnotesize answer $0.90$}
+&
+\begin{tikzpicture}[>=stealth,baseline]
+\node (f) at (0,1.0) {\cnew{\textsf{fuel}=$\true$}};
+\node (b) at (3,1.0) {\textsf{battery}};
+\node (s) at (1.5,0) {\textsf{carStarts}};
+\draw[->] (f)--(s);\draw[->] (b)--(s);
+\end{tikzpicture}
+&
+\begin{codelisting}[escapeinside={(*}{*)}]{haskell}{false}
+(*\cnew{let fuel    = True in}*)
+let battery = bernoulli 0.9 in
+let carStarts = fuel && battery in
+return (fuel, battery, carStarts)
+\end{codelisting}
+\\ \midrule
+\textbf{Rung 3}\par{\small Counterfactual}\par\smallskip{\footnotesize answer $\tfrac{9}{14}\!\approx\!0.64$}
+&
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[>=stealth]
+\node (f0) at (0,1.5) {\cnew{$\mathsf{fuel}_0$}};
+\node (b) at (2,1.5) {\textsf{battery}};
+\node (s0) at (0.4,0) {\cnew{\textsf{carStarts}$_0$}};
+\node (s1) at (3.6,0) {\cnew{\textsf{carStarts}$_1$}};
+\node (f1) at (4,1.5) {\cnew{$\mathsf{fuel}_1=\true$}};
+\draw[->] (f0)--(s0);
+\draw[->] (b)--(s0);
+\draw[->] (b)--(s1);
+\draw[->] (f1)--(s1);
+\draw[dotted,rounded corners]
+    ($(f0.north west) + (0,0.3)$)
+ -- node[below,very near start] { \footnotesize $~$factual }
+    ($(b.north east) + (0,0.3)$)
+ -- (b.north east|-s0.south east)
+ -- (f0.north west|-s0.south west)
+ -- cycle;
+
+\draw[dotted,rounded corners,fill=gray,fill opacity=0.05,text opacity=1]
+    ($(f1.north east) + (0,0.4)$)
+ -- node[below,near start] { \footnotesize counterfactual }
+    ($(b.north west) + (0,0.4)$)
+ -- ($(b.north west|-s1.south west) + (0,-0.1)$)
+ -- ($(f1.north east|-s1.south east) + (0,-0.1)$)
+ -- cycle;
+
+\end{tikzpicture}}
+&
+\begin{codelisting}[escapeinside={(*}{*)}]{haskell}{false}
+(*\cnew{let fuel\_0 = bernoulli 0.8 in}*)
+(*\cnew{let fuel\_1 = True in}*)
+let battery = bernoulli 0.9 in
+let carStarts_0 = (*\cnew{fuel\_0}*) && battery in
+let carStarts_1 = (*\cnew{fuel\_1}*) && battery in
+return ((*\cnew{carStarts\_0, carStarts\_1}*))
+\end{codelisting}
+\\ \bottomrule
+\end{tabular}
+\caption{The car model across Pearl's three rungs, with
+changes at each rung \cnew{highlighted}. Rung~1 conditions the base model; rung~2 rewrites \textsf{fuel}'s
+definition ($\opdo$); rung~3 \emph{twins} the model into a factual world~0 and counterfactual world~1 sharing the \emph{exogenous} (common) draws \textsf{fuel} and \textsf{battery}, and forces $\mathsf{fuel}=\true$ in world~1 (so only world~0 keeps the shared \textsf{fuel} draw).}
+\label{fig:carmodel}
+\end{figure}
+
 
 \subsubsection{Existing causal languages and libraries}
-Many practical tools like DoWhy (part of the PyWhy ecosystem~\cite{pywhy}) are libraries for manipulating SCMs as graphs and thus have limited expressiveness. DoWhy's GCM module nonetheless reaches rung~3, computing sample-level counterfactuals on fitted mechanisms~\cite{blobaum2024dowhygcm}. Among causal PPLs proper, several stop at rung~2. Brul\'e's Whittemore~\cite{brule2018whittemore}, an early embedded causal DSL, covers rung-2 identification and estimation. Pyro provides a $\opdo$ effect handler~\cite{bingham2018pyro}, the design that ChiRho generalises; PyMC's $\opdo$ performs graph surgery on the computation graph~\cite{abrilpla2023pymc,pymcdo}. Witty et al.~\cite{witty2019synthesis} treat an intervention as a source transformation that replaces subterms, powerful (shift, variance-scaling, mechanism replacement) but non-compositional. In contrast, our languages only expose simple typed holes, which generalise to the same powerful classes of interventions for free at higher-order (\cref{subsection:higherorderintv}). Rung-3 queries can sometimes be re-encoded on such systems by hand by an identifiability argument~\cite{shpitser2012counterfactualstested}.
+The idea of causal probabilistic programming has existed for some time. Many practical tools like DoWhy (part of the PyWhy ecosystem~\cite{pywhy}) are libraries for manipulating SCMs as graphs and thus have limited expressiveness. DoWhy's GCM module nonetheless reaches rung~3, computing sample-level counterfactuals on fitted mechanisms~\cite{blobaum2024dowhygcm}. 
+
+Among causal PPLs proper, several stop at rung~2. Brul\'e's Whittemore~\cite{brule2018whittemore}, an early embedded causal DSL, covers rung-2 identification and estimation. Pyro provides a $\opdo$ effect handler~\cite{bingham2018pyro}; PyMC's $\opdo$ performs graph surgery on the computation graph~\cite{abrilpla2023pymc,pymcdo}. Witty et al.~\cite{witty2019synthesis} treat an intervention as a source transformation that replaces subterms, powerful (shift, variance-scaling, mechanism replacement) but non-compositional. 
+Rung-3 queries can sometimes be re-encoded on such systems by hand by an identifiability argument~\cite{shpitser2012counterfactualstested}.
+
+% In contrast, our languages only expose simple typed holes, which generalise to the same powerful classes of interventions for free at higher-order (\cref{subsection:higherorderintv}). 
 
 % Among functional probabilistic languages, 
-Four systems support rung 3 natively~\cite{tavares2021language,chirho,perov2020multiverse,kiesel2023whatif}. \textbf{OmegaC}~\cite{tavares2021language} obtains rung 2 through a non-standard lazy evaluation strategy: a let-binding evaluates the bound expression $e$ to a closure $\langle \Gamma, e \rangle$ and $\opdo(x \mapsto e')$ retroactively modifies that closure $\langle \Gamma[x \mapsto e'], e\rangle$, reminiscent of dynamic binding. Rung 3 is enabled by making each program by construction an SCM-like deterministic function of an explicit exogenous noise $\omega$. OmegaC is limited in expressiveness (sampling and building random variables are separate), and only has an operational semantics. We conjecture our formalism can model OmegaC's core denotationally. \textbf{MultiVerse}~\cite{perov2020multiverse} realises Pearl's abduction--action--prediction recipe as an importance-sampling engine, without a formal semantics. \textbf{ChiRho}~\cite{chirho,tutorialchirho}, built from effect handlers and tensor broadcasting, is both the system closest to ours, and our initial motivation. Its recent distillation into typed functional abstractions~\cite{lafi-wang} bears clear similarities to $\LHO$: intervention \emph{points} tracked in a reader monad (our \emph{labels} leave open how an intervention is consumed), vectorisation used in an applicative way for twinning. Two differences are key. First, our rungs 2 and 3 are decoupled: interventions never create worlds; twinning alone does. Under ChiRho's multi-world handler, by contrast, each intervention doubles the number of worlds. Second, $\LHO$ fixes the number of worlds at twinning time and whether a variable is vectorised ($X$ or $\Endo(X)$) determines whether it is exogenous or endogenous. In contrast, ChiRho vectorises its values by default ($\MVal$ in the typed distillation~\cite{lafi-wang}) and encodes an implicit sharing inference using tensor broadcasting: a random draw is shared wherever broadcasting permits, while sample sites downstream of an intervention will draw fresh noise per world. ChiRho's $\MVal$ thus allows finer control over sharing than $\LHO$, but its relation to Pearl's twinning semantics is less clear. Finally, \textbf{probabilistic logic programming} also reaches rung 3: Kiesel et al.~\cite{kiesel2023whatif} answer counterfactual queries on ProbLog programs by a transformation proved correct against Pearl's semantics.
-
-\subsubsection{Summary of our POPL 2027 paper}
-\paragraph{Motivation: Causal models as probabilistic programs, operations as program transformations}
-
-\paragraph{Contribution 1: semantic foundations of causal programming}
-Our first contribution is to develop a semantic foundation of causal models by taking the analogy with probabilistic programs seriously. In \cref{section:hierarchylanguages}, we reconstruct Pearl's rungs of causality as a hierarchy of simple first order probabilistic programming languages $\Lone, \Ltwo, \Lthree$.  Each language exposes more intension than the previous one using syntactic annotations, and causal inference is performed using program transformations that consume these syntactic annotations: $\Lone$ is a standard first order PPL; $\Ltwo$ exposes typed holes named \emph{intervention labels}, canonically of type $\Maybe{A}$, allowing substituting to optionally perform an intervention; $\Lthree$ annotates each let binding with $\mathbf{exo}$ or $\mathbf{endo}$, so that twinning can be formulated as a vectorisation transform. The same idea underlies the intervention-as-program-transformation view of Witty~\cite{witty2021sbi,witty2023bayesian}, the logical account by Ibeling and Icard~\cite{ibeling2020hierarchy}, and the string-diagrammatic accounts of Jacobs et al.~\cite{jacobs2019causal} and Lorenz and Tull~\cite{lorenz2023causalmodelsstringdiagrams}. 
-
-What is new is the observation that this simple setting yields a semantic characterisation of Pearl's rungs of causality (\cref{section:scms}). We develop a unified account of contextual equivalences that recovers the full spectrum of causal model equivalences by varying the class of admissible contexts, e.g.~Rung 3 ($\Lthree$) programs are Rung 3 equivalent ($\equiv_3$) if they behave the same under all twinnings and interventions; Rung 2 equivalent ($\equiv_3^{\mathsf{intv}}$) if under all interventions; Rung 1 equivalent ($\equiv_3^{\mathsf{obs}}$) if they induce the same distribution under no intervention. The subscript $3$ marks that we compare $\Lthree$ programs throughout; the superscript marks the rung of context tested against ($\mathsf{obs}$, $\mathsf{intv}$, or none for full rung-3 twinning). These equivalences form a strict inclusion hierarchy $\equiv_3 \subsetneq \equiv_3^{\mathsf{intv}} \subsetneq \equiv_3^{\mathsf{obs}}$, an analogue of the causal hierarchy's non-collapse \cite{bareinboim:etal20}, i.e.~programs indistinguishable at a lower rung may still differ at a higher one.
-
-In \cref{subsection:relationtoscms} we connect the framework to the theory of SCMs, showing that $\Lthree$ extends SCMs conservatively: each SCM can be compiled into $\Lthree$, preserving the semantics of intervention and twinning (\cref{thm:scmcompilationcorrectness}). Through this compilation, we show that the hierarchy of SCM equivalences developed by Bongers et al.~\cite{Bongers_2021} is naturally subsumed by our program equivalences (\cref{thm:hierarchyBongers}).
-
-\paragraph{Contribution 2: Typed abstractions and denotational semantics for expressive causal probabilistic programming}
-Our second contribution is the development of $\LHO$, a semantically-founded, expressive, and typed language for higher-order causal probabilistic programming. $\LHO$ has a similar programming model to ChiRho \cite{chirho,lafi-wang}: it is expressive as a programming language (higher order, with control flow) and as a causal calculus (rich, higher order interventions, see \Cref{fig:intvkinds}); we illustrate it with examples such as mediation analysis, which decomposes a causal effect into a direct path and a path through an intermediate variable (\Cref{fig:mediationanalysis}). However, unlike ChiRho, it extends the first-order languages in a semantic-preserving way (\cref{thm:L3LHOsemanticpreservation}). 
-
-Rung 2: To manage interventions, we track intervention labels using \emph{grading} \cite{orchard2020unifying,katsumata2014_graded_strong_monad,dorsch2019graded,fujii2016towards,sarkis2025string}, similarly to the $\mathbf{ImP}$ construction in \cite{liell2025compositional} or intervention points in \cite{lafi-wang}. We define a graded reader monad $\IntvMonad{[\tau_1...\tau_n]}{X} \eqdef \prod_i\tau_i \to \Meas(X)$ graded by lists of intervention types $[\tau_1...\tau_n]$, where $\Meas$ is the unnormalised probability monad. A causal model of type $\IntvMonad{[\tau_1...\tau_n]}{X}$ is an intervenable probabilistic program with $n$ typed intervenable holes, each of type $\tau_i$, and a $\opdo$ intervention on the $i$th hole is simply partial application.
-
-Rung 3: To manage counterfactuals, we first note that we will consider \emph{$n$-world twinning}, which creates $n$ copies of the original model, because general counterfactual reasoning may require more than 2 copies. We now ask: what is the type of a model under twinning? The twinned version of the car model where only \texttt{fuel} is intervenable and \texttt{carStarts} is returned has type $\IntvMonad{[(\Maybe{\booleans})^n]}{\booleans^n}$: an intervenable computation with $n$ intervention labels (one \texttt{fuel} intervention label per world), and returning $n$ copies of \texttt{carStarts}. The trick is to make each causal model carry its behaviour under twinning, for any world count $n$. In other words the \emph{twinnable} car model is a world-polymorphic vectorised computation of type $\forall n. \IntvMonad{[(\Maybe{\booleans})^n]}{\booleans^n}$, where $\forall$ denotes System-F-style polymorphism \cite{reynolds74_system_f,Girard1972InterpretationFE}. Endogenous variables like \texttt{carStarts} become $n$-dimensional vectors, where $n$ is the number of worlds, and compose together using the applicative interface \cite{gibbons2016naperian}. Twinning is then a simple type application. The corresponding technical setting is the functor category $[\Bij, \catc]$, where $\catc$ is the semantic model of the underlying PPL, e.g.~$\catc = \Qbs$ if it is continuous and higher order. Each type $A$ is informally an $n$-indexed family of $\catc$-objects $\sem{A}(n)$, and each function $A \to B$ is interpreted as an $n$-indexed family of morphisms $\sem{A}(n) \to \sem{B}(n)$, i.e.~its behaviour under $n$-world twinning. This use is similar to names in nominal sets \cite{pitts2013nominalsets}.
-
-We derive $\LHO$ by denotational and functional programming techniques. In \cref{section:densem}, we develop a denotational semantics for our hierarchy of languages, which we show equivalent to the operational description (\cref{thm:L2adequacyfullabs,thm:L3adequacyfullabs}). We then turn the categorical abstractions we develop into functional programming abstractions (\cref{section:higherorder}). 
+Four systems support rung 3 natively~\cite{tavares2021language,chirho,perov2020multiverse,kiesel2023whatif}. 
+\begin{itemize}
+    \item \textbf{OmegaC}~\cite{tavares2021language} obtains rung 2 through a non-standard lazy evaluation strategy: a let-binding evaluates the bound expression $e$ to a closure $\langle \Gamma, e \rangle$ and $\opdo(x \mapsto e')$ retroactively modifies that closure $\langle \Gamma[x \mapsto e'], e\rangle$, reminiscent of dynamic binding. Rung 3 is enabled by making each program by construction an SCM-like deterministic function of an explicit exogenous noise $\omega$. OmegaC is limited in expressiveness (sampling and building random variables are separate), and only has an operational semantics. 
+    %We conjecture our formalism can model OmegaC's core denotationally. 
+    \item \textbf{MultiVerse}~\cite{perov2020multiverse} realises Pearl's abduction--action--prediction recipe as an importance-sampling engine, without a formal semantics. 
+    \item \textbf{Probabilistic logic programming} also reaches rung 3: Kiesel et al.~\cite{kiesel2023whatif} answer counterfactual queries on ProbLog programs by a transformation proved correct against Pearl's semantics.
+    \item \textbf{ChiRho}~\cite{chirho,tutorialchirho}, \todo{this part talks about later as well} built from effect handlers and tensor broadcasting, is both the system closest to ours, and our initial motivation. Its recent distillation into typed functional abstractions~\cite{lafi-wang} bears clear similarities to $\LHO$: intervention \emph{points} tracked in a reader monad (our \emph{labels} leave open how an intervention is consumed), vectorisation used in an applicative way for twinning. Two differences are key. First, our rungs 2 and 3 are decoupled: interventions never create worlds; twinning alone does. Under ChiRho's multi-world handler, by contrast, each intervention doubles the number of worlds. Second, $\LHO$ fixes the number of worlds at twinning time and whether a variable is vectorised ($X$ or $\Endo(X)$) determines whether it is exogenous or endogenous. In contrast, ChiRho vectorises its values by default ($\MVal$ in the typed distillation~\cite{lafi-wang}) and encodes an implicit sharing inference using tensor broadcasting: a random draw is shared wherever broadcasting permits, while sample sites downstream of an intervention will draw fresh noise per world. ChiRho's $\MVal$ thus allows finer control over sharing than $\LHO$, but its relation to Pearl's twinning semantics is less clear. 
+\end{itemize}
 
 \subsection{Logical, Diagrammatic, Categorical notions of Causality}
 
@@ -361,11 +445,31 @@ We derive $\LHO$ by denotational and functional programming techniques. In \cref
 
 
 \subsection{``Causality" in other fields}
-\todo{say I don't fully understand yet.}
+People talk about ``Causality'' in computer scientific field other than causal inference. I briefly survey two of these fields: concurrent/distributed computing and quantum computing. I do not claim to have full understanding of those fields because I am still in the process of reading those papers. 
 
 \paragraph{Concurrency}
 
 \paragraph{Quantum Computing}
+
+
+\section{Progress during my first year}
+I spent the majority of my first year concentrated on developing semantics for causal probabilistic programming. Our initial motivation was to \todo{finish}
+
+\paragraph{Contribution 1: semantic foundations of causal programming}
+Our first contribution is to develop a semantic foundation of causal models by taking the analogy with probabilistic programs seriously. Firstly, we reconstruct Pearl's rungs of causality as a hierarchy of simple first order probabilistic programming languages $\Lone, \Ltwo, \Lthree$.  Each language exposes more intension than the previous one using syntactic annotations, and causal inference is performed using program transformations that consume these syntactic annotations: $\Lone$ is a standard first order PPL; $\Ltwo$ exposes typed holes named \emph{intervention labels}, canonically of type $\Maybe{A}$, allowing substituting to optionally perform an intervention; $\Lthree$ annotates each let binding with $\mathbf{exo}$ or $\mathbf{endo}$, so that twinning can be formulated as a vectorisation transform. The same idea underlies the intervention-as-program-transformation view of Witty~\cite{witty2021sbi,witty2023bayesian}, the logical account by Ibeling and Icard~\cite{ibeling2020hierarchy}, and the string-diagrammatic accounts of Jacobs et al.~\cite{jacobs2019causal} and Lorenz and Tull~\cite{lorenz2023causalmodelsstringdiagrams}. 
+
+What is new is the observation that this simple setting yields a semantic characterisation of Pearl's rungs of causality. We develop a unified account of contextual equivalences that recovers the full spectrum of causal model equivalences by varying the class of admissible contexts, e.g.~Rung 3 ($\Lthree$) programs are Rung 3 equivalent ($\equiv_3$) if they behave the same under all twinnings and interventions; Rung 2 equivalent ($\equiv_3^{\mathsf{intv}}$) if under all interventions; Rung 1 equivalent ($\equiv_3^{\mathsf{obs}}$) if they induce the same distribution under no intervention. The subscript $3$ marks that we compare $\Lthree$ programs throughout; the superscript marks the rung of context tested against ($\mathsf{obs}$, $\mathsf{intv}$, or none for full rung-3 twinning). These equivalences form a strict inclusion hierarchy $\equiv_3 \subsetneq \equiv_3^{\mathsf{intv}} \subsetneq \equiv_3^{\mathsf{obs}}$, an analogue of the causal hierarchy's non-collapse \cite{bareinboim:etal20}, i.e.~programs indistinguishable at a lower rung may still differ at a higher one.
+
+Finally, we connect the framework to the theory of SCMs, showing that $\Lthree$ extends SCMs conservatively: each SCM can be compiled into $\Lthree$, preserving the semantics of intervention and twinning. Through this compilation, we show that the hierarchy of SCM equivalences developed by Bongers et al.~\cite{Bongers_2021} is naturally subsumed by our program equivalences.
+
+\paragraph{Contribution 2: Typed abstractions and denotational semantics for expressive causal probabilistic programming}
+Our second contribution is the development of $\LHO$, a semantically-founded, expressive, and typed language for higher-order causal probabilistic programming. $\LHO$ has a similar programming model to ChiRho \cite{chirho,lafi-wang}: it is expressive as a programming language (higher order, with control flow) and as a causal calculus (rich, higher order interventions like those in \todo{reference intervention part}); we illustrate it with examples such as mediation analysis \cite{pearl2014interpretation}, which decomposes a causal effect into a direct path and a path through an intermediate variable. However, unlike ChiRho, it extends the first-order languages in a semantic-preserving way. 
+
+Rung 2: To manage interventions, we track intervention labels using \emph{grading} \cite{orchard2020unifying,katsumata2014_graded_strong_monad,dorsch2019graded,fujii2016towards,sarkis2025string}, similarly to the $\mathbf{ImP}$ construction in \cite{liell2025compositional} or intervention points in \cite{lafi-wang}. We define a graded reader monad $\IntvMonad{[\tau_1...\tau_n]}{X} \eqdef \prod_i\tau_i \to \Meas(X)$ graded by lists of intervention types $[\tau_1...\tau_n]$, where $\Meas$ is the unnormalised probability monad. A causal model of type $\IntvMonad{[\tau_1...\tau_n]}{X}$ is an intervenable probabilistic program with $n$ typed intervenable holes, each of type $\tau_i$, and a $\opdo$ intervention on the $i$th hole is simply partial application.
+
+Rung 3: To manage counterfactuals, we first note that we will consider \emph{$n$-world twinning}, which creates $n$ copies of the original model, because general counterfactual reasoning may require more than 2 copies. We now ask: what is the type of a model under twinning? The twinned version of the car model where only \texttt{fuel} is intervenable and \texttt{carStarts} is returned has type $\IntvMonad{[(\Maybe{\booleans})^n]}{\booleans^n}$: an intervenable computation with $n$ intervention labels (one \texttt{fuel} intervention label per world), and returning $n$ copies of \texttt{carStarts}. The trick is to make each causal model carry its behaviour under twinning, for any world count $n$. In other words the \emph{twinnable} car model is a world-polymorphic vectorised computation of type $\forall n. \IntvMonad{[(\Maybe{\booleans})^n]}{\booleans^n}$, where $\forall$ denotes System-F-style polymorphism \cite{reynolds74_system_f,Girard1972InterpretationFE}. Endogenous variables like \texttt{carStarts} become $n$-dimensional vectors, where $n$ is the number of worlds, and compose together using the applicative interface \cite{gibbons2016naperian}. Twinning is then a simple type application. The corresponding technical setting is the functor category $[\Bij, \catc]$, where $\catc$ is the semantic model of the underlying PPL, e.g.~$\catc = \Qbs$ if it is continuous and higher order. Each type $A$ is informally an $n$-indexed family of $\catc$-objects $\sem{A}(n)$, and each function $A \to B$ is interpreted as an $n$-indexed family of morphisms $\sem{A}(n) \to \sem{B}(n)$, i.e.~its behaviour under $n$-world twinning. This use is similar to names in nominal sets \cite{pitts2013nominalsets}.
+
+We derive $\LHO$ by denotational and functional programming techniques. We first develop a denotational semantics for our hierarchy of first order languages, which we show equivalent to the operational description. We then turn the categorical abstractions we develop into functional programming abstractions. 
 
 % \section{From quantum protocols to causality}
 
