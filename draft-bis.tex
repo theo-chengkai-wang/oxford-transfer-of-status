@@ -173,11 +173,6 @@ The distinction between CBNs and BNs lies in the fact that the additional operat
     \label{fig:rung2equiv}
 \end{figure}
 
-One possible intuition behind interventions is that of scientific experiments, where setting a parameter is akin to performing an intervention. \todo{cite} So far we only considered \emph{perfect} interventions: forcefully sets a variable at a precise value. Many other types of interventions have since been considered. A few examples include:
-\begin{itemize}
-    \item 
-\end{itemize}
-\todo{stochastic, soft interventions.}
 
 \paragraph{Rung 3: Counterfactuals, Structural Causal Models} At rung 3, we consider queries that reason jointly about multiple `worlds' at the same time. Our example query \emph{given that the car didn't start, would it have started had we filled the tank?} explicitly reasons about two worlds: a factual world, in which we observe that the car did not in fact start, and a counterfactual world, where we fill the tank using an intervention and ask whether it would have started. Philosophically, we also want the two worlds to be very correlated: only the intervened variable should differ in the two worlds, and everything else should be kept the same. Therefore, we naturally consider defining an operation that takes a causal model and attempts to create two adequately correlated copies of it -- what Pearl would call \emph{twinning}. However, unfortunately, the data of a causal Bayesian network (e.g. the model in \cref{fig:rung1car}) does not determine a canonical twinning \cite{Balke1994}: there are different choices whether to share and how to share randomness between the two copies of the model. 
 
@@ -320,6 +315,18 @@ Several more notions of equivalence sit at rung 2:
     \item Finally, \emph{normalisation boxes} (local normalisation in a Markov category) generalise interventions~\cite{lorenz2023causalmodelsstringdiagrams, jacobsszelesstein2025inference} and yield rung-2 equational principles for causal Bayesian networks~\cite{jacobsszelesstein2025inference,agrawal2026equational}; we explore it in more detail in \todo{cite section later}. 
 \end{itemize}
 
+\paragraph{Interventions à la carte} 
+So far we only considered \emph{perfect} interventions: forcefully sets a variable at a precise value. Many other types of interventions have since been considered. A few examples include:
+\begin{itemize}
+    \item Stochastic/soft interventions (e.g.~\cite{didelez2006_stoch_mech_intv, munoz2012_stochastic_intv,
+dawid2002_stoch_intv, jacobs2019causal}): intervening with a distribution instead of a value.
+    \item `Dependent' interventions (e.g.~\cite{haneuse2013_dependent_intv,
+Young2014-mx_dependent_intv}): interventions depending on the factual value, e.g. `intervene by taking the factual value and add noise'
+    \item Mechanism interventions (e.g.~\cite{didelez2006_stoch_mech_intv,pearl2009causality}): replacing the mechanism of a variable completely
+    \item Mediation Analysis interventions (e.g.~\cite{pearl2014interpretation,tutorialchirho,wang2026causalppl}): these are special interventions that replace the value of a variable by its value in another counterfactual world. 
+\end{itemize}
+
+
 \paragraph{Cyclic models} \todo{Two interpretations}
 
 \subsection{Causal Probabilistic Programming Languages}
@@ -453,9 +460,9 @@ People talk about ``Causality'' in computer scientific field other than causal i
 
 
 \section{Progress during my first year}
-I spent the majority of my first year concentrated on developing semantics for causal probabilistic programming, in collaboration with Dario Stein, Michael Lee, Ohad Kammar, Jeremy Yallop, my supervisor Sam Stato, and industry collaborators Eli Bingham and John Feser from Basis who are behind Omega \cite{tavares2021language} and ChiRho \cite{chirho}. I joined the collaboration 9 months before the start of the DPhil, during which time I developed a semantics for ChiRho, which we presented in the form of a Haskell embedding at LAFI 2026 \cite{wang2026causalppl}. Our insights are summarised in \todo{cite section on ChiRho}. However, ChiRho is not without its flaws: its programming model relies on subtle interactions between effect handlers and tensor broadcasting and doesn't have a clear correspondence with traditional causal inference literature \cite{wang2026causalppl}. 
+I spent the majority of my first year concentrated on developing semantics for causal probabilistic programming, in collaboration with Dario Stein, Michael Lee, Ohad Kammar, Jeremy Yallop, my supervisor Sam Staton, and industry collaborators Eli Bingham and John Feser from Basis who are behind Omega \cite{tavares2021language} and ChiRho \cite{chirho}. I joined the collaboration 9 months before the start of the DPhil, during which time I developed a semantics for ChiRho, which we presented in the form of a Haskell embedding at LAFI 2026 \cite{wang2026causalppl}. Our insights are summarised in \todo{cite section on ChiRho}. However, ChiRho is not without its flaws: its programming model relies on subtle interactions between effect handlers and tensor broadcasting and doesn't have a clear correspondence with traditional causal inference literature \cite{wang2026causalppl}. 
 
-This year, I continued working on causal probabilistic programming by gathering the insights from ChiRho (reader monads for interventions, vectorisation for twinning) and starting from first principles. This led to our submission (which I used as term paper), now accepted to POPL 2027. This section summarises our contributions. 
+This year, I continued working on causal probabilistic programming by gathering the insights from ChiRho (reader monads for interventions, vectorisation for twinning) and starting from first principles. This led to our submission (which I used as term paper), now accepted to POPL 2027. This section summarises our contributions. I intend to continue working on this line of research; my main ideas are summarised in \todo{section}. 
 
 \paragraph{Contribution 1: semantic foundations of causal programming}
 Our first contribution is developing a semantic foundation of causal models by taking the analogy with probabilistic programs seriously. Firstly, we reconstruct Pearl's rungs of causality as a hierarchy of simple first order probabilistic programming languages $\Lone, \Ltwo, \Lthree$.  Each language exposes more intension than the previous one using syntactic annotations, and causal inference is performed using program transformations that consume these syntactic annotations: $\Lone$ is a standard first order PPL; $\Ltwo$ exposes typed holes named \emph{intervention labels}, canonically of type $\Maybe{A}$, allowing substituting to optionally perform an intervention; $\Lthree$ annotates each let binding with $\mathbf{exo}$ or $\mathbf{endo}$, so that twinning can be formulated as a vectorisation transform. The same idea underlies the intervention-as-program-transformation view of Witty~\cite{witty2021sbi,witty2023bayesian}, the logical account by Ibeling and Icard~\cite{ibeling2020hierarchy}, and the string-diagrammatic accounts of Jacobs et al.~\cite{jacobs2019causal} and Lorenz and Tull~\cite{lorenz2023causalmodelsstringdiagrams}. 
