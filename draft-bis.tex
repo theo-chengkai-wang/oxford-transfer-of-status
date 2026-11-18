@@ -25,6 +25,10 @@
 
 % \input{lit_review.tex}
 
+\todo{Say something}
+
+Due to the strong overlap between the proposal and the work done in my first year \cite{wang2026causalppl} (my term paper, recently accepted to POPL 2027), I adapted parts of its related work and introduction sections to parts of \todo{sections 2 and 3}. 
+
 \section{Literature Review}
 
 \subsection{Foundations of Probabilistic Programming}
@@ -100,7 +104,7 @@ Markov categories provide an elegant framework to formalise probability theory c
 
 \subsection{Foundations of Causal Modelling}
 
-Causal inference \cite{pearl2009causality,Pearl2018_book_of_why}, pioneered by Pearl, is a statistical toolkit that allows one to reason beyond correlation, about causation and counterfactuals. In this section we give a primer of Pearl's framework for Causality. Part of the section is adapted from the term paper \cite{wang2026causalppl}. 
+Causal inference \cite{pearl2009causality,Pearl2018_book_of_why}, pioneered by Pearl, is a statistical toolkit that allows one to reason beyond correlation, about causation and counterfactuals. In this section we give a primer of Pearl's framework for Causality. 
 
 \subsubsection{Pearl's Three Rungs of Causality}
 
@@ -308,10 +312,11 @@ One of the graph-centered inference tasks is \emph{identifiability} \todo{cite}:
 \paragraph{Equivalence of causal models} Notions of equivalence for causal models come in two families. \emph{Graph} equivalences (e.g.\ Markov equivalence~\cite{verma1990equivalence,pearl2009causality}), where we consider two causal graphs to be equivalent if they encode the same conditional independencies. These equivalences underpin causal discovery (the task of discovering causal structures from data), where algorithms often recover a graph only up to its Markov equivalence class~\cite{spirtes2000causation,peters_janzing_schoelkopf_2017_book}. 
 
 \emph{Model} equivalences determine when fully-specified causal models are equivalent. Bongers et al.~\cite{Bongers_2021} define a hierarchy of equivalences of structural causal models: they define two SCMs to be \emph{observationally} equivalent if they induce the same distribution; \emph{interventionally} equivalent if they induce the same distribution under all interventions; and \emph{counterfactually} equivalent if they are equivalent under twinning and intervention. These notions are intuitive and have a similar flavour to contextual equivalences in programming language theory; we make the correspondence precise in \todo{cite section}. 
-Several more notions of equivalence sit at rung 2:
+Several more (related) notions of equivalence sit at rung 2:
 \begin{itemize}
     \item Pearl defined how CBNs induce a family of interventional distributions~\cite{pearl2009causality};
-    \item Causal spaces~\cite{park2024measuretheoreticaxiomatisationcausality,buchholz2024products} axiomatise the idea of defining the semantics of causal moedls by their interventional distributions measure-theoretically. A causal space is essentially a morphism $\prod_i(A_i+1)\to\Prob(\prod_i A_i)$ in $\CatMeas$. 
+    \item Causal spaces~\cite{park2024measuretheoreticaxiomatisationcausality,buchholz2024products} axiomatise the idea of defining the semantics of causal moedls by their interventional distributions measure-theoretically. A causal space is essentially a morphism $\prod_i(A_i+1)\to\Prob(\prod_i A_i)$ in $\CatMeas$.
+    \item Causal abstraction~\cite{rubenstein2017consistency,beckers2019abstracting,lorenztull2026abstraction} studies `homomorphisms' between rung 2 causal models, defining them as coarsening maps that must commute with interventions. Intuitively this can be thought of as a uni-directional version of interventional equivalence. 
     \item Finally, \emph{normalisation boxes} (local normalisation in a Markov category) generalise interventions~\cite{lorenz2023causalmodelsstringdiagrams, jacobsszelesstein2025inference} and yield rung-2 equational principles for causal Bayesian networks~\cite{jacobsszelesstein2025inference,agrawal2026equational}; we explore it in more detail in \todo{cite section later}. 
 \end{itemize}
 
@@ -444,9 +449,17 @@ Four systems support rung 3 natively~\cite{tavares2021language,chirho,perov2020m
 
 \subsection{Logical, Diagrammatic, Categorical notions of Causality}
 
-\paragraph{Functorial Semantics}
+Causality and causal inference has been the object of many studies outside the space of programming languages. We briefly survey a few below.
 
-\paragraph{Logical characterisation of Ibeling and Icard}
+\paragraph{Functorial Semantics} This line of work, starting from \cite{jacobs2019causal}, presents causal models using Lawvere-style \todo{cite} functorial semantics: they consider causal models as a (structure-preserving) functor from a syntax category to a semantics category, where 
+\begin{itemize}
+    \item The syntax category is a symmetric monoidal category with a `copy-discard-uniform structure' generated from the causal structure of the model, presented using string diagrams
+    \item The semantics category is a Markov category, in which the model is interpreted.
+\end{itemize}
+Then, intervention can naturally be presented as a string-diagram surgery~\cite{jacobs2019causal}. This view naturally motivates several notions: \emph{normalisation boxes}~\cite{jacobsszelesstein2025inference,lorenz2023causalmodelsstringdiagrams} handle local normalisation, which I discuss further in \todo{section}; \emph{causal abstraction} can be presented as a particular class of natural transformations between causal models~\cite{lorenztull2026abstraction, englberger2025causalabstractionscategoricallyunified}. 
+
+\paragraph{Probabilstic Logic characterisation} Ibeling and Icard et al.\ develop a logical characterisation of Pearl's causal hierarchy~\cite{ibeling2020hierarchy}: three probabilistic logics of strictly increasing expressivity capture rung-1 to rung-3 \emph{queries}, with semantics defined directly on SCMs via Pearl's operations. The insight is that one can then reason about equivalences of causal queries in the style of identifiability or do-calculus. 
+Icard also proposed probabilistic Turing machines as the probabilistic program analogue of SCMs~\cite{icard2017programs,ibeling2019openuniverse}. As we will see below in \todo{section}, our hierarchy $\Lone$-$\Lthree$ of causal languages is the programming-language analogue of theirs: they organise \emph{queries} where we organise \emph{models}. It would be interesting to understand how this view relates to the programming languages view.
 
 \paragraph{Modulating Normalisation}
 
