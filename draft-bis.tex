@@ -485,13 +485,22 @@ For concurrent programs potentially with non-deterministism and race-conditions,
 
 % \emph{Position.} In these semantic models the causal graph is always explicit; this is in contrast to what we called \emph{model equivalences}, where the graph is implicit and we only care about the extensional property of the model's behaviour under intervention or twinning. It would be interesting to understand whether a similarly extensional characterisation of causal ordering could be useful in the context of concurrency, for example whether it makes sense to talk about \emph{intervening} on an event. 
 
-\paragraph{Quantum Computing} In quantum computing, \emph{causality} often refers to signalling constraints. Indeed, a complete positive (CP) map $F: \mathcal{A} \to \mathcal{B}$ is said to be \emph{causal} \todo{cite e.g. PQP} if its future cannot influence the past, i.e. it is trace preserving \[
-\Tr_{\mathcal{B}} \circ F = \Tr_{\mathcal{A}}
+\paragraph{Quantum Computing} In quantum computing, \emph{causality} often refers to signalling constraints. Indeed, a complete positive (CP) map $F: \mathcal{A} \to \mathcal{B}$ is said to be \emph{causal} \todo{cite e.g. PQP} if its future cannot influence the past, i.e. it is trace preserving: this is formulated as the following trace-preservation (TP) condition \[
+\Tr \circ F = \Tr
 \] 
 \todo{Make a string diagram version of this.}
+CPTP maps are the canonical model of first order quantum computation. As a natural extension of such first-order processes, notions of \emph{higher order} quantum processes have been developed in the past few decades. A higher-order quantum process is, informally, a quantum process with holes, such that if we plug those holes with CPTP maps then the resulting map is CPTP. A string diagrammatic representation of such a process could look like the following:
+\todo{make string diagram version of higher order process that has holes, like in the QCQC paper.}
+Within the world of higher order processes, one can formulate finer causal relationships using signalling constraints. For example, consider the following CP map $\Phi: A \otimes B \to C \otimes D$, then we can say that $B$ does not signal $C$ if there is a map $\Phi': A \to C$ such that the following factorisation holds:
 
-For so-called higher order quantum processes, 
+\todo{make string diagram equality with discarding $D$ becoming discarding $B$}
 
+in which case we can draw such a map in the following shape:
+\todo{draw comb form of $\Phi$}
+
+Using these signalling constraints one can gather together \emph{causal relationships} between each input/output wire. Certain higher-order processes can be completely factorised according to these causal relationships; they are said to be of \emph{fixed} causal ordering. Not all maps satisfy this property, and those that don't are said to have \emph{indefinite} causal order. Examples include the famous quantum switch \todo{cite}, which coherently controls the order in which two input CPTP maps are applied; the classical switch, where the order is classically controlled; and even processes that go beyond coherently controlled orders like the OCB process, which are not yet known to be physically realisable. \todo{cite} The canonical formalism for these processes is process matrices \todo{cite}, which essentially representing higher order maps as a big PSD operator using the \todo{Choi} isomorphism. Classes of different higher-order processes with fixed, classically controlled, quantum controlled causal orders and beyond have been formulated by \todo{cite}. Also, a categorical formulation of higher order quantum processes based on signalling constraints has been formulated by Kissinger and Uijlen's Caus construction \todo{cite}, and further expanded by Simmons and Kissinger \todo{cite}, where they characterised the category as a model of a BV logic. 
+
+It is also interesting to note that higher order quantum processes have been used to define \emph{quantum causal models}, with the holes acting as intervention points. Cyclic such models have been used to study indefine causal orders. It would be interesting to explore this space further.
 
 \section{Progress during my first year}
 I spent the majority of my first year concentrated on developing semantics for causal probabilistic programming, in collaboration with Dario Stein, Michael Lee, Ohad Kammar, Jeremy Yallop, my supervisor Sam Staton, and industry collaborators Eli Bingham and John Feser from Basis who are behind Omega \cite{tavares2021language} and ChiRho \cite{chirho}. I joined the collaboration 9 months before the start of the DPhil, during which time I developed a semantics for ChiRho, which we presented in the form of a Haskell embedding at LAFI 2026 \cite{wang2026causalppl}. Our insights are summarised in \todo{cite section on ChiRho}. However, ChiRho is not without its flaws: its programming model relies on subtle interactions between effect handlers and tensor broadcasting and doesn't have a clear correspondence with traditional causal inference literature \cite{wang2026causalppl}. 
