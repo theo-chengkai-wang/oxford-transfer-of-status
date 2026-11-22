@@ -301,7 +301,7 @@ However, SCMs can be equivalent as CBNs but different as SCMs. Intuitively, any 
 
 % Rung 3 queries reason about hypothetical worlds in the light of what actually happened: given that the car did not start, would it have started had we filled the tank? Answering them requires relating the factual world to the counterfactual one. A causal Bayesian network cannot do this: its mechanisms are stochastic, so it does not say whether the randomness behind a variable is the same in both worlds. \emph{Structural causal models} (SCMs; also called structural equation models or functional causal models) \cite{pearl2009causality,Bongers_2021} fix this by separating each mechanism into a deterministic function and a source of noise. Variables are split into \emph{exogenous} variables $U$, which are independent random variables modelling background factors, and \emph{endogenous} variables $V$, each defined by a structural equation $V := f_V(\mathrm{pa}(V), U_V)$. Our car model becomes $\mathsf{fuel} := U_{\mathsf{fuel}}$, $\mathsf{battery} := U_{\mathsf{battery}}$ and $\mathsf{carStarts} := \mathsf{fuel} \wedge \mathsf{battery}$, with $U_{\mathsf{fuel}} \sim \mathrm{Bern}(0.8)$ and $U_{\mathsf{battery}} \sim \mathrm{Bern}(0.9)$. Behind this lies a philosophical assumption: the model is a \emph{closed world}. All uncertainty is uncertainty about the exogenous background, and once the background is fixed, everything else follows deterministically. The background is therefore shared by every world, actual or hypothetical, which licenses an additional operation, \emph{twinning} \cite{Balke1994}. We take two copies of the endogenous variables, one factual and one counterfactual, over the same exogenous variables. We condition on the factual copy, intervene on the counterfactual copy, and query the counterfactual copy. In our example, observing that the car did not start makes a flat battery more likely, so $\Pr(\mathsf{carStarts}' \mid \neg\mathsf{carStarts}, \opdo(\mathsf{fuel}' = \true)) = 9/14 \approx 0.64$, below the interventional $0.9$.
 
-\subsubsection{Topics in Causality}
+\subsubsection{Assorted Topics in Causality}
 In this section I give a brief account of selected topics in causal inference that are relevant to the proposal. 
 
 \paragraph{Causal Structures and Identifiability} In causal inference, the central object of study is often not the causal model but the graph of that model, or its causal \emph{structure}. There are two reasons for focusing on the causal structure rather than on a particular model (\todo{cite}). First, a fully specified model is rarely available. Secondly, the structure records the modeller's causal assumptions: an edge $X \to Y$ asserts that $Y$ \emph{may} depend on $X$, and its absence asserts that it does not. A particular model compatible with the structure may realise fewer dependencies than the structure permits, e.g.\ a mechanism may ignore one of its parents, so the structure is the more faithful record of what was assumed~\cite{spirtes2000causation,barrett2020quantumcausalmodels}. 
@@ -574,6 +574,8 @@ We derive $\LHO$ by denotational and functional programming techniques. We first
 % % \end{itemize}
 
 \section{Project Proposal}
+
+I am interested in working on the programming language theoretic and categorical semantics of causality. 
 
 \subsection{Developing the field of Causal PPLs}
 \subsubsection{Putting the language into practice}
