@@ -575,21 +575,40 @@ We derive $\LHO$ by denotational and functional programming techniques. We first
 
 \section{Project Proposal}
 
-I am interested in working on the programming language theoretic and categorical semantics of causality. 
+For the rest of my DPhil, I plan to work on developing better categorical and programming language theoretic foundations for causality, extending my work during first year \cite{wang2026causalppl}. To be more precise, I can broadly divide my research goals into three categories:
+\begin{itemize}
+    \item Developing the field of causal probabilistic programming languages;
+    \item Developing alternative programming language tools for graph-oriented causal modelling;
+    \item Relating Pearl's causality to other notions in higher order quantum computing and concurrency.
+\end{itemize}
+The three categories are in increasing order of risk, and it is in this same order that I plan to pursue them. I give more detail below.
 
 \subsection{Developing the field of Causal PPLs}
-\subsubsection{Putting the language into practice}
-\subsubsection{Expressivity}
+This line will mainly be extending my work during the first year \cite{wang2026causalppl}. The main goal is to develop the ideas that we have about the right abstractions for causal probabilistic programming into expressive practical programming languages. By doing so, we will further develop our abstractions, which have the potential of shedding light on the fundamental structures behind causal modelling. 
 
-\subsection{Better understanding our categorical constructions}
-\subsubsection{Relation to other constructions}
-\subsubsection{A more synthetic approach?}
+
+\paragraph{Cyclic models} 
+
+\paragraph{Inference for unspecified or underspecified models}
+
+\paragraph{First class counterfactual worlds}
+
+\paragraph{Comparision with other languages} One important way of understanding how expressive my language is would be to compare it with a different language that supports similar operations. For ChiRho \cite{chirho}, we have a relatively clear image of how it compares with our language by developing its semantics \cite{lafi-wang} and understanding what programs it allows one to write. However, for Omega \cite{tavares2021language}, I am yet to understand its semantics, what it can and can't do. The idea here would be to first understand the language, perhaps repurpose some of our abstractions to understand how Omega implements counterfactuals \emph{denotationally}; this will give us both an idea of its semantics and a way of implementing it using Haskell, which we can then use as a playground to gain understanding about it. 
+
+\paragraph{Implementing an efficient causal probabilistic programming library} Apart from all the possible language extensions proposed above, one general way to understand what language extensions might be necessary for practical causal programming is by having an implementation and writing big example programs that push the limit of our language's expressiveness. Currently, we have an implementation for $\LHO$, the higher-order causal PPL that we have developed. However, it is a definitional implementation based on Haskell and MonadBayes \cite{monadbayes1,monadbayes2,monadbayes3} and highly inefficient. To support our research, we should therefore implement a more efficient version of $\LHO$ in a language that supports vectorised Bayesian inference. One such candidate is Python and Jax. 
+
+\paragraph{Synthetic Foundations} Somewhat orthogonally from the above, I would like to develop synthetic foundations for causality and causal inference, possibly based on Markov categories, which is the synthetic foundation for probability theory (rung 1). The motivation is that in our work \cite{wang2026causalppl}, we presented everything around a category $\catc$ along with a commutative and affine monad $\Prob$, and several adhoc properties, so as to present our abstractions in a uniform way over discrete ($\Set$ with the finitely supported distribution monad), first-order continuous ($\Sbs$ with a restriction of the Giry monad), higher-order continuous ($\Qbs$ with its probabilisty monad) probability theories. I would like to work on making these categorical assumptions precise.
+
+Work that has already been done in the direction of synthetic foundations \cite{jacobs2019causal,jacobsszelesstein2025inference,lorenz2023causalmodelsstringdiagrams, dilavore2026normalizedprobabilisticsemanticsassociative} often focus on the graph-oriented view of causality: \cite{jacobs2019causal,jacobsszelesstein2025inference} represent a (rung 2) causal model as a functor from its graph into a Markov category; \cite{dilavore2026normalizedprobabilisticsemanticsassociative} use non-associativity to model the effects of normalisation, to synthetically derive graphical criteria for identifiability. 
+
+I want to focus instead on the model-oriented view of causality. In particular, can we define an interventional structure on Markov categories, or some uniform construction that turns a Markov category into an intervenable one? Can we define such intervention structures such that it works even for the so-called `higher-order' intervention types that we briefly mentioned in \todo{section above}. Furthermore, can we define what it means for a Markov category to `support counterfactuals', e.g. what is a valid counterfactual structure? Counterfactuals, which we did not dig very deep into in the literature review, is a contentious topic: there is ample philosophical debate on what is the right notion of counterfactuals; see e.g. \todo{cite Sanders Beckers}. So can we make such a definition so it captures various flavours of counterfactual constructions existing in the literature? 
+
+One possible starting point could be to consider the relationship of our constructions with Park et al's causal spaces \cite{park2024measuretheoreticaxiomatisationcausality} and counterfactual spaces \cite{park2026counterfactualspaces}. We already know that Causal spaces are very much related to our graded monad: \todo{continue here.}
 
 \subsection{Understanding causality using a graph-centered approach}
 
 \subsection{Understanding relationship with `causality' as used in other fields}
-\subsubsection{Concurrency}
-\subsubsection{Higher-order processes and quantum causality}
+
 
 
 % \subsection{Towards practical causal probabilistic programming}
