@@ -583,3 +583,39 @@
 \newcommand{\CatMeas}{\catname{Mbl}}
 
 \DeclareMathOperator{\Tr}{Tr}
+
+% ---------------------------------------------------------------------------
+% Added by Claude (26 Nov 2026): red highlighting of everything Claude wrote.
+% \claude{...}  colours text red; [claude] on a tikzpicture colours a diagram red;
+% bib entries with keywords={claude} are printed in red by the hook below.
+\colorlet{claudered}{red!80!black}
+\newcommand{\claude}[1]{{\color{claudered}#1}}
+\tikzset{claude/.style={color=claudered, text=claudered}}
+\ifdefined\AtEveryBibitem
+  \AtEveryBibitem{\ifkeyword{claude}{\color{claudered}}{}}
+\fi
+
+% Uniform style for graphical-model figures (Claude, 26 Nov 2026):
+%   var  = a plain variable node;  intv = a node changed by intervention/twinning
+%   (same highlight colour as \cnew in code listings);  exo/endo/world as above.
+\tikzset{
+  graph/.style={>=stealth, baseline},
+  var/.style={draw=black!70, fill=black!4, rounded corners=2pt, inner sep=3pt, minimum height=1.8em},
+  intv/.style={var, fill=codenew, draw=orange!70!black},
+}
+
+% String-diagram style (Claude, 26 Nov 2026); diagrams read bottom to top as in
+% Coecke--Kissinger.  \pic{discard} draws the discarding ("ground") effect.
+\tikzset{
+  sd/.style={baseline=(current bounding box.center), thick, font=\small},
+  box/.style={draw, fill=white, minimum width=1.1cm, minimum height=0.7cm, inner sep=3pt},
+  hole/.style={draw, dashed, fill=white, minimum width=0.9cm, minimum height=0.6cm, inner sep=2pt},
+  process/.style={draw, rounded corners=3pt, fill=black!8, inner sep=0pt},
+  wire/.style={thick},
+  wlabel/.style={font=\scriptsize, inner sep=1.5pt},
+  discard/.pic={
+    \draw[thick] (-0.18,0)--(0.18,0);
+    \draw[thick] (-0.11,0.09)--(0.11,0.09);
+    \draw[thick] (-0.04,0.18)--(0.04,0.18);
+  },
+}

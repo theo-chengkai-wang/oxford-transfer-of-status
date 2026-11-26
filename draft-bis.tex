@@ -9,6 +9,8 @@
 \date{\today}
 
 \addbibresource{refs.bib}
+\addbibresource{refs-quantum.bib} % added by Claude 26 Nov 2026 (quantum / concurrency entries)
+\addbibresource{refs-new.bib}     % added by Claude 26 Nov 2026 (causal-inference / categorical entries)
 
 \begin{document}
 
@@ -27,32 +29,32 @@
 
 \todo{Say something}
 
-Due to the strong overlap between the proposal and the work done in my first year \cite{wang2026causalppl} (my term paper, recently accepted to POPL 2027), I adapted parts of its related work and introduction sections to parts of \todo{sections 2 and 3}. 
+Due to the strong overlap between the proposal and the work done in my first year \cite{wang2026causalppl} (my term paper, recently accepted to POPL 2027), I adapted parts of its related work and introduction sections to parts of \claude{\cref{sec:litreview,sec:firstyear}}. 
 
-\section{Literature Review}
+\section{Literature Review}\label{sec:litreview}
 
-\subsection{Foundations of Probabilistic Programming}
+\subsection{Foundations of Probabilistic Programming}\label{sec:ppl}
 
-\paragraph{From Bayesian Networks to Probabilistic Programming} A central tool in Bayesian probabilistic modelling is Bayesian networks \todo{cite}, a graphical representation of a joint distribution. Formally, a Bayesian network over a certain set of variables $V$ is a directed acyclic graph over $V$, a domain $D_x$ for each variable $x \in V$, and for each variable $v \in V$, a conditional distribution $P(x \mid \mathsf{Parents}(x))$. This data can be seen as a Markov factorisation of a joint distribution $$P(x_1...x_n) = \prod_{x\in V} P(x \mid \mathsf{Parents}(x))$$
-Bayesian networks are useful because their graphical structure encodes the conditional independencies between variables (a variable is assumed to only depend on its parents), exploited to make Bayesian inference (computing conditional distributions) more efficient. \todo{cite again} 
+\paragraph{From Bayesian Networks to Probabilistic Programming} A central tool in Bayesian probabilistic modelling is Bayesian networks \claude{\cite{pearl1988probabilistic,koller2009pgm}}, a graphical representation of a joint distribution. Formally, a Bayesian network over a certain set of variables $V$ is a directed acyclic graph over $V$, a domain $D_x$ for each variable $x \in V$, and for each variable $v \in V$, a conditional distribution $P(x \mid \mathsf{Parents}(x))$. This data can be seen as a Markov factorisation of a joint distribution $$P(x_1...x_n) = \prod_{x\in V} P(x \mid \mathsf{Parents}(x))$$
+Bayesian networks are useful because their graphical structure encodes the conditional independencies between variables (a variable is assumed to only depend on its parents), exploited to make Bayesian inference (computing conditional distributions) more efficient \claude{\cite{lauritzen1988local,koller2009pgm}}. 
 
 For instance consider the scenario where we are trying to model a car, which has fuel with probability $0.8$, battery with probability $0.9$, and only starts if it has both fuel and battery. Then we can model the joint distribution between $\mathsf{fuel}$, $\mathsf{battery}$ and $\mathsf{carStarts}$ with the Bayesian network in \cref{fig:rung1car}. 
 
 \begin{figure}
     \centering
-\begin{tikzpicture}[>=stealth,baseline]
-\node (f) at (0,1.0) {\textsf{fuel}};
-\node (b) at (3,1.0) {\textsf{battery}};
-\node (s) at (1.5,0) {\textsf{carStarts}};
+\begin{tikzpicture}[graph]
+\node[var] (f) at (0,1.2) {\textsf{fuel}};
+\node[var] (b) at (3,1.2) {\textsf{battery}};
+\node[var] (s) at (1.5,0) {\textsf{carStarts}};
 \draw[->] (f)--(s);\draw[->] (b)--(s);
 \end{tikzpicture}
-    \caption{Graphical representaton of the car model}
+    \caption{Graphical representaton of the car model \claude{(figure restyled)}}
     \label{fig:rung1car}
 \end{figure}
 
-Probabilistic Programming languages can be seen as a compositional generalisation of Bayesian networks: they provide a compositional syntax for specifying probabilistic models and performing inference on them. Our running example, for instance, can be represented by the program in \cref{fig:rung1program}. Like for Bayesian networks, probabilistic programs represent joint distributions (lines 1-3 of \cref{fig:rung1program} represent the joint distribution represented by the Bayesian network). Unlike Bayesian networks, we can also record observations like $\mathsf{carStarts}=\false$ (`the car did not start') using the $\opcondition: \booleans \to 1$ operation (line 4 of \cref{fig:rung1program}), or more general `soft' conditioning using $\opscore: \reals^+ \to 1$. Operationally, every (probabilistic) run of a probabilistic program carries a \emph{weight}. Soft conditioning multiplies the weight, and hard conditioning discards any run where the boolean condition evaluates to $\false$, i.e. scores it by $0$. Clearly, $\opcondition(b) = \opscore(\ifelse{b}{1}{0})$. \todo{cite.} The conditional distribution that the program represents is then obtained from a weighted normalisation of the runs. 
+Probabilistic Programming languages can be seen as a compositional generalisation of Bayesian networks: they provide a compositional syntax for specifying probabilistic models and performing inference on them. Our running example, for instance, can be represented by the program in \cref{fig:rung1program}. Like for Bayesian networks, probabilistic programs represent joint distributions (lines 1-3 of \cref{fig:rung1program} represent the joint distribution represented by the Bayesian network). Unlike Bayesian networks, we can also record observations like $\mathsf{carStarts}=\false$ (`the car did not start') using the $\opcondition: \booleans \to 1$ operation (line 4 of \cref{fig:rung1program}), or more general `soft' conditioning using $\opscore: \reals^+ \to 1$. Operationally, every (probabilistic) run of a probabilistic program carries a \emph{weight}. Soft conditioning multiplies the weight, and hard conditioning discards any run where the boolean condition evaluates to $\false$, i.e. scores it by $0$. Clearly, $\opcondition(b) = \opscore(\ifelse{b}{1}{0})$ \claude{\cite{semantics_ppl_staton2016,staton2017commutative}}. The conditional distribution that the program represents is then obtained from a weighted normalisation of the runs. 
 
-The problem of inferring the exact conditional distribution from a probabilistic program is undecidable in general \todo{cite}, and intractable to say the least. This is why inference is often solved using approximate algorithms like \todo{cite}.
+The problem of inferring the exact conditional distribution from a probabilistic program is undecidable in general \claude{\cite{ackerman2011noncomputable}}, and intractable to say the least. This is why inference is often solved using approximate algorithms like \claude{Markov chain Monte Carlo, sequential Monte Carlo and variational inference (see e.g.\ \cite{vandemeent2021introductionprobabilisticprogramming})}.
 
 \begin{figure}
     \centering
@@ -67,20 +69,20 @@ The problem of inferring the exact conditional distribution from a probabilistic
     \label{fig:rung1program}
 \end{figure}
 
-\paragraph{Semantics of PPLs} The semantics of probabilistic programming languages are generally given in a category $\catc$ that `supports probability theory' with a normalised probability monad $\Prob$ \todo{Kock}. In the discrete case, one considers $\Set$ and the finitely supported distributions monad. Because $\Set$ is cartesian-closed, one can not only interpret first order programs, but also higher order ones like $(X \to \Prob(Y)) \to \Prob(Z)$. In the more general continuous case, one often uses categories like the category of measurable spaces $\CatMeas$ (or subcategories thereof) with the Giry monad $G: \CatMeas \to \CatMeas$ \todo{cite}. Because $\CatMeas$ is famously not cartesian-closed, several works \cite{semantics_ppl_staton2016,Heunen_2017} have developed the category of quasi-Borel spaces (QBS) as an alternative in which higher order probabilistic programming is possible. Many extensions to QBS have since been developed, such as $\omega$QBS \todo{cite}, which enables recursion, and quasi-Borel families (QBFs), which enable dependent types \todo{cite}. 
+\paragraph{Semantics of PPLs} The semantics of probabilistic programming languages are generally given in a category $\catc$ that `supports probability theory' with a normalised probability monad $\Prob$ \claude{\cite{kock72,semantics_ppl_staton2016}}. In the discrete case, one considers $\Set$ and the finitely supported distributions monad. Because $\Set$ is cartesian-closed, one can not only interpret first order programs, but also higher order ones like $(X \to \Prob(Y)) \to \Prob(Z)$. In the more general continuous case, one often uses categories like the category of measurable spaces $\CatMeas$ (or subcategories thereof) with the Giry monad $G: \CatMeas \to \CatMeas$ \claude{\cite{giry1982categorical}}. Because $\CatMeas$ is famously not cartesian-closed, several works \cite{semantics_ppl_staton2016,Heunen_2017} have developed the category of quasi-Borel spaces (QBS) as an alternative in which higher order probabilistic programming is possible. Many extensions to QBS have since been developed, such as $\omega$QBS \claude{\cite{vakar2019domain}}, which enables recursion, and quasi-Borel families (QBFs), which enable dependent types \claude{\cite{ahman2026qbf}}. 
 
 Normalised probability monads only allow one to interpret sampling; interpreting conditioning (or scoring in general) will require \emph{unnormalised} probability monads $\Meas$. An unnormalised probability monad should be a super-monad of the normalised counterpart. Without going into too much detail, there are many possible choices for $\Meas$ with different trade-offs. For instance, we can consider $\Meas(X) = \Prob(X \times \reals^+)$, which enables general scoring using a writer effect; or indeed the subdistribution monad $\Meas(X) = \Prob(X + 1)$, which only supports (hard) conditioning. Finally, in this context, Bayesian inference can be thought of as a normalisation map $\opnorm: \Meas(X) \to \Prob(X) + 1$ (e.g. \cite{semantics_ppl_staton2016}), where the additional $+1$ outcome is because the input distribution could be everywhere-zero. 
 
 Many PPLs exploit the monadic interface in their implementation, if not their formal analysis. To name a few: \begin{itemize}
     \item MonadBayes \cite{monadbayes1,monadbayes2,monadbayes3} encodes the monadic interface using Haskell's type classes, so that programs can be written independently of the choice of inference algorithm.
     \item LazyPPL \cite{lazyppl} exploits Haskell's laziness for both efficient inference and inference on coinductive data like streams. 
-    \item GenJAX \cite{becker26genjax} is a vectorised probabilistic programming language built on top of Jax \todo{cite}, and has its formal analysis based on the monadic language.
+    \item GenJAX \cite{becker26genjax} is a vectorised probabilistic programming language built on top of Jax \claude{\cite{jax2018github}}, and has its formal analysis based on the monadic language.
 \end{itemize}
 
 
-\paragraph{Synthetic Foundations} In parallel to probabilistic programming, \emph{Markov categories} present a synthetic approach to probability theory. Markov categories axiomatise the categorical structure essential to probability theory without measure theory: a symmetric monoidal category (intuitively, a category of stochastic maps), along with a commutative comonoid on each object, i.e. a co-multiplication operation $\delta_A: A \to A \otimes A$ and a co-unit $\epsilon_A: A \to I$, such that $\epsilon_A$ is natural with respect to $A$. Intuitively, one thinks of $\delta_A$ as the operation of taking an $A$ and copying it, and $\epsilon_A$ as the operation of discarding the result of type $A$. \todo{citations}. Markov categories provide a unifying account of many categories in which one can do probability theory, notably $\mathsf{FinStoch}$, the category of (finite) stochastic matries; $\mathsf{Stoch}$, the category of measurable spaces and Markov kernels; and the Kleisli categories of the probability monads that we mentioned above. For example, $\mathsf{Stoch}$ is the Kleisli category of the Giry monad on $\CatMeas$. The correspondence betwen Kleisli categories of affine commutative monads and a certain subclass of Markov categories coined `representable' is studied in \todo{Fritz, Gonda, Perrone, Rischel 2023}. 
+\paragraph{Synthetic Foundations} In parallel to probabilistic programming, \emph{Markov categories} present a synthetic approach to probability theory. Markov categories axiomatise the categorical structure essential to probability theory without measure theory: a symmetric monoidal category (intuitively, a category of stochastic maps), along with a commutative comonoid on each object, i.e. a co-multiplication operation $\delta_A: A \to A \otimes A$ and a co-unit $\epsilon_A: A \to I$, such that $\epsilon_A$ is natural with respect to $A$. Intuitively, one thinks of $\delta_A$ as the operation of taking an $A$ and copying it, and $\epsilon_A$ as the operation of discarding the result of type $A$ \claude{\cite{fritz2020synthetic,chojacobs2019disintegration}}. Markov categories provide a unifying account of many categories in which one can do probability theory, notably $\mathsf{FinStoch}$, the category of (finite) stochastic matries; $\mathsf{Stoch}$, the category of measurable spaces and Markov kernels; and the Kleisli categories of the probability monads that we mentioned above. For example, $\mathsf{Stoch}$ is the Kleisli category of the Giry monad on $\CatMeas$. The correspondence betwen Kleisli categories of affine commutative monads and a certain subclass of Markov categories coined `representable' is studied in \claude{\cite{fritz2023representable}}. 
 
-Markov categories provide an elegant framework to formalise probability theory concepts, notably: deterministic morphisms, almost sure equality, conditionals, stochastic independence, Disintegration, and Bayesian inversion \todo{citations}. More relevant to us are also analyses of graphical properties used in causal inference like $d$-seperation \todo{cite Fritz and Klingler}, which we will elaborate on later.
+Markov categories provide an elegant framework to formalise probability theory concepts, notably: deterministic morphisms, almost sure equality, conditionals, stochastic independence, Disintegration, and Bayesian inversion \claude{\cite{fritz2020synthetic,chojacobs2019disintegration}}. More relevant to us are also analyses of graphical properties used in causal inference like $d$-seperation \claude{\cite{fritz2023dseparation}}, which we will elaborate on later.
 
 % \subsubsection{Monadic Probabilistic Programming}
 
@@ -102,11 +104,11 @@ Markov categories provide an elegant framework to formalise probability theory c
 % \end{itemize}
 
 
-\subsection{Foundations of Causal Modelling}
+\subsection{Foundations of Causal Modelling}\label{sec:causal}
 
 Causal inference \cite{pearl2009causality,Pearl2018_book_of_why}, pioneered by Pearl, is a statistical toolkit that allows one to reason beyond correlation, about causation and counterfactuals. In this section we give a primer of Pearl's framework for Causality. 
 
-\subsubsection{Pearl's Three Rungs of Causality}
+\subsubsection{Pearl's Three Rungs of Causality}\label{sec:rungs}
 
 Pearl \cite{Pearl2018_book_of_why} organises causal questions about the world into three rungs:
 \begin{enumerate}
@@ -127,24 +129,24 @@ For instance, if we reinterpret \cref{fig:rung1car} to be a CBN, we can answer o
 
 \begin{figure}
     \centering
-    \begin{tikzpicture}[>=stealth,baseline]
-\node (f) at (0,1.0) {\cnew{\textsf{fuel}=$\true$}};
-\node (b) at (3,1.0) {\textsf{battery}};
-\node (s) at (1.5,0) {\textsf{carStarts}};
+    \begin{tikzpicture}[graph]
+\node[intv] (f) at (0,1.2) {\textsf{fuel}$\,=\true$};
+\node[var]  (b) at (3,1.2) {\textsf{battery}};
+\node[var]  (s) at (1.5,0) {\textsf{carStarts}};
 \draw[->] (f)--(s);\draw[->] (b)--(s);
 \end{tikzpicture}
-\caption{Car model, intervened with $\opdo(\mathsf{fuel} = \true)$}
+\caption{Car model, intervened with $\opdo(\mathsf{fuel} = \true)$ \claude{(figure restyled)}}
 \label{fig:rung2car}
 \end{figure}
 
-The distinction between CBNs and BNs lies in the fact that the additional operation of intervention exposes the intensional, causal structure of the graphical model \todo{cite}. In \cref{fig:rung2equiv}, all three models represent the same joint distribution, so can be seen as equivalent as BNs, or `rung 1 equivalent'. However, they are different as CBNs, because they clearly behave differently under intervention. 
+The distinction between CBNs and BNs lies in the fact that the additional operation of intervention exposes the intensional, causal structure of the graphical model \claude{\cite{pearl2009causality,bareinboim:etal20}}. In \cref{fig:rung2equiv}, all three models represent the same joint distribution, so can be seen as equivalent as BNs, or `rung 1 equivalent'. However, they are different as CBNs, because they clearly behave differently under intervention. 
 \begin{figure}
     \centering
     \begin{subfigure}[b]{0.3\textwidth}
         \centering
-        \begin{tikzpicture}[>=stealth]
-        \node (f) at (0,0) {\textsf{fuel}};
-        \node (s) at (2,0) {\textsf{carStarts}};
+        \begin{tikzpicture}[graph]
+        \node[var] (f) at (0,0) {\textsf{fuel}};
+        \node[var] (s) at (2.4,0) {\textsf{carStarts}};
         \draw[->] (f)--(s);
         \end{tikzpicture}
         \caption{Fuel causes starting}
@@ -153,9 +155,9 @@ The distinction between CBNs and BNs lies in the fact that the additional operat
     \hfill
     \begin{subfigure}[b]{0.3\textwidth}
         \centering
-        \begin{tikzpicture}[>=stealth]
-        \node (f) at (0,0) {\textsf{fuel}};
-        \node (s) at (2,0) {\textsf{carStarts}};
+        \begin{tikzpicture}[graph]
+        \node[var] (f) at (0,0) {\textsf{fuel}};
+        \node[var] (s) at (2.4,0) {\textsf{carStarts}};
         \draw[->] (s)--(f);
         \end{tikzpicture}
         \caption{Starting causes fuel}
@@ -164,16 +166,16 @@ The distinction between CBNs and BNs lies in the fact that the additional operat
     \hfill
     \begin{subfigure}[b]{0.3\textwidth}
         \centering
-        \begin{tikzpicture}[>=stealth]
-        \node (u) at (1,1) {$U$};
-        \node (f) at (0,0) {\textsf{fuel}};
-        \node (s) at (2,0) {\textsf{carStarts}};
+        \begin{tikzpicture}[graph]
+        \node[var] (u) at (1.2,1.1) {$U$};
+        \node[var] (f) at (0,0) {\textsf{fuel}};
+        \node[var] (s) at (2.4,0) {\textsf{carStarts}};
         \draw[->] (u)--(f); \draw[->] (u)--(s);
         \end{tikzpicture}
         \caption{Common cause}
         \label{fig:minicommon}
     \end{subfigure}
-    \caption{Three causal Bayesian networks over $\mathsf{fuel}$ and $\mathsf{carStarts}$ equivalent as Bayesian networks.}
+    \caption{Three causal Bayesian networks over $\mathsf{fuel}$ and $\mathsf{carStarts}$ equivalent as Bayesian networks. \claude{(figure restyled)}}
     \label{fig:rung2equiv}
 \end{figure}
 
@@ -248,7 +250,7 @@ Each acyclic SCM is a CBN. It is a special CBN that factors into an exogenous pa
     \label{fig:rung3twin}
 \end{figure}
 
-However, SCMs can be equivalent as CBNs but different as SCMs. Intuitively, any CBN can be turned into an SCM by taking each of its stochastic dependencies $f: X \to \Prob(Y)$ and factorising it into a noise variable $n : \Prob(N)$ and a deterministic mechanism $f': X \times N \to Y$, \todo{cite reparameterisation trick}. The idea is then to set the original variables of the CBN as endogenous and the new noise variables as exogenous. Different choices of such factorisations will behave the same under interventions, but their twinnings could be different. For a concrete example, the reader may refer to e.g.\ \cite{Balke1994,pearl2009causality}. 
+However, SCMs can be equivalent as CBNs but different as SCMs. Intuitively, any CBN can be turned into an SCM by taking each of its stochastic dependencies $f: X \to \Prob(Y)$ and factorising it into a noise variable $n : \Prob(N)$ and a deterministic mechanism $f': X \times N \to Y$, \claude{the \emph{reparameterisation trick} of \cite{kingma2014vae}}. The idea is then to set the original variables of the CBN as endogenous and the new noise variables as exogenous. Different choices of such factorisations will behave the same under interventions, but their twinnings could be different. For a concrete example, the reader may refer to e.g.\ \cite{Balke1994,pearl2009causality}. 
 
 % \todo{finish extra intension explanation: CBNs equivalent but diff as SCMs}
 
@@ -301,26 +303,26 @@ However, SCMs can be equivalent as CBNs but different as SCMs. Intuitively, any 
 
 % Rung 3 queries reason about hypothetical worlds in the light of what actually happened: given that the car did not start, would it have started had we filled the tank? Answering them requires relating the factual world to the counterfactual one. A causal Bayesian network cannot do this: its mechanisms are stochastic, so it does not say whether the randomness behind a variable is the same in both worlds. \emph{Structural causal models} (SCMs; also called structural equation models or functional causal models) \cite{pearl2009causality,Bongers_2021} fix this by separating each mechanism into a deterministic function and a source of noise. Variables are split into \emph{exogenous} variables $U$, which are independent random variables modelling background factors, and \emph{endogenous} variables $V$, each defined by a structural equation $V := f_V(\mathrm{pa}(V), U_V)$. Our car model becomes $\mathsf{fuel} := U_{\mathsf{fuel}}$, $\mathsf{battery} := U_{\mathsf{battery}}$ and $\mathsf{carStarts} := \mathsf{fuel} \wedge \mathsf{battery}$, with $U_{\mathsf{fuel}} \sim \mathrm{Bern}(0.8)$ and $U_{\mathsf{battery}} \sim \mathrm{Bern}(0.9)$. Behind this lies a philosophical assumption: the model is a \emph{closed world}. All uncertainty is uncertainty about the exogenous background, and once the background is fixed, everything else follows deterministically. The background is therefore shared by every world, actual or hypothetical, which licenses an additional operation, \emph{twinning} \cite{Balke1994}. We take two copies of the endogenous variables, one factual and one counterfactual, over the same exogenous variables. We condition on the factual copy, intervene on the counterfactual copy, and query the counterfactual copy. In our example, observing that the car did not start makes a flat battery more likely, so $\Pr(\mathsf{carStarts}' \mid \neg\mathsf{carStarts}, \opdo(\mathsf{fuel}' = \true)) = 9/14 \approx 0.64$, below the interventional $0.9$.
 
-\subsubsection{Assorted Topics in Causality}
+\subsubsection{Assorted Topics in Causality}\label{sec:assorted}
 In this section I give a brief account of selected topics in causal inference that are relevant to the proposal. 
 
-\paragraph{Causal Structures and Identifiability} In causal inference, the central object of study is often not the causal model but the graph of that model, or its causal \emph{structure}. There are two reasons for focusing on the causal structure rather than on a particular model (\todo{cite}). First, a fully specified model is rarely available. Secondly, the structure records the modeller's causal assumptions: an edge $X \to Y$ asserts that $Y$ \emph{may} depend on $X$, and its absence asserts that it does not. A particular model compatible with the structure may realise fewer dependencies than the structure permits, e.g.\ a mechanism may ignore one of its parents, so the structure is the more faithful record of what was assumed~\cite{spirtes2000causation,barrett2020quantumcausalmodels}. 
+\paragraph{Causal Structures and Identifiability} In causal inference, the central object of study is often not the causal model but the graph of that model, or its causal \emph{structure}. There are two reasons for focusing on the causal structure rather than on a particular model (\claude{\cite{pearl2009causality,peters_janzing_schoelkopf_2017_book}}). First, a fully specified model is rarely available. Secondly, the structure records the modeller's causal assumptions: an edge $X \to Y$ asserts that $Y$ \emph{may} depend on $X$, and its absence asserts that it does not. A particular model compatible with the structure may realise fewer dependencies than the structure permits, e.g.\ a mechanism may ignore one of its parents, so the structure is the more faithful record of what was assumed~\cite{spirtes2000causation,barrett2020quantumcausalmodels}. 
 
-One of the graph-centered inference tasks is \emph{identifiability} \todo{cite}: computing interventional distribution $\Pr(y \mid \opdo(x))$ given assumptions on the causal graph and observational distributions. If doing is is possible, we say that the causal quantity is \emph{identifiable}. Over the years, many sufficient conditions for identifiability based on purely graphical criteria like d-separation have been developed, such as the frontdoor and backdoor criteria \todo{cite}. These tools culminated into the do-calculus. Developed by Pearl \todo{cite}, the do-calculus is a set of three equations for rewriting interventional queries into observational ones when the causal graph satisfies some graphical criterion. \todo{cite} proved that the do-calculus is complete for identification: a causal quantity is uniquely determined by the input observational quantities for every causal model compatible with the causal graph if and only if its expression in terms of the input observational quantities is derivable by the do-calculus. 
+One of the graph-centered inference tasks is \emph{identifiability} \claude{\cite{pearl1995docalculus,pearl2009causality}}: computing interventional distribution $\Pr(y \mid \opdo(x))$ given assumptions on the causal graph and observational distributions. If doing is is possible, we say that the causal quantity is \emph{identifiable}. Over the years, many sufficient conditions for identifiability based on purely graphical criteria like d-separation have been developed, such as the frontdoor and backdoor criteria \claude{\cite{pearl1995docalculus}}. These tools culminated into the do-calculus. Developed by Pearl \claude{\cite{pearl1995docalculus}}, the do-calculus is a set of three equations for rewriting interventional queries into observational ones when the causal graph satisfies some graphical criterion. \claude{Huang and Valtorta \cite{huang2006complete} and Shpitser and Pearl \cite{shpitser2006identification,JMLR:v9:shpitser08a}} proved that the do-calculus is complete for identification: a causal quantity is uniquely determined by the input observational quantities for every causal model compatible with the causal graph if and only if its expression in terms of the input observational quantities is derivable by the do-calculus. 
 
 
-\paragraph{Equivalence of causal models} Notions of equivalence for causal models come in two families. \emph{Graph} equivalences (e.g.\ Markov equivalence~\cite{verma1990equivalence,pearl2009causality}), where we consider two causal graphs to be equivalent if they encode the same conditional independencies. These equivalences underpin causal discovery (the task of discovering causal structures from data), where algorithms often recover a graph only up to its Markov equivalence class~\cite{spirtes2000causation,peters_janzing_schoelkopf_2017_book}. 
+\paragraph{Equivalence of causal models}\label{par:equiv} Notions of equivalence for causal models come in two families. \emph{Graph} equivalences (e.g.\ Markov equivalence~\cite{verma1990equivalence,pearl2009causality}), where we consider two causal graphs to be equivalent if they encode the same conditional independencies. These equivalences underpin causal discovery (the task of discovering causal structures from data), where algorithms often recover a graph only up to its Markov equivalence class~\cite{spirtes2000causation,peters_janzing_schoelkopf_2017_book}. 
 
-\emph{Model} equivalences determine when fully-specified causal models are equivalent. Bongers et al.~\cite{Bongers_2021} define a hierarchy of equivalences of structural causal models: they define two SCMs to be \emph{observationally} equivalent if they induce the same distribution; \emph{interventionally} equivalent if they induce the same distribution under all interventions; and \emph{counterfactually} equivalent if they are equivalent under twinning and intervention. These notions are intuitive and have a similar flavour to contextual equivalences in programming language theory; we make the correspondence precise in \todo{cite section}. 
+\emph{Model} equivalences determine when fully-specified causal models are equivalent. Bongers et al.~\cite{Bongers_2021} define a hierarchy of equivalences of structural causal models: they define two SCMs to be \emph{observationally} equivalent if they induce the same distribution; \emph{interventionally} equivalent if they induce the same distribution under all interventions; and \emph{counterfactually} equivalent if they are equivalent under twinning and intervention. These notions are intuitive and have a similar flavour to contextual equivalences in programming language theory; we make the correspondence precise in \claude{\cref{sec:firstyear}}. 
 Several more (related) notions of equivalence sit at rung 2:
 \begin{itemize}
     \item Pearl defined how CBNs induce a family of interventional distributions~\cite{pearl2009causality};
     \item Causal spaces~\cite{park2024measuretheoreticaxiomatisationcausality,buchholz2024products} axiomatise the idea of defining the semantics of causal moedls by their interventional distributions measure-theoretically. A causal space is essentially a morphism $\prod_i(A_i+1)\to\Prob(\prod_i A_i)$ in $\CatMeas$.
     \item Causal abstraction~\cite{rubenstein2017consistency,beckers2019abstracting,lorenztull2026abstraction} studies `homomorphisms' between rung 2 causal models, defining them as coarsening maps that must commute with interventions. Intuitively this can be thought of as a uni-directional version of interventional equivalence. 
-    \item Finally, \emph{normalisation boxes} (local normalisation in a Markov category) generalise interventions~\cite{lorenz2023causalmodelsstringdiagrams, jacobsszelesstein2025inference} and yield rung-2 equational principles for causal Bayesian networks~\cite{jacobsszelesstein2025inference,agrawal2026equational}; we explore it in more detail in \todo{cite section later}. 
+    \item Finally, \emph{normalisation boxes} (local normalisation in a Markov category) generalise interventions~\cite{lorenz2023causalmodelsstringdiagrams, jacobsszelesstein2025inference} and yield rung-2 equational principles for causal Bayesian networks~\cite{jacobsszelesstein2025inference,agrawal2026equational}; we explore it in more detail in \claude{\cref{sec:othernotions}}. 
 \end{itemize}
 
-\paragraph{Interventions à la carte} 
+\paragraph{Interventions à la carte}\label{par:intv} 
 So far we only considered \emph{perfect} interventions: forcefully sets a variable at a precise value. Many other types of interventions have since been considered. A few examples include:
 \begin{itemize}
     \item Stochastic/soft interventions (e.g.~\cite{didelez2006_stoch_mech_intv, munoz2012_stochastic_intv,
@@ -334,7 +336,7 @@ Young2014-mx_dependent_intv}): interventions depending on the factual value, e.g
 
 % \paragraph{Cyclic models} \todo{Two interpretations}
 
-\subsection{Causal Probabilistic Programming Languages}
+\subsection{Causal Probabilistic Programming Languages}\label{sec:cppl}
 
 \subsubsection{Motivation} Causal inference and probabilistic programming are both generalisations of statistical inference methods based on Bayesian networks: causal models enable us to answer questions about causality; probabilistic programming enables us to express richer probabilistic models with control flow and higher order functions compositionally, and systematically perform Bayesian inference on them. Causal probabilistic programming is an emerging field where the goal is to combine these two lines of work and be able to compute causal queries systematically on expressive probabilistic programs. 
 
@@ -351,10 +353,10 @@ That said, program transformations can be difficult to reason about and don't al
 \midrule
 \textbf{Rung 1}\par{\small Observation}\par\smallskip{\footnotesize answer $\tfrac57\!\approx\!0.71$}
 &
-\begin{tikzpicture}[>=stealth,baseline]
-\node (f) at (0,1.0) {\textsf{fuel}};
-\node (b) at (3,1.0) {\textsf{battery}};
-\node (s) at (1.5,0) {\textsf{carStarts}};
+\begin{tikzpicture}[graph]
+\node[var] (f) at (0,1.2) {\textsf{fuel}};
+\node[var] (b) at (3,1.2) {\textsf{battery}};
+\node[var] (s) at (1.5,0) {\textsf{carStarts}};
 \draw[->] (f)--(s);\draw[->] (b)--(s);
 \end{tikzpicture}
 &
@@ -367,10 +369,10 @@ return (fuel, battery, carStarts)
 \\ \midrule
 \textbf{Rung 2}\par{\small Intervention}\par\smallskip{\footnotesize answer $0.90$}
 &
-\begin{tikzpicture}[>=stealth,baseline]
-\node (f) at (0,1.0) {\cnew{\textsf{fuel}=$\true$}};
-\node (b) at (3,1.0) {\textsf{battery}};
-\node (s) at (1.5,0) {\textsf{carStarts}};
+\begin{tikzpicture}[graph]
+\node[intv] (f) at (0,1.2) {\textsf{fuel}$\,=\true$};
+\node[var]  (b) at (3,1.2) {\textsf{battery}};
+\node[var]  (s) at (1.5,0) {\textsf{carStarts}};
 \draw[->] (f)--(s);\draw[->] (b)--(s);
 \end{tikzpicture}
 &
@@ -384,32 +386,20 @@ return (fuel, battery, carStarts)
 \textbf{Rung 3}\par{\small Counterfactual}\par\smallskip{\footnotesize answer $\tfrac{9}{14}\!\approx\!0.64$}
 &
 \resizebox{\linewidth}{!}{%
-\begin{tikzpicture}[>=stealth]
-\node (f0) at (0,1.5) {\cnew{$\mathsf{fuel}_0$}};
-\node (b) at (2,1.5) {\textsf{battery}};
-\node (s0) at (0.4,0) {\cnew{\textsf{carStarts}$_0$}};
-\node (s1) at (3.6,0) {\cnew{\textsf{carStarts}$_1$}};
-\node (f1) at (4,1.5) {\cnew{$\mathsf{fuel}_1=\true$}};
+\begin{tikzpicture}[graph]
+\node[intv] (f0) at (0,1.6)   {$\mathsf{fuel}_0$};
+\node[var]  (b)  at (2.4,1.6) {\textsf{battery}};
+\node[intv] (f1) at (4.8,1.6) {$\mathsf{fuel}_1=\true$};
+\node[intv] (s0) at (0.4,0)   {$\mathsf{carStarts}_0$};
+\node[intv] (s1) at (4.4,0)   {$\mathsf{carStarts}_1$};
 \draw[->] (f0)--(s0);
 \draw[->] (b)--(s0);
 \draw[->] (b)--(s1);
 \draw[->] (f1)--(s1);
-\draw[dotted,rounded corners]
-    ($(f0.north west) + (0,0.3)$)
- -- node[below,very near start] { \footnotesize $~$factual }
-    ($(b.north east) + (0,0.3)$)
- -- (b.north east|-s0.south east)
- -- (f0.north west|-s0.south west)
- -- cycle;
-
-\draw[dotted,rounded corners,fill=gray,fill opacity=0.05,text opacity=1]
-    ($(f1.north east) + (0,0.4)$)
- -- node[below,near start] { \footnotesize counterfactual }
-    ($(b.north west) + (0,0.4)$)
- -- ($(b.north west|-s1.south west) + (0,-0.1)$)
- -- ($(f1.north east|-s1.south east) + (0,-0.1)$)
- -- cycle;
-
+\begin{scope}[on background layer]
+  \node[world, fit=(f0)(s0), label={[font=\footnotesize]above:factual}] {};
+  \node[world, fit=(f1)(s1), label={[font=\footnotesize]above:counterfactual}] {};
+\end{scope}
 \end{tikzpicture}}
 &
 \begin{codelisting}[escapeinside={(*}{*)}]{haskell}{false}
@@ -424,12 +414,12 @@ return ((*\cnew{carStarts\_0, carStarts\_1}*))
 \end{tabular}
 \caption{The car model across Pearl's three rungs, with
 changes at each rung \cnew{highlighted}. Rung~1 conditions the base model; rung~2 rewrites \textsf{fuel}'s
-definition ($\opdo$); rung~3 \emph{twins} the model into a factual world~0 and counterfactual world~1 sharing the \emph{exogenous} (common) draws \textsf{fuel} and \textsf{battery}, and forces $\mathsf{fuel}=\true$ in world~1 (so only world~0 keeps the shared \textsf{fuel} draw).}
+definition ($\opdo$); rung~3 \emph{twins} the model into a factual world~0 and counterfactual world~1 sharing the \emph{exogenous} (common) draws \textsf{fuel} and \textsf{battery}, and forces $\mathsf{fuel}=\true$ in world~1 (so only world~0 keeps the shared \textsf{fuel} draw). \claude{(figure restyled)}}
 \label{fig:carmodel}
 \end{figure}
 
 
-\subsubsection{Existing causal languages and libraries}
+\subsubsection{Existing causal languages and libraries}\label{sec:existing}
 The idea of causal probabilistic programming has existed for some time. Many practical tools like DoWhy (part of the PyWhy ecosystem~\cite{pywhy}) are libraries for manipulating SCMs as graphs and thus have limited expressiveness. DoWhy's GCM module nonetheless reaches rung~3, computing sample-level counterfactuals on fitted mechanisms~\cite{blobaum2024dowhygcm}. 
 
 Among causal PPLs proper, several stop at rung~2. Brul\'e's Whittemore~\cite{brule2018whittemore}, an early embedded causal DSL, covers rung-2 identification and estimation. Pyro provides a $\opdo$ effect handler~\cite{bingham2018pyro}; PyMC's $\opdo$ performs graph surgery on the computation graph~\cite{abrilpla2023pymc,pymcdo}. Witty et al.~\cite{witty2019synthesis} treat an intervention as a source transformation that replaces subterms, powerful (shift, variance-scaling, mechanism replacement) but non-compositional. 
@@ -447,21 +437,21 @@ Four systems support rung 3 natively~\cite{tavares2021language,chirho,perov2020m
     \item \textbf{Probabilistic logic programming} also reaches rung 3: Kiesel et al.~\cite{kiesel2023whatif} answer counterfactual queries on ProbLog programs by a transformation proved correct against Pearl's semantics. It would be interesting to explore how their approach relates to the other languages. 
 \end{itemize}
 
-\subsection{Logical, Diagrammatic, Categorical notions of Causality}
+\subsection{Logical, Diagrammatic, Categorical notions of Causality}\label{sec:othernotions}
 
 Causality and causal inference has been the object of many studies outside the space of programming languages. We briefly survey a few below.
 
-\paragraph{Functorial Semantics} This line of work, starting from \cite{jacobs2019causal}, presents causal models using Lawvere-style \todo{cite} functorial semantics: they consider causal models as a (structure-preserving) functor from a syntax category to a semantics category, where 
+\paragraph{Functorial Semantics} This line of work, starting from \cite{jacobs2019causal}, presents causal models using Lawvere-style \claude{\cite{lawvere_thesis}} functorial semantics: they consider causal models as a (structure-preserving) functor from a syntax category to a semantics category, where 
 \begin{itemize}
     \item The syntax category is a symmetric monoidal category with a `copy-discard-uniform structure' generated from the causal structure of the model, presented using string diagrams
     \item The semantics category is a Markov category, in which the model is interpreted.
 \end{itemize}
-Then, intervention can naturally be presented as a string-diagram surgery~\cite{jacobs2019causal}. This view naturally motivates several notions: \emph{normalisation boxes}~\cite{jacobsszelesstein2025inference,lorenz2023causalmodelsstringdiagrams} handle local normalisation, which I discuss further in \todo{section}; \emph{causal abstraction} can be presented as a particular class of natural transformations between causal models~\cite{lorenztull2026abstraction, englberger2025causalabstractionscategoricallyunified}. 
+Then, intervention can naturally be presented as a string-diagram surgery~\cite{jacobs2019causal}. This view naturally motivates several notions: \emph{normalisation boxes}~\cite{jacobsszelesstein2025inference,lorenz2023causalmodelsstringdiagrams} handle local normalisation, which I discuss further in \claude{the paragraph `Modulating Normalisation' below}; \emph{causal abstraction} can be presented as a particular class of natural transformations between causal models~\cite{lorenztull2026abstraction, englberger2025causalabstractionscategoricallyunified}. 
 
 \paragraph{Probabilstic Logic characterisation} Ibeling and Icard et al.\ develop a logical characterisation of Pearl's causal hierarchy~\cite{ibeling2020hierarchy}: three probabilistic logics of strictly increasing expressivity capture rung-1 to rung-3 \emph{queries}, with semantics defined directly on SCMs via Pearl's operations. The insight is that one can then reason about equivalences of causal queries in the style of identifiability or do-calculus. 
-Icard also proposed probabilistic Turing machines as the probabilistic program analogue of SCMs~\cite{icard2017programs,ibeling2019openuniverse}. As we will see below in \todo{section}, our hierarchy $\Lone$-$\Lthree$ of causal languages is the programming-language analogue of theirs: they organise \emph{queries} where we organise \emph{models}. It would be interesting to understand how this view relates to the programming languages view, and whether establishing a bridge between the two views could shed light on enabling do-calculus-style equational reasoning in the programming languages view. 
+Icard also proposed probabilistic Turing machines as the probabilistic program analogue of SCMs~\cite{icard2017programs,ibeling2019openuniverse}. As we will see below in \claude{\cref{sec:firstyear}}, our hierarchy $\Lone$-$\Lthree$ of causal languages is the programming-language analogue of theirs: they organise \emph{queries} where we organise \emph{models}. It would be interesting to understand how this view relates to the programming languages view, and whether establishing a bridge between the two views could shed light on enabling do-calculus-style equational reasoning in the programming languages view. 
 
-\paragraph{Modulating Normalisation} We mentioned earlier that `Bayesian inference' could be thought of as a normalisation map $\mathsf{norm}: \Meas(X) \to \Prob(X) + 1$. Normalisation is famously a \emph{global} operation: it depends on the weight of every trace. For example, consider the program
+\paragraph{Modulating Normalisation}\label{par:norm} We mentioned earlier that `Bayesian inference' could be thought of as a normalisation map $\mathsf{norm}: \Meas(X) \to \Prob(X) + 1$. Normalisation is famously a \emph{global} operation: it depends on the weight of every trace. For example, consider the program
 \[
 t = \mathsf{if}\ \mathsf{flip}\ \tfrac12\ \mathsf{then}\ (\mathsf{score}\ 0.1;\ \mathsf{return}\ a)\ \mathsf{else}\ (\mathsf{score}\ 1;\ \mathsf{return}\ b)
 \]
@@ -476,46 +466,104 @@ These shortcomings motivate rencent work \cite{jacobsszelesstein2025inference,lo
 \end{itemize}
 These approaches are, in my mind, promising approaches to obtain a programming language theoretic version of the do-calculus. 
 
-\subsection{``Causality" in other fields}
+\subsection{``Causality" in other fields}\label{sec:otherfields}
 People talk about ``Causality'' in computer scientific field other than causal inference. I briefly introduce two of these fields: concurrent/distributed computing and quantum computing. I do not claim to have full understanding of those fields because I am still in the process of reading those papers. 
 
-\paragraph{Concurrency} Concurrent and distributed computing has a long history of talking about `causality' as the actual ordering of observable events. In distributed computing, for instance, \emph{causal} broadcasting denotes a broadcasting protocol that guarantees that messages are delivered in a way that respects their causal ordering (Lamport's happens-before relationship). In the space of concurrent programming languages, semantic models often contain a `causal' component, in particular, a partial order called the \emph{causal order}. The simplest such example is a partially-ordered multiset, or pomset, which is informally a multiset of events ordered by a causal ordering, the (partial) order in which these events happened \todo{reference}. Pomsets are the closest model to (acyclic) causal models, sharing the causal ordering/DAG structure. They are sufficient to model (true) concurrency without race conditions; recent work by Kammar et al.~\cite{Kammar2026} develop an algebraic theory of POSIX-like threads (fork-wait concurrency) without shared memory access, and show it is complete with respect to pomsets. It would be interesting to understand how exactly this relates to Pearl-style causal models. 
+\paragraph{Concurrency} Concurrent and distributed computing has a long history of talking about `causality' as the actual ordering of observable events. In distributed computing, for instance, \emph{causal} broadcasting denotes a broadcasting protocol that guarantees that messages are delivered in a way that respects their causal ordering (Lamport's happens-before relationship). In the space of concurrent programming languages, semantic models often contain a `causal' component, in particular, a partial order called the \emph{causal order}. The simplest such example is a partially-ordered multiset, or pomset, which is informally a multiset of events ordered by a causal ordering, the (partial) order in which these events happened \claude{\cite{pratt1986concurrency,gischer1988pomsets}}. Pomsets are the closest model to (acyclic) causal models, sharing the causal ordering/DAG structure. They are sufficient to model (true) concurrency without race conditions; recent work by Kammar et al.~\cite{Kammar2026} develop an algebraic theory of POSIX-like threads (fork-wait concurrency) without shared memory access, and show it is complete with respect to pomsets. It would be interesting to understand how exactly this relates to Pearl-style causal models. 
 
-For concurrent programs potentially with non-deterministism and race-conditions, the causal ordering is not determined in advance. This motivates approaches that give semantics to such programs using sets of traces \todo{cite} or sets of pomsets \cite{pratt1986concurrency,vanglabbeek2001concurrency}. An alternative approach to such trace-like semantics is Glynn Winskel's event structures \todo{cite}, where instead of having a set of causal orders, we take a single causal order $(E, \leq)$ and add a conflict relation $\#$ to model causal inconsistencies. Given an event structure $(E, \leq, \#)$, we can understand it through its \emph{configurations}, sets of non-conflicting events downward-closed under the causal ordering. Intuitively, a configuration denotes a possible state along a concurrent program's execution, consisting of all the observable events that happened before the current point of execution. Event structures are particularly interesting, because by modelling race conditions (say, a concurrent write), they model some kind of \emph{indefinite causal ordering}, where the causal ordering in which two events happen (the two writes) is not determined. It would be interesting to study if this relates to the notion of indefinite causal ordering in higher order quantum processes \todo{cite section}.
+For concurrent programs potentially with non-deterministism and race-conditions, the causal ordering is not determined in advance. This motivates approaches that give semantics to such programs using sets of traces \claude{\cite{CSP_10.1145/359576.359585,brookes1984csp}} or sets of pomsets \cite{pratt1986concurrency,vanglabbeek2001concurrency}. An alternative approach to such trace-like semantics is Glynn Winskel's event structures \claude{\cite{nielsen1981petri,winskel1986eventstructures}}, where instead of having a set of causal orders, we take a single causal order $(E, \leq)$ and add a conflict relation $\#$ to model causal inconsistencies. Given an event structure $(E, \leq, \#)$, we can understand it through its \emph{configurations}, sets of non-conflicting events downward-closed under the causal ordering. Intuitively, a configuration denotes a possible state along a concurrent program's execution, consisting of all the observable events that happened before the current point of execution. Event structures are particularly interesting, because by modelling race conditions (say, a concurrent write), they model some kind of \emph{indefinite causal ordering}, where the causal ordering in which two events happen (the two writes) is not determined. It would be interesting to study if this relates to the notion of indefinite causal ordering in higher order quantum processes \claude{(next paragraph)}.
 
 % \emph{Position.} In these semantic models the causal graph is always explicit; this is in contrast to what we called \emph{model equivalences}, where the graph is implicit and we only care about the extensional property of the model's behaviour under intervention or twinning. It would be interesting to understand whether a similarly extensional characterisation of causal ordering could be useful in the context of concurrency, for example whether it makes sense to talk about \emph{intervening} on an event. 
 
-\paragraph{Quantum Computing} In quantum computing, \emph{causality} often refers to signalling constraints. Indeed, a complete positive (CP) map $F: \mathcal{A} \to \mathcal{B}$ is said to be \emph{causal} \todo{cite e.g. PQP} if its future cannot influence the past, i.e. it is trace preserving: this is formulated as the following trace-preservation (TP) condition \[
+\paragraph{Quantum Computing}\label{par:quantum} In quantum computing, \emph{causality} often refers to signalling constraints. Indeed, a complete positive (CP) map $F: \mathcal{A} \to \mathcal{B}$ is said to be \emph{causal} \claude{\cite{chiribella2010purification,PQP_Coecke_Kissinger_2017}} if its future cannot influence the past, i.e. it is trace preserving: this is formulated as the following trace-preservation (TP) condition \[
 \Tr \circ F = \Tr
-\] 
-\todo{Make a string diagram version of this.}
+\]
+\claude{or, as a string diagram, writing $\Tr$ as the discarding effect:
+\[
+\begin{tikzpicture}[sd,claude]
+  \node[box] (F) at (0,0) {$F$};
+  \draw[wire] (F.south) -- ++(0,-0.6) node[wlabel,below] {$\mathcal{A}$};
+  \draw[wire] (F.north) -- ++(0,0.45) coordinate (d);
+  \pic at (d) {discard};
+  \node[wlabel,right] at ($(F.north)+(0.05,0.22)$) {$\mathcal{B}$};
+\end{tikzpicture}
+\quad = \quad
+\begin{tikzpicture}[sd,claude]
+  \draw[wire] (0,-0.95) node[wlabel,below] {$\mathcal{A}$} -- (0,0.8) coordinate (d);
+  \pic at (d) {discard};
+\end{tikzpicture}
+\]}
 CPTP maps are the canonical model of first order quantum computation. As a natural extension of such first-order processes, notions of \emph{higher order} quantum processes have been developed in the past few decades. A higher-order quantum process is, informally, a quantum process with holes, such that if we plug those holes with CPTP maps then the resulting map is CPTP. A string diagrammatic representation of such a process could look like the following:
-\todo{make string diagram version of higher order process that has holes, like in the QCQC paper.}
+\claude{\[
+\begin{tikzpicture}[sd,claude]
+  \node[process, minimum width=4.6cm, minimum height=2.4cm] (W) at (0,0) {};
+  \node[anchor=north west, font=\small, inner sep=4pt] at (W.north west) {$W$};
+  \node[hole] (h1) at (-1.15,0) {$?$};
+  \node[hole] (h2) at ( 1.15,0) {$?$};
+  \draw[wire] ($(h1.south)+(0,-0.5)$) -- (h1.south) node[wlabel,left,midway] {$A_I$};
+  \draw[wire] (h1.north) -- ++(0,0.5) node[wlabel,left,midway] {$A_O$};
+  \draw[wire] ($(h2.south)+(0,-0.5)$) -- (h2.south) node[wlabel,left,midway] {$B_I$};
+  \draw[wire] (h2.north) -- ++(0,0.5) node[wlabel,left,midway] {$B_O$};
+  \draw[wire] (W.south) -- ++(0,-0.6) node[wlabel,below] {$P$};
+  \draw[wire] (W.north) -- ++(0,0.6) node[wlabel,above] {$F$};
+\end{tikzpicture}
+\]
+Here $W$ is a process with two holes: plugging CPTP maps $A_I \to A_O$ and $B_I \to B_O$ into them yields a CPTP map $P \to F$.}
 Within the world of higher order processes, one can formulate finer causal relationships using signalling constraints. For example, consider the following CP map $\Phi: A \otimes B \to C \otimes D$, then we can say that $B$ does not signal $C$ if there is a map $\Phi': A \to C$ such that the following factorisation holds:
-
-\todo{make string diagram equality with discarding $D$ becoming discarding $B$}
-
+\claude{\[
+\begin{tikzpicture}[sd,claude]
+  \node[box, minimum width=1.9cm] (P) at (0,0) {$\Phi$};
+  \draw[wire] ($(P.south)+(-0.5,0)$) -- ++(0,-0.6) node[wlabel,below] {$A$};
+  \draw[wire] ($(P.south)+( 0.5,0)$) -- ++(0,-0.6) node[wlabel,below] {$B$};
+  \draw[wire] ($(P.north)+(-0.5,0)$) -- ++(0,0.6) node[wlabel,above] {$C$};
+  \draw[wire] ($(P.north)+( 0.5,0)$) -- ++(0,0.45) coordinate (d);
+  \pic at (d) {discard};
+  \node[wlabel,right] at ($(P.north)+(0.55,0.22)$) {$D$};
+\end{tikzpicture}
+\quad = \quad
+\begin{tikzpicture}[sd,claude]
+  \node[box] (P) at (0,0) {$\Phi'$};
+  \draw[wire] (P.south) -- ++(0,-0.6) node[wlabel,below] {$A$};
+  \draw[wire] (P.north) -- ++(0,0.6) node[wlabel,above] {$C$};
+  \draw[wire] (1.2,-0.95) node[wlabel,below] {$B$} -- (1.2,0.3) coordinate (d);
+  \pic at (d) {discard};
+\end{tikzpicture}
+\]}
 in which case we can draw such a map in the following shape:
-\todo{draw comb form of $\Phi$}
+\claude{\[
+\begin{tikzpicture}[sd,claude]
+  % comb body: spine on the left, two teeth, slot on the right
+  \draw[process, thick] (-1.3,-1.5) -- (1.3,-1.5) -- (1.3,-0.7) -- (-0.6,-0.7)
+     -- (-0.6,0.7) -- (1.3,0.7) -- (1.3,1.5) -- (-1.3,1.5) -- cycle;
+  \node[font=\small] at (-0.95,0) {$\Phi$};
+  % global past and future
+  \draw[wire] (0,-1.5) -- ++(0,-0.6) node[wlabel,below] {$A$};
+  \draw[wire] (0, 1.5) -- ++(0, 0.6) node[wlabel,above] {$D$};
+  % open wires in the slot: C comes out of the lower tooth, B goes into the upper one
+  \draw[wire] (0.4,-0.7) -- (0.4,-0.2) node[wlabel,right] {$C$};
+  \draw[wire] (0.4, 0.2) node[wlabel,right] {$B$} -- (0.4,0.7);
+\end{tikzpicture}
+\]
+The slot between the two teeth is where a map $C \to B$ can be plugged in; $A$ and $D$ are the global past and future, and the output $C$ is produced before the input $B$ is read \cite{chiribella2009networks}.}
 
-Using these signalling constraints one can gather together \emph{causal relationships} between each input/output wire. Certain higher-order processes can be completely factorised according to these causal relationships; they are said to be of \emph{fixed} causal ordering. Not all maps satisfy this property, and those that don't are said to have \emph{indefinite} causal order. Examples include the famous quantum switch \todo{cite}, which coherently controls the order in which two input CPTP maps are applied; the classical switch, where the order is classically controlled; and even processes that go beyond coherently controlled orders like the OCB process, which are not yet known to be physically realisable. \todo{cite} The canonical formalism for these processes is process matrices \todo{cite}, which essentially representing higher order maps as a big PSD operator using the \todo{Choi} isomorphism. Classes of different higher-order processes with fixed, classically controlled, quantum controlled causal orders and beyond have been formulated by \todo{cite}. Also, a categorical formulation of higher order quantum processes based on signalling constraints has been formulated by Kissinger and Uijlen's Caus construction \todo{cite}, and further expanded by Simmons and Kissinger \todo{cite}, where they characterised the category as a model of a BV logic. 
+Using these signalling constraints one can gather together \emph{causal relationships} between each input/output wire. Certain higher-order processes can be completely factorised according to these causal relationships; they are said to be of \emph{fixed} causal ordering. Not all maps satisfy this property, and those that don't are said to have \emph{indefinite} causal order. Examples include the famous quantum switch \claude{\cite{chiribella2013switch}}, which coherently controls the order in which two input CPTP maps are applied; the classical switch, where the order is classically controlled; and even processes that go beyond coherently controlled orders like the OCB process, which are not yet known to be physically realisable \claude{\cite{oreshkov2012noncausal,oreshkov2019timedelocalized,wechs2023timedelocalised}}. The canonical formalism for these processes is process matrices \claude{\cite{oreshkov2012noncausal,araujo2015witnessing}}, which essentially representing higher order maps as a big PSD operator using the \claude{Choi--Jamio{\l}kowski \cite{choi1975completely}} isomorphism. Classes of different higher-order processes with fixed, classically controlled, quantum controlled causal orders and beyond have been formulated by \claude{Wechs et al.\ \cite{wechs2021qcqc}, building on \cite{oreshkov2016separable}}. Also, a categorical formulation of higher order quantum processes based on signalling constraints has been formulated by Kissinger and Uijlen's Caus construction \claude{\cite{kissinger2019categorical}}, and further expanded by Simmons and Kissinger \claude{\cite{simmons2022bv,simmons2024thesis}}, where they characterised the category as a model of a BV logic. 
 
-It is also interesting to note that higher order quantum processes have been used to define \emph{quantum causal models}, with the holes acting as intervention points. Cyclic such models have been used to study indefine causal orders. It would be interesting to explore this space further.
+It is also interesting to note that higher order quantum processes have been used to define \emph{quantum causal models} \claude{\cite{barrett2020quantumcausalmodels}}, with the holes acting as intervention points. Cyclic such models have been used to study indefine causal orders \claude{\cite{barrett2021cyclic}}. It would be interesting to explore this space further.
 
-\section{Progress during my first year}
-I spent the majority of my first year concentrated on developing semantics for causal probabilistic programming, in collaboration with Dario Stein, Michael Lee, Ohad Kammar, Jeremy Yallop, my supervisor Sam Staton, and industry collaborators Eli Bingham and John Feser from Basis who are behind Omega \cite{tavares2021language} and ChiRho \cite{chirho}. I joined the collaboration 9 months before the start of the DPhil, during which time I developed a semantics for ChiRho, which we presented in the form of a Haskell embedding at LAFI 2026 \cite{wang2026causalppl}. Our insights are summarised in \todo{cite section on ChiRho}. However, ChiRho is not without its flaws: its programming model relies on subtle interactions between effect handlers and tensor broadcasting and doesn't have a clear correspondence with traditional causal inference literature \cite{wang2026causalppl}. 
+\section{Progress during my first year}\label{sec:firstyear}
+I spent the majority of my first year concentrated on developing semantics for causal probabilistic programming, in collaboration with Dario Stein, Michael Lee, Ohad Kammar, Jeremy Yallop, my supervisor Sam Staton, and industry collaborators Eli Bingham and John Feser from Basis who are behind Omega \cite{tavares2021language} and ChiRho \cite{chirho}. I joined the collaboration 9 months before the start of the DPhil, during which time I developed a semantics for ChiRho, which we presented in the form of a Haskell embedding at LAFI 2026 \cite{lafi-wang}. Our insights are summarised in \claude{\cref{sec:existing}}. However, ChiRho is not without its flaws: its programming model relies on subtle interactions between effect handlers and tensor broadcasting and doesn't have a clear correspondence with traditional causal inference literature \cite{lafi-wang,wang2026causalppl}. 
 
-This year, I continued working on causal probabilistic programming by gathering the insights from ChiRho (reader monads for interventions, vectorisation for twinning) and starting from first principles. This led to our submission (which I used as term paper), now accepted to POPL 2027. This section, adapted from the submission, summarises our contributions. I intend to continue working on this line of research; my main ideas are summarised in \todo{section}. 
+This year, I continued working on causal probabilistic programming by gathering the insights from ChiRho (reader monads for interventions, vectorisation for twinning) and starting from first principles. This led to our submission (which I used as term paper), now accepted to POPL 2027. This section, adapted from the submission, summarises our contributions. I intend to continue working on this line of research; my main ideas are summarised in \claude{\cref{sec:proposal}}. 
 
-\paragraph{Contribution 1: semantic foundations of causal programming}
+\paragraph{Contribution 1: semantic foundations of causal programming}\label{par:contrib1}
 Our first contribution is developing a semantic foundation of causal models by taking the analogy with probabilistic programs seriously. Firstly, we reconstruct Pearl's rungs of causality as a hierarchy of simple first order probabilistic programming languages $\Lone, \Ltwo, \Lthree$.  Each language exposes more intension than the previous one using syntactic annotations, and causal inference is performed using program transformations that consume these syntactic annotations: $\Lone$ is a standard first order PPL; $\Ltwo$ exposes typed holes named \emph{intervention labels}, canonically of type $\Maybe{A}$, allowing substituting to optionally perform an intervention; $\Lthree$ annotates each let binding with $\mathbf{exo}$ or $\mathbf{endo}$, so that twinning can be formulated as a vectorisation transform. The same idea underlies the intervention-as-program-transformation view of Witty~\cite{witty2021sbi,witty2023bayesian}, the logical account by Ibeling and Icard~\cite{ibeling2020hierarchy}, and the string-diagrammatic accounts of Jacobs et al.~\cite{jacobs2019causal} and Lorenz and Tull~\cite{lorenz2023causalmodelsstringdiagrams}. 
 
 What is new is the observation that this simple setting yields a semantic characterisation of Pearl's rungs of causality. We develop a unified account of contextual equivalences that recovers the full spectrum of causal model equivalences by varying the class of admissible contexts, e.g.~Rung 3 ($\Lthree$) programs are Rung 3 equivalent ($\equiv_3$) if they behave the same under all twinnings and interventions; Rung 2 equivalent ($\equiv_3^{\mathsf{intv}}$) if under all interventions; Rung 1 equivalent ($\equiv_3^{\mathsf{obs}}$) if they induce the same distribution under no intervention. The subscript $3$ marks that we compare $\Lthree$ programs throughout; the superscript marks the rung of context tested against ($\mathsf{obs}$, $\mathsf{intv}$, or none for full rung-3 twinning). These equivalences form a strict inclusion hierarchy $\equiv_3 \subsetneq \equiv_3^{\mathsf{intv}} \subsetneq \equiv_3^{\mathsf{obs}}$, an analogue of the causal hierarchy's non-collapse \cite{bareinboim:etal20}, i.e.~programs indistinguishable at a lower rung may still differ at a higher one.
 
 Finally, we connect the framework to the theory of SCMs, showing that $\Lthree$ extends SCMs conservatively: each SCM can be compiled into $\Lthree$, preserving the semantics of intervention and twinning. Through this compilation, we show that the hierarchy of SCM equivalences developed by Bongers et al.~\cite{Bongers_2021} is naturally subsumed by our program equivalences.
 
-\paragraph{Contribution 2: Typed abstractions and denotational semantics for expressive causal probabilistic programming}
-Our second contribution is the development of $\LHO$, a semantically-founded, expressive, and typed language for higher-order causal probabilistic programming. $\LHO$ has a similar programming model to ChiRho \cite{chirho,lafi-wang}: it is expressive as a programming language (higher order, with control flow) and as a causal calculus (rich, higher order interventions like those in \todo{reference intervention part}); we illustrate it with examples such as mediation analysis \cite{pearl2014interpretation}, which decomposes a causal effect into a direct path and a path through an intermediate variable. However, unlike ChiRho, it extends the first-order languages in a semantic-preserving way. 
+\paragraph{Contribution 2: Typed abstractions and denotational semantics for expressive causal probabilistic programming}\label{par:contrib2}
+Our second contribution is the development of $\LHO$, a semantically-founded, expressive, and typed language for higher-order causal probabilistic programming. $\LHO$ has a similar programming model to ChiRho \cite{chirho,lafi-wang}: it is expressive as a programming language (higher order, with control flow) and as a causal calculus (rich, higher order interventions like those in \claude{the paragraph `Interventions à la carte' of \cref{sec:assorted}}); we illustrate it with examples such as mediation analysis \cite{pearl2014interpretation}, which decomposes a causal effect into a direct path and a path through an intermediate variable. However, unlike ChiRho, it extends the first-order languages in a semantic-preserving way. 
 
 Rung 2: To manage interventions, we track intervention labels using \emph{grading} \cite{orchard2020unifying,katsumata2014_graded_strong_monad,dorsch2019graded,fujii2016towards,sarkis2025string}, similarly to the $\mathbf{ImP}$ construction in \cite{liell2025compositional} or intervention points in \cite{lafi-wang}. We define a graded reader monad $\IntvMonad{[\tau_1...\tau_n]}{X} \eqdef \prod_i\tau_i \to \Meas(X)$ graded by lists of intervention types $[\tau_1...\tau_n]$, where $\Meas$ is the unnormalised probability monad. A causal model of type $\IntvMonad{[\tau_1...\tau_n]}{X}$ is an intervenable probabilistic program with $n$ typed intervenable holes, each of type $\tau_i$, and a $\opdo$ intervention on the $i$th hole is simply partial application.
 
@@ -573,7 +621,7 @@ We derive $\LHO$ by denotational and functional programming techniques. We first
 % %     \item Higher order quantum computing, briefly, and how they could induce interesting things both on the pomset side (logics).
 % % \end{itemize}
 
-\section{Project Proposal}
+\section{Project Proposal}\label{sec:proposal}
 
 For the rest of my DPhil, I plan to work on developing better categorical and programming language theoretic foundations for causality, extending my work during first year \cite{wang2026causalppl}. To be more precise, I can broadly divide my research goals into three categories:
 \begin{itemize}
@@ -588,11 +636,11 @@ This line will mainly be extending my work during the first year \cite{wang2026c
 
 
 
-\paragraph{Cyclic models} So far, we have largely considered acyclic causal models, i.e. causal models without causal feedback loops. As argued by \cite{Bongers_2021}, this is linked with the fact that acyclic causal models enjoy many properties such as inducing a unique joint distribution over the variables, thus allowing us to present them as (terminating) probabilistic programs in \cite{wang2026causalppl}. However, many systems in the real world contain feedback loops. One might for example imagine modelling a free market, where the supply and the demand affect the price and vice versa \cite{Bongers_2021}. One natural way of interpreting such systems is to unroll them into dynamical systems, which would have an acyclic structure over time, but often in the causal inference literature one studies approximations of those systems and their equilibrium states \todo{cite}, both require models that can express feedback loops. 
+\paragraph{Cyclic models} So far, we have largely considered acyclic causal models, i.e. causal models without causal feedback loops. As argued by \cite{Bongers_2021}, this is linked with the fact that acyclic causal models enjoy many properties such as inducing a unique joint distribution over the variables, thus allowing us to present them as (terminating) probabilistic programs in \cite{wang2026causalppl}. However, many systems in the real world contain feedback loops. One might for example imagine modelling a free market, where the supply and the demand affect the price and vice versa \cite{Bongers_2021}. One natural way of interpreting such systems is to unroll them into dynamical systems, which would have an acyclic structure over time, but often in the causal inference literature one studies approximations of those systems and their equilibrium states \claude{\cite{fisher1970correspondence,mooij2013ode,Bongers_2021}}, both require models that can express feedback loops. 
 
-In our setting, it would be interesting to study how different interpretations of cyclic causal models (as dynamical systems, or as their equilibrium states) relate to notions of recursion and (domain-theoretic) fixed points. One idea could be to interpret our language in $\omega\Qbs$ \todo{cite} and extend it with recursion at the term level (recursive programs) or the type level (coinductive types). The practical starting point of this exploration would be with LazyPPL, which supports inference on lazy datatypes like streams already; this has been recently studied by Park and Staton \todo{Seo Jin's paper}. Another direction would be to study causal cycles internally to a compact closed category: similar structures have already been used to study indefinite causal orders in higher order quantum processes \todo{kissinger uijlen}, as well as loops/fixed points in programming \todo{traced monoidal categories citation}. 
+In our setting, it would be interesting to study how different interpretations of cyclic causal models (as dynamical systems, or as their equilibrium states) relate to notions of recursion and (domain-theoretic) fixed points. One idea could be to interpret our language in $\omega\Qbs$ \claude{\cite{vakar2019domain}} and extend it with recursion at the term level (recursive programs) or the type level (coinductive types). The practical starting point of this exploration would be with LazyPPL, which supports inference on lazy datatypes like streams already; this has been recently studied by Park and Staton \claude{\cite{park2027coinduction}}. Another direction would be to study causal cycles internally to a compact closed category: similar structures have already been used to study indefinite causal orders in higher order quantum processes \claude{\cite{kissinger2019categorical}}, as well as loops/fixed points in programming \claude{\cite{joyal1996traced,hasegawa1997recursion}}. 
 
-\paragraph{Inference for unspecified or underspecified models} In our work \cite{wang2026causalppl}, we only ever considered fully specified models, that is, models where all the causal relationships \emph{and} mechanisms were specified. Oftentimes, however, we are not given a full causal graph and need to infer causal relationships and/or their mechanism from data. Our work takes a Bayesian approach to these tasks: we can solve these inference tasks so long as we provide a Bayesian prior for them. In contrast, traditional causal inference \cite{pearl2009causality} \todo{cite ppl} consider the question of inferring those quantities often \emph{without} Bayesian priors, only from (incomplete) causal assumptions like assumptions on the causal graph or partial knowledge on the mechanisms. For example, causal identifiability asks when can we infer certain interventional quantities from observational data; causal discovery asks how to infer a causal structure from data. \todo{cite people} 
+\paragraph{Inference for unspecified or underspecified models} In our work \cite{wang2026causalppl}, we only ever considered fully specified models, that is, models where all the causal relationships \emph{and} mechanisms were specified. Oftentimes, however, we are not given a full causal graph and need to infer causal relationships and/or their mechanism from data. Our work takes a Bayesian approach to these tasks: we can solve these inference tasks so long as we provide a Bayesian prior for them. In contrast, traditional causal inference \cite{pearl2009causality}\claude{\cite{spirtes2000causation,peters_janzing_schoelkopf_2017_book}} consider the question of inferring those quantities often \emph{without} Bayesian priors, only from (incomplete) causal assumptions like assumptions on the causal graph or partial knowledge on the mechanisms. For example, causal identifiability asks when can we infer certain interventional quantities from observational data; causal discovery asks how to infer a causal structure from data \claude{\cite{pearl1995docalculus,JMLR:v9:shpitser08a,spirtes2000causation,peters_janzing_schoelkopf_2017_book}}. 
 
 \todo{Talk about imprecise probability and using it to do causal inference, could be interesting to build an entire PL foundation around it.}
 
@@ -604,7 +652,7 @@ In our setting, it would be interesting to study how different interpretations o
 
 Work that has already been done in the direction of synthetic foundations \cite{jacobs2019causal,jacobsszelesstein2025inference,lorenz2023causalmodelsstringdiagrams, dilavore2026normalizedprobabilisticsemanticsassociative} often focus on the graph-oriented view of causality: \cite{jacobs2019causal,jacobsszelesstein2025inference} represent a (rung 2) causal model as a functor from its graph into a Markov category; \cite{dilavore2026normalizedprobabilisticsemanticsassociative} use non-associativity to model the effects of normalisation, to synthetically derive graphical criteria for identifiability. 
 
-I want to focus instead on the model-oriented view of causality. In particular, can we define an interventional structure on Markov categories, or some uniform construction that turns a Markov category into an intervenable one? Can we define such intervention structures such that it works even for the so-called `higher-order' intervention types that we briefly mentioned in \todo{section above}. Once we have such a construction, would the naturally induced notion of morphism be related to \emph{causal abstraction} \todo{cite section above}. Furthermore, can we define what it means for a Markov category to `support counterfactuals', e.g. what is a valid counterfactual structure? Counterfactuals, which we did not dig very deep into in the literature review, is a contentious topic: there is ample philosophical debate on what is the right notion of counterfactuals; see e.g. \todo{cite Sanders Beckers}. So can we make such a definition so it captures various flavours of counterfactual constructions existing in the literature? 
+I want to focus instead on the model-oriented view of causality. In particular, can we define an interventional structure on Markov categories, or some uniform construction that turns a Markov category into an intervenable one? Can we define such intervention structures such that it works even for the so-called `higher-order' intervention types that we briefly mentioned in \claude{\cref{sec:assorted,sec:firstyear}}. Once we have such a construction, would the naturally induced notion of morphism be related to \emph{causal abstraction} \claude{(\cref{sec:assorted})}. Furthermore, can we define what it means for a Markov category to `support counterfactuals', e.g. what is a valid counterfactual structure? Counterfactuals, which we did not dig very deep into in the literature review, is a contentious topic: there is ample philosophical debate on what is the right notion of counterfactuals; see e.g.\ \claude{\cite{beckers2021equivalent,beckers2024nondeterministic}}. So can we make such a definition so it captures various flavours of counterfactual constructions existing in the literature? 
 
 One possible starting point could be to consider the relationship of our constructions with Park et al's causal spaces \cite{park2024measuretheoreticaxiomatisationcausality} and counterfactual spaces \cite{park2026counterfactualspaces}. We already know that Causal spaces are very much related to our graded monad: a causal space can be seen as a morphism $d: \prod_i (\Maybe{A_i}) \to \Prob(\prod_i A_i)$ in $\CatMeas$, satisfying the equation that for all $(v_j)_{j \neq i}$ where $v_j \in A_j$, $\pi_i(d((v_j)_{j \neq i},\Just{a_i})) = \delta_{a_i}$, i.e. `intervening with on the $i$th variable with $a_i$ and retrieving the value at that variable gives the interventional value'. 
 
