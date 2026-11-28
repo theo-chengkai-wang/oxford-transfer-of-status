@@ -660,22 +660,58 @@ As mentioned earlier \todo{cite section}, there are two approaches to causal inf
 
 \subsection{Understanding relationship with `causality' as used in other fields}
 
-This direction is the least thought out and bears the highest risk. The motivation is simple: many fields in computer science talk about causality. As detailed in \todo{cite section}, causality in other fields refers to the order in which observable events occur: in concurrency these are observable events from different threads, and in quantum computing these are the order in which the input quantum operations are applied in a higher-order quantum process. How are these notions of causality related, and can we give a unifying presentation of those fields? 
+This direction is the least thought out and bears the highest risk. The motivation is simple: many fields in computer science talk about causality. As detailed in \claude{\cref{sec:otherfields}}, causality in other fields refers to the order in which observable events occur: in concurrency these are observable events from different threads, and in quantum computing these are the order in which the input quantum operations are applied in a higher-order quantum process. How are these notions of causality related, and can we give a unifying presentation of those fields? 
 
 As mentioned before, my understanding of these fields are currently relatively limited, and a serious research programme in this direction would require a comprehensive literature review in these fields to see whether there are interesting connections. In the following, I briefly expand on two directions below that might be interesting to explore.
 
 \paragraph{Intensional and extensional notions of causality} The different notions of causality that we have mentioned in the literature review can be divided into two kinds: causality where we have access to an explicit graph (causal identifiability, pomsets, quantum combs), and causality that is extensionally inferred from a particular computation (interventional/twinning equivalences in our work, signalling constraints for higher order quantum processes). 
 
-For both causal models and higher order quantum processes, both kinds of causality are studied, and these two fields are actually remarkably similar; so similar, that quantum causal models \cite{barrett2020quantumcausalmodels} were defined based on higher order quantum processes. In both cases, a model (a process) is said to be consistent with a causal graph if it can be factorised in a way that is consistent to the said graph \cite{pearl2009causality,chiribella2009networks} \todo{cite qcqc paper}. In both cases, however, the graph-based notion of causality is different, in general, from the extensional notion: in the same way a causal model consistent to a causal graph might contain fewer causal relationships/more independencies, a higher order quantum process can do so too \cite{barrett2020quantumcausalmodels}. Given these structural similarities, it is natural to want to study the relationship between the interventional and the signalling-based notions of causality. And indeed the two notions seem very related: 
+For both causal models and higher order quantum processes, both kinds of causality are studied, and these two fields are actually remarkably similar; so similar, that quantum causal models \cite{barrett2020quantumcausalmodels} were defined based on higher order quantum processes. In both cases, a model (a process) is said to be consistent with a causal graph if it can be factorised in a way that is consistent to the said graph \cite{pearl2009causality,chiribella2009networks}\claude{\cite{wechs2021qcqc}}. In both cases, however, the graph-based notion of causality is different, in general, from the extensional notion: in the same way a causal model consistent to a causal graph might contain fewer causal relationships/more independencies, a higher order quantum process can do so too \cite{barrett2020quantumcausalmodels}. Given these structural similarities, it is natural to want to study the relationship between the interventional and the signalling-based notions of causality. And indeed the two notions seem very related: 
 
-\todo{explain why with an example, draw comb and say no interventional causal influence iff no-signalling} 
+\claude{To see why, consider the simplest higher-order process with a single slot: a comb $W$ with global past $P$ and global future $F$, whose slot has input $A_I$ (the lower tooth) and output $A_O$ (the upper tooth), as in \cref{par:quantum}. In a quantum causal model \cite{barrett2020quantumcausalmodels}, this slot is precisely an intervention point: an intervention at $A$ is the choice of which CPTP map $A_I \to A_O$ to plug into it, and the Pearl-style intervention $\opdo(A = a)$ is the special case where we plug in the map that discards $A_I$ and prepares the state $a$, i.e.\ we ignore the mechanism that $W$ proposes for $A$ and force a value instead:
+\[
+\begin{tikzpicture}[sd,claude]
+  \draw[process, thick] (-1.3,-1.8) -- (1.3,-1.8) -- (1.3,-0.9) -- (-0.6,-0.9)
+     -- (-0.6,0.9) -- (1.3,0.9) -- (1.3,1.8) -- (-1.3,1.8) -- cycle;
+  \node[font=\small] at (-0.95,0) {$W$};
+  \draw[wire] (0,-1.8) -- ++(0,-0.6) node[wlabel,below] {$P$};
+  \draw[wire] (0, 1.8) -- ++(0, 0.6) node[wlabel,above] {$F$};
+  \draw[wire] (0.4,-0.9) -- (0.4,-0.45) coordinate (d) node[wlabel,right,midway] {$A_I$};
+  \pic at (d) {discard};
+  \node[box, minimum width=0.5cm, minimum height=0.4cm] (a) at (0.4,0.3) {$a$};
+  \draw[wire] (a.north) -- (0.4,0.9) node[wlabel,right,midway] {$A_O$};
+\end{tikzpicture}
+\quad = \quad \Pr(F \mid \opdo(A = a))
+\]
+Pearl would say that $A$ has no causal influence on $F$ if the result of this diagram does not depend on $a$. On the other hand, $A_O$ is said not to signal to $F$ \cite{chiribella2009networks,kissinger2019categorical} if $W$, with $A_I$ discarded, factorises as $W' \otimes \Tr_{A_O}$ for some $W' : P \to F$:
+\[
+\begin{tikzpicture}[sd,claude]
+  \draw[process, thick] (-1.3,-1.8) -- (1.3,-1.8) -- (1.3,-0.9) -- (-0.6,-0.9)
+     -- (-0.6,0.9) -- (1.3,0.9) -- (1.3,1.8) -- (-1.3,1.8) -- cycle;
+  \node[font=\small] at (-0.95,0) {$W$};
+  \draw[wire] (0,-1.8) -- ++(0,-0.6) node[wlabel,below] {$P$};
+  \draw[wire] (0, 1.8) -- ++(0, 0.6) node[wlabel,above] {$F$};
+  \draw[wire] (0.4,-0.9) -- (0.4,-0.45) coordinate (d) node[wlabel,right,midway] {$A_I$};
+  \pic at (d) {discard};
+  \draw[wire] (0.4,0.35) -- (0.4,0.9) node[wlabel,right,midway] {$A_O$};
+\end{tikzpicture}
+\quad = \quad
+\begin{tikzpicture}[sd,claude]
+  \node[box] (W) at (0,0) {$W'$};
+  \draw[wire] (W.south) -- ++(0,-0.7) node[wlabel,below] {$P$};
+  \draw[wire] (W.north) -- ++(0,0.7) node[wlabel,above] {$F$};
+  \draw[wire] (1.2,-1.05) node[wlabel,below] {$A_O$} -- (1.2,0.3) coordinate (d);
+  \pic at (d) {discard};
+\end{tikzpicture}
+\]
+The two conditions are equivalent: plugging a state $a$ into the right-hand side yields $W'$ whatever $a$ is, and conversely, if the first diagram is independent of $a$ for every state $a$, then by linearity $W$ with $A_I$ discarded factorises as above. In other words, for processes with a definite causal order, \emph{no interventional causal influence is exactly no-signalling}. The interventional equivalence $\equiv_3^{\mathsf{intv}}$ of \cref{par:contrib1} and the signalling-based causal structure of \cref{par:quantum} thus look like two presentations of the same extensional notion of causality, one phrased in terms of what can be plugged into a hole and the other in terms of how the process factorises.}
 
-\noindent That said, there are reasons to believe they are subtly different as well: notably Perinotti \todo{cite https://arxiv.org/pdf/2012.15213v3} defines a notion of causal influence on reversible processes using interventions, and shows that it is in general weaker than signalling. I would like to see if I can develop a categorical picture that generalises both. One approach could be to study the relationship between our constructions and the Caus construction \cite{kissinger2019categorical} and the subsequent logical characterisations \cite{simmons2024thesis}. 
+\noindent That said, there are reasons to believe they are subtly different as well: notably Perinotti \claude{\cite{perinotti2021causalinfluence}} defines a notion of causal influence on reversible processes using interventions, and shows that it is in general weaker than signalling. I would like to see if I can develop a categorical picture that generalises both. One approach could be to study the relationship between our constructions and the Caus construction \cite{kissinger2019categorical} and the subsequent logical characterisations \cite{simmons2024thesis}. 
 
 For concurrency, I am not aware of a canonical, extensional notion of causality like intervention or signalling. Still, it would be interesting to understand whether insights about quantum process style signalling or Pearl-style interventions/counterfactuals would be useful to impose on the causal graph of a concurrent program. 
 
 
-\paragraph{Indefinite causal orders} Another significant point of similarity between the three fields is the notion of indefinite causal orders: where the causal ordering of events are not determined in advance. Indefinite causal order is a quantum computing term; it refers to higher order quantum processes like the OCB process \cite{oreshkov2012noncausal} or the quantum switch \todo{cite} that do not use its input operation in a definite, predetermined causal order. Quantum switches are interesting such instances because they are known to have physical realisations: they correspond to processes where the order in which operations are applied is coherent controlled. In Pearl-style causality, this informally corresponds to cyclic causal models, i.e. causal models with feedback loops; in fact, the quantum causality literature is known to use cyclic models to study these processes \cite{barrett2020quantumcausalmodels,barrett2021cyclic}. 
+\paragraph{Indefinite causal orders} Another significant point of similarity between the three fields is the notion of indefinite causal orders: where the causal ordering of events are not determined in advance. Indefinite causal order is a quantum computing term; it refers to higher order quantum processes like the OCB process \cite{oreshkov2012noncausal} or the quantum switch \claude{\cite{chiribella2013switch}} that do not use its input operation in a definite, predetermined causal order. Quantum switches are interesting such instances because they are known to have physical realisations: they correspond to processes where the order in which operations are applied is coherent controlled. In Pearl-style causality, this informally corresponds to cyclic causal models, i.e. causal models with feedback loops; in fact, the quantum causality literature is known to use cyclic models to study these processes \cite{barrett2020quantumcausalmodels,barrett2021cyclic}. 
 
 In concurrency, `indefinite causal orders' are an essential phenomenon because they are connected race conditions: two threads performing operations concurrently on a memory location can be seen as a non-deterministic choice between the different interleavings, or, \emph{causal orderings} between the different operations, in a way similar to quantum switches, which instead gives a `quantum' choice between different interleavings of its input operations. An interesting consequence of this is that models of concurrency naturally have to model indefinite causal orderings, albeit where the control is classical. 
 
