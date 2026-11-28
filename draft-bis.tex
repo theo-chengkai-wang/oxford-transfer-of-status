@@ -21,15 +21,11 @@
 % \end{abstract}
 \tableofcontents
 
-\section{Introduction}
+\section{Overview}
 
-% [I am interested in causality, approached it in two angles in the past year. Admittedly narrow, and misses quite a few things, that I plan to learn this year.]
+For my DPhil, I plan to work on developing categorical and programming language semantics for causality. In this document, I start by giving a literature review of the fields related to my thesis topic (\cref{sec:litreview}): probabilistic programming, causal inference, causal probabilistic programming and notions of `causality' studied in other fields. This gives the necessary background to understand the motivation and initial approaches in the proposal. Then, I present the progress I made during my first year (\cref{sec:firstyear}), with details about my paper about causal probabilistic programming which served as my term paper \cite{wang2026causalppl} (accepted to POPL 27). Finally, I outline several research directions (\cref{sec:proposal}) that I am interested in exploring in the space of semantics for causality, along with initial approaches. 
 
-% \input{lit_review.tex}
-
-\todo{Say something}
-
-Due to the strong overlap between the proposal and the work done in my first year \cite{wang2026causalppl} (my term paper, recently accepted to POPL 2027), I adapted parts of its related work and introduction sections to parts of \claude{\cref{sec:litreview,sec:firstyear}}. 
+Due to the strong overlap between the proposal and the work done in my first year \cite{wang2026causalppl}, I adapted parts of its related work and introduction sections to parts of \claude{\cref{sec:litreview,sec:firstyear}}. 
 
 \section{Literature Review}\label{sec:litreview}
 
@@ -623,13 +619,13 @@ We derive $\LHO$ by denotational and functional programming techniques. We first
 
 \section{Project Proposal}\label{sec:proposal}
 
-For the rest of my DPhil, I plan to work on developing better categorical and programming language theoretic foundations for causality, extending my work during first year \cite{wang2026causalppl}. To be more precise, I can broadly divide my research goals into three categories:
+For the rest of my DPhil, I plan to work on developing better categorical and programming language theoretic foundations for causality, extending my work during first year \cite{wang2026causalppl}. To be more precise, I can broadly divide my research goals into three categories\footnote{Not in the sense of category theory.}:
 \begin{itemize}
     \item Developing the field of causal probabilistic programming languages;
     \item Developing alternative programming language tools for graph-oriented causal modelling;
     \item Relating Pearl's causality to other notions in higher order quantum computing and concurrency.
 \end{itemize}
-The three categories are in increasing order of risk, and it is in this same order that I plan to pursue them. I give more detail below.
+The three categories are in increasing order of risk, and it is in this same order that I plan to pursue them. I outline the motivation and initial ideas of all three categories below. 
 
 \subsection{Developing the field of Causal PPLs}
 This line will mainly be extending my work during the first year \cite{wang2026causalppl}. The main goal is to develop the ideas that we have about the right abstractions for causal probabilistic programming into expressive practical programming languages. By doing so, we will further develop our abstractions, which have the potential of shedding light on the fundamental structures behind causal modelling. 
@@ -654,9 +650,11 @@ Work that has already been done in the direction of synthetic foundations \cite{
 
 I want to focus instead on the model-oriented view of causality. In particular, can we define an interventional structure on Markov categories, or some uniform construction that turns a Markov category into an intervenable one? Can we define such intervention structures such that it works even for the so-called `higher-order' intervention types that we briefly mentioned in \claude{\cref{sec:assorted,sec:firstyear}}. Once we have such a construction, would the naturally induced notion of morphism be related to \emph{causal abstraction} \claude{(\cref{sec:assorted})}. Furthermore, can we define what it means for a Markov category to `support counterfactuals', e.g. what is a valid counterfactual structure? Counterfactuals, which we did not dig very deep into in the literature review, is a contentious topic: there is ample philosophical debate on what is the right notion of counterfactuals; see e.g.\ \claude{\cite{beckers2021equivalent,beckers2024nondeterministic}}. So can we make such a definition so it captures various flavours of counterfactual constructions existing in the literature? 
 
-One possible starting point could be to consider the relationship of our constructions with Park et al's causal spaces \cite{park2024measuretheoreticaxiomatisationcausality} and counterfactual spaces \cite{park2026counterfactualspaces}. We already know that Causal spaces are very much related to our graded monad: a causal space can be seen as a morphism $d: \prod_i (\Maybe{A_i}) \to \Prob(\prod_i A_i)$ in $\CatMeas$, satisfying the equation that for all $(v_j)_{j \neq i}$ where $v_j \in A_j$, $\pi_i(d((v_j)_{j \neq i},\Just{a_i})) = \delta_{a_i}$, i.e. `intervening with on the $i$th variable with $a_i$ and retrieving the value at that variable gives the interventional value'. 
+One possible starting point could be to consider the relationship of our constructions with Park et al's causal spaces \cite{park2024measuretheoreticaxiomatisationcausality} and counterfactual spaces \cite{park2026counterfactualspaces}. We already know that Causal spaces are very much related to our graded monad: a causal space can be seen as a morphism $d: \prod_i (\Maybe{A_i}) \to \Prob(\prod_i A_i)$ in $\CatMeas$, satisfying the equation that for all $(v_j)_{j \neq i}$ where $v_j \in \Maybe{A_j}$, $\pi_i(d((v_j)_{j \neq i},\Just{a_i})) = \delta_{a_i}$, i.e. `intervening with on the $i$th variable with $a_i$ and retrieving the value at that variable gives the interventional value'. 
 
 \subsection{Understanding causality using a graph-centered approach}
+
+As mentioned earlier \todo{cite section}, there are two approaches to causal inference: model-centered, which is what we opted for in developing abstractions for causal PPLs, and graph-centered, which is closer to more traditional, Pearl-style causal inference. 
 
 \paragraph{Causal identifiability}
 
@@ -672,23 +670,27 @@ For both causal models and higher order quantum processes, both kinds of causali
 
 \todo{explain why with an example, draw comb and say no interventional causal influence iff no-signalling} 
 
-\noindent That said, there are reasons to believe they are subtly different as well: notably Perinotti \todo{cite https://arxiv.org/pdf/2012.15213v3} defines a notion of causal inference on reversible processes using interventions, and shows that it is in general weaker than signalling. I would like to see if I can develop a categorical picture that generalises both. One approach could be to study the relationship between our constructions and the Caus construction \cite{kissinger2019categorical} and the subsequent logical characterisations \cite{simmons2024thesis}. 
+\noindent That said, there are reasons to believe they are subtly different as well: notably Perinotti \todo{cite https://arxiv.org/pdf/2012.15213v3} defines a notion of causal influence on reversible processes using interventions, and shows that it is in general weaker than signalling. I would like to see if I can develop a categorical picture that generalises both. One approach could be to study the relationship between our constructions and the Caus construction \cite{kissinger2019categorical} and the subsequent logical characterisations \cite{simmons2024thesis}. 
 
 For concurrency, I am not aware of a canonical, extensional notion of causality like intervention or signalling. Still, it would be interesting to understand whether insights about quantum process style signalling or Pearl-style interventions/counterfactuals would be useful to impose on the causal graph of a concurrent program. 
 
 
-\paragraph{Indefinite causal orders} Another significant point of similarity between the three fields is the notion of indefinite causal orders: where the causal ordering of events are not determined in advance. Indefinite causal order is a quantum computing term; it refers to higher order quantum processes like the OCB process \cite{oreshkov2012noncausal} or the quantum switch \todo{cite} that do not use its input operation in a definite, predetermined causal order. Quantum switches are interesting such instances because they are known to have physical realisations: they correspond to processes where the order in which operations are applied is coherent controlled. In Pearl-style causality, this corresponds to cyclic causal models, i.e. causal models with feedback loops; in fact, the quantum causality literature is knwon to use cyclic models to study these processes \cite{barrett2020quantumcausalmodels,barrett2021cyclic}. In concurrency, `indefinite causal orders' are an essential phenomenon because they correspond exactly to race conditions. \todo{talk about this further.}
+\paragraph{Indefinite causal orders} Another significant point of similarity between the three fields is the notion of indefinite causal orders: where the causal ordering of events are not determined in advance. Indefinite causal order is a quantum computing term; it refers to higher order quantum processes like the OCB process \cite{oreshkov2012noncausal} or the quantum switch \todo{cite} that do not use its input operation in a definite, predetermined causal order. Quantum switches are interesting such instances because they are known to have physical realisations: they correspond to processes where the order in which operations are applied is coherent controlled. In Pearl-style causality, this informally corresponds to cyclic causal models, i.e. causal models with feedback loops; in fact, the quantum causality literature is known to use cyclic models to study these processes \cite{barrett2020quantumcausalmodels,barrett2021cyclic}. 
+
+In concurrency, `indefinite causal orders' are an essential phenomenon because they are connected race conditions: two threads performing operations concurrently on a memory location can be seen as a non-deterministic choice between the different interleavings, or, \emph{causal orderings} between the different operations, in a way similar to quantum switches, which instead gives a `quantum' choice between different interleavings of its input operations. An interesting consequence of this is that models of concurrency naturally have to model indefinite causal orderings, albeit where the control is classical. 
+
+I want to understand how exactly these phenomena are related. One starting point could be to understand how race conditions in concurrency and indefinite causal orders are related by making a quantum programming language for higher order quantum processes using concurrency abstractions. 
 
 
-Interesting connections
-\begin{itemize}
-    \item Different Notions of Causality: Graph-based (based on \emph{observable} events that actually happened); Intervention/Signalling-based. Known to relate but not to correspond exactly. 
-    \begin{itemize}
-        \item Intervention - signalling relation sketch? They share the extensionality property and are used already together, they clearly are related too, for example this is a special case where they are. What about in general? 
-        \item Concurrency trace as a causal model? Would that be a helpful view? For example think about how the pomset alg theories relate to a potential alg theory of \emph{intervention}. Also would counterfactual reasoning be interesting or sensible to study? 
-    \end{itemize}
-    \item Similar themes: cyclic causal models, Indefinite Causal Orders, Causal Inconsistencies and Races. These all look very similar and in fact known to be a bit related already. I want to explore how exactly they are connected. 
-\end{itemize}
+% Interesting connections
+% \begin{itemize}
+%     \item Different Notions of Causality: Graph-based (based on \emph{observable} events that actually happened); Intervention/Signalling-based. Known to relate but not to correspond exactly. 
+%     \begin{itemize}
+%         \item Intervention - signalling relation sketch? They share the extensionality property and are used already together, they clearly are related too, for example this is a special case where they are. What about in general? 
+%         \item Concurrency trace as a causal model? Would that be a helpful view? For example think about how the pomset alg theories relate to a potential alg theory of \emph{intervention}. Also would counterfactual reasoning be interesting or sensible to study? 
+%     \end{itemize}
+%     \item Similar themes: cyclic causal models, Indefinite Causal Orders, Causal Inconsistencies and Races. These all look very similar and in fact known to be a bit related already. I want to explore how exactly they are connected. 
+% \end{itemize}
 
 % \subsection{Towards practical causal probabilistic programming}
 % \begin{itemize}
